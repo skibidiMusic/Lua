@@ -2,7 +2,7 @@
 local env = getgenv() :: {};
 
 local dir = env.fischSakso
-if dir then
+if dir and dir.Disable then
     dir.Disable()
 else
     env.fischSakso = {}
@@ -30,6 +30,7 @@ local Window = ImGui:CreateWindow({
 	Size = UDim2.fromOffset(350, 300), --// Roblox property 
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
 })
+Window:Center()
 
 local MainTab = Window:CreateTab({
 	Name = "Main",
@@ -44,6 +45,32 @@ local TeleportsHeader = MainTab:CollapsingHeader({
 	Title = "Teleports",
 	Open = true
 })
+
+-->> stun the char
+local nullify_velocity = function(time_out : number)
+	local start = os.clock()
+	time_out = time_out or 5
+	repeat
+		for _, child in ipairs(Player.Character:GetChildren()) do
+			if child:IsA("BasePart") then
+				child.Massless = true
+				child.Velocity = Vector3.new(0, 0, 0)
+				child.RotVelocity = Vector3.new(0, 0, 0)
+				child.Anchored = true
+			end
+		end
+
+		task.wait()
+	until os.clock() - start > time_out
+	for _, child in ipairs(Player.Character:GetChildren()) do
+		if child:IsA("BasePart") then
+			child.Massless = false
+			child.Velocity = Vector3.new(0, 0, 0)
+			child.RotVelocity = Vector3.new(0, 0, 0)
+			child.Anchored = false
+		end
+	end
+end
 
 -->> hook the rod
 local getRod;
@@ -78,12 +105,13 @@ do
 
     local function buttonDetected(button: GuiButton)
 		if button.Name ~= "button" then return end
+        task.wait()
         while button.Parent do
-            task.wait()
-            local pos = button.AbsolutePosition
+            task.wait(.2)
+            local pos = button.Position
             local size = button.AbsoluteSize
-            VIM:SendMouseButtonEvent(pos.X + (size.X / 2), pos.Y + (size.Y / 2), Enum.UserInputType.MouseButton1.Value, true, PlayerGui, 1)
-            VIM:SendMouseButtonEvent(pos.X + (size.X / 2), pos.Y + (size.Y / 2), Enum.UserInputType.MouseButton1.Value, false, PlayerGui, 1)
+            VIM:SendMouseButtonEvent(pos.X + (size.X / 2), pos.Y + (size.Y / 2), Enum.UserInputType.MouseButton1.Value, true, button.Parent, 1)
+            VIM:SendMouseButtonEvent(pos.X + (size.X / 2), pos.Y + (size.Y / 2), Enum.UserInputType.MouseButton1.Value, false, button.Parent, 1)
         end
 	end
 
@@ -148,11 +176,14 @@ do
     end
 
 	autoMinigame.enable = function()
+
         thread = task.defer(loop)
 	end
 	
 	autoMinigame.disable = function()
-		task.cancel(thread)
+        if thread then
+            task.cancel(thread)
+        end
 	end
 
     disableJanitor:Add(autoMinigame.disable)
@@ -175,6 +206,7 @@ end
 local function perfectCast()
     local rod = getRod()
     if rod then
+        nullify_velocity()
         rod.events.reset:FireServer()
         rod.events.cast:FireServer(100)
     end
@@ -203,7 +235,9 @@ do
         con = Player.Backpack.ChildAdded:Connect(fireRemote)
     end
     autoSell.disable = function()
-        con:Disconnect()
+        if con then
+            con:Disconnect()
+        end
     end
 
     disableJanitor:Add(autoSell.disable)
@@ -241,7 +275,9 @@ do
     end
 
     autoCast.disable = function()
-        task.cancel(thread)
+        if thread then
+            task.cancel(thread)
+        end
     end
 
     disableJanitor:Add(autoCast.disable)
