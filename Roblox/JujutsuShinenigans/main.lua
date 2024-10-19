@@ -1,9 +1,18 @@
+-->> LOADSTRING
+--[[
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/JujutsuShinenigans/main.lua'))()
+]]
+
+-->> SRC
+
 -->> fix repeats
 local env = getgenv() :: {};
 
 local dir = env.jjsSakso
-if dir and dir.Disable then
-    dir.Disable()
+if dir then
+	if dir.disable then
+		dir.Disable()
+	end
 else
     env.jjsSakso = {}
     dir = env.jjsSakso
@@ -28,7 +37,6 @@ local disableJanitor = Janitor.new()
 local config = {
 	autoBlock = {
 		enabled = false,
-
 		tryDashIfNotBlockable = true,
 		
 		tryCounter = true, --< attempts a counter instead of blocking when counter is available
@@ -78,6 +86,7 @@ local Window = ImGui:CreateWindow({
 	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
 	AutoSize = "Y",
+	NoClose = true
 })
 Window:Center()
 
@@ -272,17 +281,7 @@ local function block(enemy: Model, length: number, enemySpeedMultiplier: number?
 	end)
 end
 
---// character stuff
-local characterNames = {
-	Megumi = true,
-	Mahoraga = true,
-	Mahito = true,
-	Itadori = true,
-	Hakari = true,
-	Gojo = true,
-}
-
---// autoblock logic
+--ui 
 AutoblockTab:Checkbox({
 	Label = "Enabled",
 	Value = false,
@@ -307,396 +306,418 @@ AutoblockTab:Checkbox({
 	end,
 })
 
---(melee)
-local meleeBlockHeader = AutoblockTab:CollapsingHeader({
-	Title = "Functions",
-	Open = true
-})
 
---melee attacks
-do
-	-->> ui
-	meleeBlockHeader:Checkbox({
-		Label = "Block Melee",
-		Value = false,
-		Callback = function(self, Value)
-			config.autoBlock.Melee = Value
-		end,
-	})
-
-	-->> hook
-	local function meleeDetected(enemyChar: Model, COMBO: number?)
-		if not config.autoBlock.Melee then return end
-		local localChar = Player.Character
-		if localChar and localChar ~= enemyChar then
-			local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
-			if math.abs(diffVec.Y) < 4 then
-				diffVec = normalizeToGround(diffVec)
-				if enemyChar:GetAttribute("Moveset") == "Itadori" and enemyChar:GetAttribute("InUlt") then
-					if normalizeToGround(diffVec).Magnitude < 20 then	
-						block(enemyChar, 0.55, 1, diffVec.Magnitude < 10 and config.autoBlock.punish and COMBO == 4, true)
-					end
-				else
-					if diffVec.Magnitude < 15 then	
-						block(enemyChar, 0.35, 1, config.autoBlock.punish and diffVec.Magnitude < 10)
-					end 
-				end
-			end
-		end
-	end
-
-	for name in characterNames do
-		local service = ServiceFolder:FindFirstChild(name .. "Service")
-		if service then
-			if name == "Mahoraga" or name == "Mahito" then
-				disableJanitor:Add(service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model, combo: number, finish: string?)
-					if action == "Swing" then
-						meleeDetected(character)
-					end
-				end))
-			else
-				disableJanitor:Add(service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model, combo: number, finish: string?)
-					if action == "Swing2" then
-						meleeDetected(character, combo)
-					end
-				end))
-			end
-		end
-	end
-end
-
---chase (front dash)
-do
-	-->> ui
-	meleeBlockHeader:Checkbox({
-		Label = "Block Chase",
-		Value = false,
-		Callback = function(self, Value)
-			config.autoBlock.chase = Value
-		end,
-	})
-
-	-->> hook
-	local function chaseDetected(enemyChar: Model)
-		if not config.autoBlock.chase then return end
-		local localChar = Player.Character
-		if localChar and localChar ~= enemyChar then
-			local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
-			if math.abs(diffVec.Y) < 15 then
-				diffVec = normalizeToGround(diffVec)
-				if diffVec.Magnitude < 35 then
-					if diffVec.Magnitude < 8 or diffVec.Unit:Dot(-enemyChar:GetPivot().LookVector) > 0.8  then
-						block(enemyChar, 0.5, 3, true, true)
-					end
-				end
-			end
-		end
-	end
-
-	for name in characterNames do
-		local service = ServiceFolder:FindFirstChild(name .. "Service")
-		if service then
-			disableJanitor:Add(service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
-				if action == "Chase" then
-					chaseDetected(character)
-				end
-			end))
-		end
-	end
-end
-
-
-
-
-
-
-
-
-local autoblockMelee = {}
-
-
-
---// CONFIG AND LOADUP SHIT
-local config = {
-
-	
+--// character stuff
+local characterNames = {
+	Megumi = true,
+	Mahoraga = true,
+	Mahito = true,
+	Itadori = true,
+	Hakari = true,
+	Gojo = true,
 }
 
-
-
-
-
-
-
-
-
---// block Melee
-
---// block chase(dash)
-if config.autoBlock.chase then
-	local function chaseDetected(enemyChar: Model)
-		local localChar = Player.Character
-		if localChar and localChar ~= enemyChar then
-			local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
-			if math.abs(diffVec.Y) < 15 and diffVec.Magnitude < 35 then	
-				if diffVec.Magnitude < 15 or diffVec.Unit:Dot(-enemy:GetPivot().LookVector) > 0.8  then
-					block(enemyChar, 0.5, 3, true, true)
-				end
-			end 
-		end
-	end
-
-	local remoteHooks = {}
-
-	for name in characterNames do
-		local service = ServiceFolder:FindFirstChild(name .. "Service")
-		if service then
-			table.insert(remoteHooks, service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
-				if action == "Chase" then
-					chaseDetected(character)
-				end
-			end))
-		end
-	end
-
-	table.insert(disableFuncs, function()
-		for _, v in remoteHooks do
-			v:Disconnect()
-		end
-	end)
-end
-
---// enter domain
-if config.enterDomain then
-	local function domainDetected(domainPart: BasePart)
-		domainPart.CanCollide = false
-	end
-
-	local hook = workspace.Domains.ChildAdded:Connect(function(child: Instance) 
-		domainDetected(child)
-	end)
-
-	for _, v in workspace.Domains:GetChildren() do
-		domainDetected(v)
-	end
-
-	table.insert(disableFuncs, function()
-		hook:Disconnect()
-	end)
-end
-
---// block megumi skills
-
---(toad)
-if config.autoBlock.Megumi.blockToad then
-	local function toadDetected(enemy: Model)
-		task.delay(.4 - Player:GetNetworkPing() * 0.5, block, enemy, .5, 1, false, false)
-	end
-
-	local remoteHook = ServiceFolder.ToadService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, target: Model) 
-		if (action == "Toad" or action == "ToadAir") and target == Player.Character then
-			toadDetected(enemy.Character)
-		end
-	end)
-
-	table.insert(disableFuncs, function()
-		remoteHook:Disconnect()
-	end)
-end
-
---(dog)
-if config.autoBlock.Megumi.blockDog then
-	local function dogDetected(dogModel: Model, target: Model)
-		task.wait(.3 - Player:GetNetworkPing() * 0.5)
-		if distanceFromCharacter(target).Magnitude < 6 then
-			block(dogModel, .25, 1, false, true)
-		end
-	end
-
-	local remoteHook = ServiceFolder.DivineDogService.RE.Effects.OnClientEvent:Connect(function(action: string, dogModel: Model) 
-		if (action == "Slash") then
-			local targetValue = dogModel:FindFirstChild("Target")
-			if not targetValue then return end
-
-			if not targetValue.Value then
-				--// wait a bit to see if value changes or not
-				local valueWaitConn = targetValue.Changed:Once(function(target: Model) 
-					dogDetected(dogModel, target)
-				end)
-
-				task.delay(.25, function()
-					valueWaitConn:Disconnect()
-				end)
-
-			else
-				dogDetected(dogModel, targetValue.Value)
-			end
-		end
-	end)
-
-	table.insert(disableFuncs, function()
-		remoteHook:Disconnect()
-	end)
-end
-
---// block Itadori Skills
-
---(cursed strikes)
-if config.autoBlock.Itadori.blockCursedStrikes then
-	local function cursedStrikesDetected(enemy: Model, from: CFrame)
-		if typeof(from) ~= "CFrame" then return end
-		local localChar = Player.Character
-		if localChar and enemy ~= Player.Character then
-			local distance = distanceFromCharacter(from.Position)
-			if distance then
-				if distance.Magnitude < 40 then
-					if distance.Magnitude < 15 then
-						block(enemy, 0.5, 1, true)
-					elseif distance.Unit:Dot(-from.LookVector) > 0.5 then
-						block(enemy, 0.5, 1, true)
-					end
-				end
-			end
-		end
-	end
-
-	local remoteHook1 = ServiceFolder.CursedStrikesService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
-		if action == "Dash" then
-			cursedStrikesDetected(enemy, cfRame)
-		end
-	end)
-
-	local remoteHook2 = ServiceFolder.CursedStrikesService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
-		if action == "Swing" then
-			cursedStrikesDetected(enemy, enemy.PrimaryPart.CFrame)
-		end
-	end)
-
-	table.insert(disableFuncs, function()
-		remoteHook1:Disconnect()
-		remoteHook2:Disconnect()
-	end)
-end
-
---// mahito skills
-if config.autoBlock.Mahito.blockFocusStrike then
-	local function focusStrikeDetected(enemy: Model)
-		local localChar = Player.Character
-		if localChar and enemy ~= Player.Character then
-			local distance = distanceFromCharacter(enemy)
-			if distance then
-				if distance.Magnitude < 25 then
-					if distance.Magnitude < 15 then
-						block(enemy, 0.5, 1, true, true)
-					elseif distance.Unit:Dot(-enemy:GetPivot().LookVector) > 0.7 then
-						block(enemy, 0.5, 1, true, true)
-					end
-				end
-			end
-		end
-	end
+--// autoblock logic
+--(melee)
+do
+	local meleeBlockHeader = AutoblockTab:CollapsingHeader({
+		Title = "Melee",
+		Open = false
+	})
 	
-	local remoteHook1 = ServiceFolder.FocusStrikeService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
-		if action == "Startup" then
-			focusStrikeDetected(enemy)
-		end
-	end)
-
-	local remoteHook2 = ServiceFolder.FocusStrikeService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
-		if action == "Swing" then
-			focusStrikeDetected(enemy)
-		end
-	end)
-
-	table.insert(disableFuncs, function()
-		remoteHook1:Disconnect()
-		remoteHook2:Disconnect()
-	end)
-end
-
-if config.autoBlock.Mahito.blockSoulFire then
-	local function soulFireDetected(enemy: Model)
-		local localChar = Player.Character
-		if localChar and localChar ~= enemy then
-			local distance = distanceFromCharacter(enemy)
-			
-			if distance and distance.Magnitude < 10 and math.abs(distance.Y) < 3  then
-				task.wait(.3 - Player:GetNetworkPing())
-			else
-				task.wait(.4 - Player:GetNetworkPing())
-			end
-
-			for i = 1, 3 do			
-				local distance = distanceFromCharacter(enemy)
-				if distance then
-					if distance.Magnitude < 65 and math.abs(distance.Y) < 3 and distance.Unit:Dot(-enemy:GetPivot().LookVector) > 0.8 then
-						block(enemy, math.max(0.1 + 0.6 * distance.Magnitude / 60, .3), 1, false, true)
-					end
-				end
-				task.wait(.25 - Player:GetNetworkPing())
-			end
-		end
-	end
+	--melee attacks
+	do
+		-->> ui
+		meleeBlockHeader:Checkbox({
+			Label = "Block Melee",
+			Value = false,
+			Callback = function(self, Value)
+				config.autoBlock.Melee = Value
+			end,
+		})
 	
-	local remoteHook = ServiceFolder.SoulfireService.RE.Effects.OnClientEvent:Connect(function(action: string, char: Model) 
-		if action == "Morph" then
-			soulFireDetected(char)
-		end
-	end)
-	
-	table.insert(disableFuncs, function()
-		remoteHook:Disconnect()
-	end)
-end
-
-if config.autoBlock.Mahito.blockSpecialDash then
-	local function specialDashDetected(enemy: Model, style: number)
-		local localChar = Player.Character
-		if localChar and enemy ~= Player.Character then
-			local distance = distanceFromCharacter(enemy)
-			if distance then
-				if distance.Magnitude < 25 then
-					if distance.Magnitude < 8 or distance.Unit:Dot(-enemy:GetPivot().LookVector) > 0.8  then
-						if style == 1 then
-							block(enemy, 0.5, 1, true, false)
-						else
-							counter()
+		-->> hook
+		local function meleeDetected(enemyChar: Model, COMBO: number?)
+			if not config.autoBlock.Melee then return end
+			local localChar = Player.Character
+			if localChar and localChar ~= enemyChar then
+				local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
+				if math.abs(diffVec.Y) < 4 then
+					diffVec = normalizeToGround(diffVec)
+					if enemyChar:GetAttribute("Moveset") == "Itadori" and enemyChar:GetAttribute("InUlt") then
+						if normalizeToGround(diffVec).Magnitude < 20 then	
+							block(enemyChar, 0.55, 1, diffVec.Magnitude < 10 and config.autoBlock.punish and COMBO == 4, true)
 						end
-
+					else
+						if diffVec.Magnitude < 15 then	
+							block(enemyChar, 0.35, 1, config.autoBlock.punish and diffVec.Magnitude < 10)
+						end 
 					end
 				end
 			end
 		end
+	
+		for name in characterNames do
+			local service = ServiceFolder:FindFirstChild(name .. "Service")
+			if service then
+				if name == "Mahoraga" or name == "Mahito" then
+					disableJanitor:Add(service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model, combo: number, finish: string?)
+						if action == "Swing" then
+							meleeDetected(character)
+						end
+					end))
+				else
+					disableJanitor:Add(service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model, combo: number, finish: string?)
+						if action == "Swing2" then
+							meleeDetected(character, combo)
+						end
+					end))
+				end
+			end
+		end
+	end
+	
+	--chase (front dash)
+	do
+		-->> ui
+		meleeBlockHeader:Checkbox({
+			Label = "Block Chase",
+			Value = false,
+			Callback = function(self, Value)
+				config.autoBlock.chase = Value
+			end,
+		})
+	
+		-->> hook
+		local function chaseDetected(enemyChar: Model)
+			if not config.autoBlock.chase then return end
+			local localChar = Player.Character
+			if localChar and localChar ~= enemyChar then
+				local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
+				if math.abs(diffVec.Y) < 15 then
+					diffVec = normalizeToGround(diffVec)
+					if diffVec.Magnitude < 35 then
+						if diffVec.Magnitude < 12 or diffVec.Unit:Dot(-enemyChar:GetPivot().LookVector) > 0.8  then
+							block(enemyChar, 0.5, 3, true, true)
+						end
+					end
+				end
+			end
+		end
+	
+		for name in characterNames do
+			local service = ServiceFolder:FindFirstChild(name .. "Service")
+			if service then
+				disableJanitor:Add(service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
+					if action == "Chase" then
+						chaseDetected(character)
+					end
+				end))
+			end
+		end
+	end	
+end
+
+--(blocking skills)
+do
+	local skillBlockHeader = AutoblockTab:CollapsingHeader({
+		Title = "Skills",
+		Open = false
+	})
+
+	--(itadori)
+	do
+		local itadoriHeader = skillBlockHeader:CollapsingHeader({
+			Title = "Itadori",
+			Open = false
+		})
+
+		-->> cursed strikes (1.)
+		do
+			itadoriHeader:Checkbox({
+				Label = "Cursed Strikes",
+				Value = false,
+				Callback = function(self, Value)
+					config.autoBlock.Itadori.blockCursedStrikes = Value
+				end,
+			})
+
+			local function cursedStrikesDetected(enemy: Model, from: CFrame)
+				if not config.autoBlock.Itadori.blockCursedStrikes then return end
+				if typeof(from) ~= "CFrame" then return end
+				local localChar = Player.Character
+				if localChar and enemy ~= Player.Character then
+					local distance = distanceFromCharacter(from.Position)
+					if distance and math.abs(distance.Y) < 8 then
+						distance = normalizeToGround(distance)
+						if distance.Magnitude < 40 then
+							if distance.Magnitude < 15 then
+								block(enemy, 0.5, 1, true)
+							elseif distance.Unit:Dot(-from.LookVector) > 0.5 then
+								block(enemy, 0.5, 1, true)
+							end
+						end
+					end
+				end
+			end
+		
+			disableJanitor:Add( ServiceFolder.CursedStrikesService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
+				if action == "Dash" then
+					cursedStrikesDetected(enemy, cfRame)
+				end
+			end) )
+		
+			disableJanitor:Add( ServiceFolder.CursedStrikesService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
+				if action == "Swing" then
+					cursedStrikesDetected(enemy, enemy.PrimaryPart.CFrame)
+				end
+			end) )
+		end
 	end
 
-	local remoteHook1 = ServiceFolder.MahitoService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, style: number)
-		if action == "ChaseStart" then
-			specialDashDetected(enemy, style)
-		end
-	end)
+	--(megumi)
+	do
+		local megumiHeader = skillBlockHeader:CollapsingHeader({
+			Title = "Megumi",
+			Open = false
+		})
 
-	local remoteHook2 = ServiceFolder.MahitoService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, style: number)
-		if action == "Chase2" then
-			specialDashDetected(enemy, style)
-		end
-	end)
+		-->> toad (1)
+		do
+			megumiHeader:Checkbox({
+				Label = "Toad (frog)",
+				Value = false,
+				Callback = function(self, Value)
+					config.autoBlock.Megumi.blockToad = Value
+				end,
+			})
 
-	table.insert(disableFuncs, function()
-		remoteHook1:Disconnect()
-		remoteHook2:Disconnect()
-	end)
+			local function toadDetected(enemy: Model)
+				if not config.autoBlock.Megumi.blockToad then return end
+				task.delay(.4 - Player:GetNetworkPing() * 0.5, block, enemy, .5, 1, false, false)
+			end
+		
+			disableJanitor:Add( ServiceFolder.ToadService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, target: Model) 
+				if (action == "Toad" or action == "ToadAir") and target == Player.Character then
+					toadDetected(enemy.Character)
+				end
+			end) )
+		end
+
+		-->> wolf (2)
+		do
+			megumiHeader:Checkbox({
+				Label = "Wolf",
+				Value = false,
+				Callback = function(self, Value)
+					config.autoBlock.Megumi.blockDog = Value
+				end,
+			})
+
+			local function dogDetected(dogModel: Model, target: Model)
+				if not config.autoBlock.Megumi.blockDog then return end
+				task.wait(.3 - Player:GetNetworkPing() * 0.5)
+				if distanceFromCharacter(target).Magnitude < 6 then
+					block(dogModel, .25, 1, false, true)
+				end
+			end
+		
+			disableJanitor:Add(ServiceFolder.DivineDogService.RE.Effects.OnClientEvent:Connect(function(action: string, dogModel: Model) 
+				if (action == "Slash") then
+					local targetValue = dogModel:FindFirstChild("Target")
+					if not targetValue then return end
+		
+					if not targetValue.Value then
+						--// wait a bit to see if value changes or not
+						local valueWaitConn = targetValue.Changed:Once(function(target: Model) 
+							dogDetected(dogModel, target)
+						end)
+		
+						task.delay(.25, function()
+							valueWaitConn:Disconnect()
+						end)
+		
+					else
+						dogDetected(dogModel, targetValue.Value)
+					end
+				end
+			end) )
+		end
+	end
+
+	--(mahito)
+	do
+		local mahitoHeader = skillBlockHeader:CollapsingHeader({
+			Title = "Mahito",
+			Open = false
+		})
+
+		-->> focus strike (1)
+		do
+			mahitoHeader:Checkbox({
+				Label = "Focus Strike",
+				Value = false,
+				Callback = function(self, Value)
+					config.autoBlock.Mahito.blockFocusStrike = Value
+				end,
+			})
+
+			local function focusStrikeDetected(enemy: Model)
+				if not config.autoBlock.Mahito.blockFocusStrike then return end
+				local localChar = Player.Character
+				if localChar and enemy ~= Player.Character then
+					local distance = distanceFromCharacter(enemy)
+					if distance and math.abs(distance.Y) < 8 then
+						distance = normalizeToGround(distance)
+						if distance.Magnitude < 25 then
+							if distance.Magnitude < 15 then
+								block(enemy, 0.5, 1, true, true)
+							elseif distance.Unit:Dot(-enemy:GetPivot().LookVector) > 0.8 then
+								block(enemy, 0.5, 1, true, true)
+							end
+						end
+					end
+				end
+			end
+			
+			disableJanitor:Add( ServiceFolder.FocusStrikeService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
+				if action == "Startup" then
+					focusStrikeDetected(enemy)
+				end
+			end) )
+		
+			disableJanitor:Add( ServiceFolder.FocusStrikeService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
+				if action == "Swing" then
+					focusStrikeDetected(enemy)
+				end
+			end) )
+		end
+
+		-->> soul bullets (2)
+		do
+			mahitoHeader:Checkbox({
+				Label = "Bullets",
+				Value = false,
+				Callback = function(self, Value)
+					config.autoBlock.Mahito.blockSoulFire = Value
+				end,
+			})
+
+			local function soulFireDetected(enemy: Model)
+				if not config.autoBlock.Mahito.blockSoulFire then return end
+				local localChar = Player.Character
+				if localChar and localChar ~= enemy then
+					local distance = distanceFromCharacter(enemy)
+					
+					if distance and distance.Magnitude < 10 and math.abs(distance.Y) < 3  then
+						task.wait(.3 - Player:GetNetworkPing())
+					else
+						task.wait(.4 - Player:GetNetworkPing())
+					end
+		
+					for i = 1, 3 do			
+						local distance = distanceFromCharacter(enemy)
+						if distance then
+							if distance.Magnitude < 65 and math.abs(distance.Y) < 3 and distance.Unit:Dot(-enemy:GetPivot().LookVector) > 0.8 then
+								block(enemy, math.max(0.1 + 0.6 * distance.Magnitude / 60, .3), 1, false, true)
+							end
+						end
+						task.wait(.25 - Player:GetNetworkPing())
+					end
+				end
+			end
+			
+			disableJanitor:Add( ServiceFolder.SoulfireService.RE.Effects.OnClientEvent:Connect(function(action: string, char: Model) 
+				if action == "Morph" then
+					soulFireDetected(char)
+				end
+			end) )
+		end
+
+		-->> special dash :)
+		do
+			mahitoHeader:Checkbox({
+				Label = "Special Dash",
+				Value = false,
+				Callback = function(self, Value)
+					config.autoBlock.Mahito.blockSpecialDash = Value
+				end,
+			})
+
+			local function specialDashDetected(enemy: Model, style: number)
+				if not config.autoBlock.Mahito.blockSpecialDash then return end
+				local localChar = Player.Character
+				if localChar and enemy ~= Player.Character then
+					local distance = distanceFromCharacter(enemy)
+					if distance and math.abs(distance.Y) < 8 then
+						distance = normalizeToGround(distance)
+						if distance.Magnitude < 25 then
+							if distance.Magnitude < 8 or distance.Unit:Dot(-enemy:GetPivot().LookVector) > 0.8  then
+								if style == 1 then
+									block(enemy, 0.5, 1, true, false)
+								else
+									counter()
+								end
+		
+							end
+						end
+					end
+				end
+			end
+		
+			disableJanitor:Add( ServiceFolder.MahitoService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, style: number)
+				if action == "ChaseStart" then
+					specialDashDetected(enemy, style)
+				end
+			end) )
+		
+			disableJanitor:Add( ServiceFolder.MahitoService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, style: number)
+				if action == "Chase2" then
+					specialDashDetected(enemy, style)
+				end
+			end) )
+		end
+
+	end
+
 end
 
 
+--// misc. stuff
+--(entering domains)
+do
+	local function toggle(val: boolean)
+		config.misc.enterDomain = val
+		if val then
+			disableJanitor:Add(workspace.Domains.ChildAdded:Connect(function(child: Instance) 
+				child.CanCollide = false
+			end), nil, "enterDomains") 
+			for _, v in workspace.Domains:GetChildren() do
+				v.CanCollide = false
+			end		
+		else
+			disableJanitor:Remove("enterDomains")
+			for _, v in workspace.Domains:GetChildren() do
+				v.CanCollide = true
+			end		
+		end
+	end
 
---//
---misc stuff 
+	MiscTab:Checkbox({
+		Label = "Enter Domains",
+		Value = false,
+		Callback = function(self, Value)
+			toggle(Value)
+		end,
+	})
+end
 
---// always black flash
-if config.alwaysBlackFlash then
+--(always black flash)
+do
 	local remote = ServiceFolder.DivergentFistService.RE.Activated
 	
 	local function blackFlashDetected(character: Model)
+		if not config.misc.alwaysBlackFlash then return end
 		local localChar = Player.Character
 		if not localChar or localChar ~= character then return end
 		
@@ -704,18 +725,23 @@ if config.alwaysBlackFlash then
 		remote:FireServer()
 	end
 	
-	local remoteHook = ServiceFolder.DivergentFistService.RE.Effects.OnClientEvent:Connect(function(effectName: string, char: Model) 
+	disableJanitor:Add( ServiceFolder.DivergentFistService.RE.Effects.OnClientEvent:Connect(function(effectName: string, char: Model) 
 		if effectName == "CurseBuild" then
 			blackFlashDetected(char)
 		end
-	end)
-	
-	table.insert(disableFuncs, function()
-		remoteHook:Disconnect()
-	end)
+	end) )
+
+	MiscTab:Checkbox({
+		Label = "Always Black Flash",
+		Value = false,
+		Callback = function(self, Value)
+			config.misc.alwaysBlackFlash = Value
+		end,
+	})
 end
 
-if config.antiFall then
+--(u cant fall off map)
+do
 	local partData = {
 		{size = Vector3.new(-17.25, 11.75, -533.115), pos = Vector3.new(740.5, 2.5, 372.771)},
 		{size = Vector3.new(145, 2.5, 1389.771), pos = Vector3.new(352.5, 11.75, -24.615)},
@@ -724,33 +750,63 @@ if config.antiFall then
 	}
 	
 	local parts = {}
-	for _, v in partData do
-		local part = Instance.new("Part")
-		part.Color = Color3.fromRGB(0, 0, 0)
-		part.Transparency = 0.9
-		part.Position = v.pos
-		part.Size = v.size
-		part.Anchored = true
-		part.CanCollide = true
-		part.CanTouch = false
-		part.CanQuery = false
-		part.Parent = workspace.Map.Core
-		table.insert(parts, part)
+
+	local function spawnParts()
+		for _, v in partData do
+			local part = Instance.new("Part")
+			part.Color = Color3.fromRGB(0, 0, 0)
+			part.Transparency = 0.9
+			part.Position = v.pos
+			part.Size = v.size
+			part.Anchored = true
+			part.CanCollide = true
+			part.CanTouch = false
+			part.CanQuery = false
+			part.Parent = workspace.Map.Core
+			table.insert(parts, part)
+		end
 	end
-	
-	table.insert(disableFuncs, function()
+
+	local function cleanUp()
 		for _, v in parts do
 			v:Destroy()
 		end
-	end)
-end
-
---//
-
-local function disable()
-	for _, v in disableFuncs do
-		v()
+		table.clear(parts)
 	end
+
+	disableJanitor:Add(cleanUp)
+
+	MiscTab:Checkbox({
+		Label = "Anti-Void",
+		Value = false,
+		Callback = function(self, Value)
+			config.misc.antiFall = Value
+			if Value then
+				spawnParts()
+			else
+				cleanUp()
+			end
+		end,
+	})
 end
+
+-->> unloading the gui
+local function disable()
+	disableJanitor:Cleanup()
+	Window:Close()
+	dir.disable = nil
+end
+
+local closeTab = Window:CreateTab({
+	Name = "Close",
+	Visible = true
+})
+
+closeTab:Button({
+    Text = "Close the cheat",
+    Callback = function(self)
+        disable()
+    end,
+})
 
 dir.disable = disable
