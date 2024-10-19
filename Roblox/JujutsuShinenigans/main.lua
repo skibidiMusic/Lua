@@ -31,7 +31,6 @@ local Player = game:GetService("Players").LocalPlayer
 local ImGui = loadstring(game:HttpGet('https://github.com/depthso/Roblox-ImGUI/raw/main/ImGui.lua'))()
 local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Janitor.lua'))()
 
-
 -->> main
 local disableJanitor = Janitor.new()
 local config = {
@@ -66,8 +65,6 @@ local config = {
 		},
 		
 		whiteList = {
-			["length214907"] = true,
-			["WilliamsChild7s"] = true
 		}
 	},
 
@@ -97,11 +94,104 @@ local AutoblockTab = Window:CreateTab({
 
 local MiscTab = Window:CreateTab({
 	Name = "Misc",
-	Visible = true 
+	Visible = false 
 })
 
 
+
+
 -->> code
+--// debugging (mini-console)
+local ConsoleTab = Window:CreateTab({
+	Name = "Console (Output)",
+	Visible = false 
+})
+
+local debugConsole = {};
+
+do
+	ConsoleTab:Separator({
+		Text = "This is for debuging"
+	})
+
+	local Row = ConsoleTab:Row()
+
+	local Console = ConsoleTab:Console({
+		Text = "Console",
+		ReadOnly = true,
+		LineNumbers = true,
+		Border = true,
+		Fill = false,
+		Enabled = true,
+		AutoScroll = true,
+		RichText = true,
+		MaxLines = 50
+	})
+
+	Row:Button({
+		Text = "Clear",
+		Callback = Console.Clear
+	})
+	
+	Row:Checkbox({
+		Label = "Pause",
+		Value = false,
+		Callback = function(self, Value)
+			Console.Enabled = not Value
+		end,
+	})	
+
+	Row:Checkbox({
+		Label = "AutoScroll",
+		Value = true,
+		Callback = function(self, Value)
+			Console.AutoScroll = Value
+		end,
+	})	
+
+	Row:Fill()
+
+	-->> functionality
+	local function ToString(v:any, depth: number?)
+		local dataType = typeof(v)
+		local str;
+	
+		if dataType == "Instance" then
+			dataType = v.ClassName
+			str = v:GetFullName()
+		else
+			if dataType == "table" then
+				depth = depth or 0
+				local depthShit = string.rep("\t", depth)
+				str = "{\n"
+				for i, c in v do
+					str = str .. string.format(depthShit .. "\t[%s]: %s,\n", tostring(i), ToString(c, depth + 1))
+				end
+				str = str .. depthShit .. "}"
+			elseif dataType == "string" then
+				str = string.format("%q", v)
+			else
+				str = tostring(v)
+			end
+		end
+	
+		return string.format("(%s) %s", dataType, str)
+	end
+
+    function debugConsole.advancedToString(v)
+        return ToString(v)
+    end
+
+	function debugConsole.print(...)
+		debugConsole.ui:AppendText(...)
+	end
+
+	debugConsole.ui = Console
+
+	ConsoleTab:Separator({})
+end
+
+
 --// Helper Funcs
 local function distanceFromCharacter(v: Model | BasePart | Vector3) : Vector3?
 	local character = Player.Character
@@ -281,7 +371,14 @@ local function block(enemy: Model, length: number, enemySpeedMultiplier: number?
 	end)
 end
 
---ui 
+
+--// AUTOBLOCK
+
+--few toggles
+AutoblockTab:Separator({
+	Text = "Tunes"
+})
+
 AutoblockTab:Checkbox({
 	Label = "Enabled",
 	Value = false,
@@ -683,6 +780,60 @@ do
 end
 
 
+--(whitelist for autoblock)
+do
+	AutoblockTab:Separator({
+		Text = "Whitelist"
+	})
+
+    local whitelistRow = AutoblockTab:Row()
+
+    local function updateState(name: string)
+        if config.autoBlock.whiteList[name] then
+            config.autoBlock.whiteList[name]:Destroy()
+            config.autoBlock.whiteList[name] = nil
+        else
+            config.autoBlock.whiteList[name] = whitelistRow:Button({
+                Text = name,
+                Callback = function(self)
+                    updateState(name)
+                end,
+            })
+        end
+    end
+
+    AutoblockTab:Separator({})
+
+    local dropdown;
+
+    local function playerListChanged()
+        if dropdown then dropdown:Destroy() end
+        local players = game.Players:GetPlayers()
+        for i, v: Player in game.Players do
+            players[i] = v.Name
+        end
+        dropdown = AutoblockTab:Combo({
+            Placeholder = "Choose to add.",
+            Label = "Players",
+            Items = players,
+            Callback = function(self, Value)
+                updateState(Value)
+            end,
+        })
+    end
+
+    playerListChanged()
+
+    disableJanitor:Add( game.Players.PlayerAdded:Connect(function(player)
+        playerListChanged()
+    end) )
+
+    disableJanitor:Add( game.Players.PlayerRemoving:Connect(function(player)
+        playerListChanged()
+    end) )
+end
+
+
 --// misc. stuff
 --(entering domains)
 do
@@ -790,6 +941,7 @@ do
 	})
 end
 
+
 -->> unloading the gui
 local function disable()
 	disableJanitor:Cleanup()
@@ -799,7 +951,7 @@ end
 
 local closeTab = Window:CreateTab({
 	Name = "Close",
-	Visible = true
+	Visible = false
 })
 
 closeTab:Button({
