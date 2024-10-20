@@ -5,7 +5,7 @@
 
 --//config
 
-local useRobloxConsole = false;
+local useRobloxConsole = true; --< dont set to false, lags too muuch
 
 -->> src
 

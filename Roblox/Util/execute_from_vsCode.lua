@@ -10,8 +10,6 @@ end
 local function connect()
     local wait_time = 0
     local success, socket = xpcall(WebSocket.connect, function()
-        rconsolename('Krnl Execute - Debug Output')
-        rconsoleerr('[RETRYING IN 3 SECONDS] Failed to connect, please open Visual Studio Code!')
         wait_time = 3
     end, 'ws://[::1]:16640/')
 
@@ -22,14 +20,16 @@ local function connect()
                 connected = true
                 return
             end
-            
-            loadstring(data)()
+
+            if data then
+                loadstring(data)()
+            end
         end)
 
         while (connected) do
             connected = false
             socket:Send('ping')
-            wait(3)
+            task.wait(3)
         end
     end
 

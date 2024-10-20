@@ -11,7 +11,7 @@ local env = getgenv() :: {};
 local dir = env.jjsSakso
 if dir then
 	if dir.disable then
-		dir.Disable()
+		dir.disable()
 	end
 else
     env.jjsSakso = {}
@@ -62,6 +62,10 @@ local config = {
 			blockFocusStrike = true,
 			blockSoulFire = true,
 			blockSpecialDash = true
+		},
+
+		Gojo = {
+			blockLapseBlue = true,
 		},
 		
 		whiteList = {
@@ -777,6 +781,66 @@ do
 
 	end
 
+	--(gojo)
+	do
+		local gojoHeader = skillBlockHeader:CollapsingHeader({
+			Title = "Gojo",
+			Open = false
+		})
+
+		-->> blue (1)
+		do
+			gojoHeader:Checkbox({
+				Label = "Lapse Blue",
+				Value = false,
+				Callback = function(self, Value)
+					config.autoBlock.Gojo.blockLapseBlue = Value
+				end,
+			})
+
+			local remote = ServiceFolder.LapseBlueService.RE.Effects
+
+			local grabbedTick = 0;
+			local function localCharGrabbed(target: Model)
+				if target == Player.Character then
+					grabbedTick = tick();
+				end
+			end
+			disableJanitor:Add (
+				remote.OnClientEvent:Connect(function(action: string, target: Model)
+					if action == "BlueGrab" then
+						localCharGrabbed(target)
+					end
+				end)
+			)
+
+			local function blueDetected(enemy: Model)
+				if not config.autoBlock.Gojo.blockLapseBlue then return end
+				local localChar = Player.Character
+				if not localChar then return end
+				if tick() - grabbedTick < .2 then
+					--<<< might be us
+					local distance = distanceFromCharacter(enemy)
+					if distance.Magnitude < 35 then
+						distance = normalizeToGround(distance)
+						if enemy:GetPivot().LookVector:Dot(-distance.Unit) > 0.25 then
+							--<< it probably IS us
+							task.wait(.25 - Player:GetNetworkPing())
+							block(enemy, .2, 1, true, true)
+						end
+					end
+				end
+			end
+			disableJanitor:Add (
+				remote.OnClientEvent:Connect(function(action: string, enemy: Model)
+					if action == "LapseBlue" then
+						blueDetected(enemy)
+					end
+				end)
+			)
+		end
+	end
+
 end
 
 
@@ -945,7 +1009,7 @@ end
 -->> unloading the gui
 local function disable()
 	disableJanitor:Cleanup()
-	Window:Close()
+	Window:Destroy()
 	dir.disable = nil
 end
 
