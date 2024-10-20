@@ -86,7 +86,7 @@ local config = {
 local Window = ImGui:CreateWindow({
 	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
-	AutoSize = "Y",
+	Size = UDim2.new(0, 300, 0, 500),
 	NoClose = true
 })
 Window:Center()
@@ -936,7 +936,7 @@ do
 		local localChar = Player.Character
 		if not localChar or localChar ~= character then return end
 		
-		task.wait(.2 - Player:GetNetworkPing())
+		task.wait(.3 - Player:GetNetworkPing())
 		remote:FireServer()
 	end
 	
@@ -1006,6 +1006,20 @@ do
 end
 
 
+-->> keybinds
+local Keybinds = Window:CreateTab({
+	Name = "Keybinds",
+	Visible = false 
+})
+
+Keybinds:Keybind({
+	Label = "Toggle UI",
+	Value = Enum.KeyCode.RightControl,
+	Callback = function()
+		Window:SetVisible(not Window.Visible)
+	end,
+})
+
 -->> unloading the gui
 local function disable()
 	disableJanitor:Cleanup()
@@ -1018,8 +1032,12 @@ local closeTab = Window:CreateTab({
 	Visible = false
 })
 
+closeTab:Separator({
+
+})
+
 closeTab:Button({
-    Text = "Close the cheat",
+    Text = "Unload the cheat",
     Callback = function(self)
         disable()
     end,
