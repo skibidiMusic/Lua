@@ -386,7 +386,7 @@ AutoblockTab:Separator({
 
 AutoblockTab:Checkbox({
 	Label = "Enabled",
-	Value = false,
+	Value = true,
 	Callback = function(self, Value)
 		config.autoBlock.enabled = Value
 	end,
@@ -394,7 +394,7 @@ AutoblockTab:Checkbox({
 
 AutoblockTab:Checkbox({
 	Label = "Try Countering",
-	Value = false,
+	Value = true,
 	Callback = function(self, Value)
 		config.autoBlock.tryCounter = Value
 	end,
@@ -402,7 +402,7 @@ AutoblockTab:Checkbox({
 
 AutoblockTab:Checkbox({
 	Label = "Punish",
-	Value = false,
+	Value = true,
 	Callback = function(self, Value)
 		config.autoBlock.punish = Value
 	end,
@@ -432,7 +432,7 @@ do
 		-->> ui
 		meleeBlockHeader:Checkbox({
 			Label = "Block Melee",
-			Value = false,
+			Value = true,
 			Callback = function(self, Value)
 				config.autoBlock.Melee = Value
 			end,
@@ -484,7 +484,7 @@ do
 		-->> ui
 		meleeBlockHeader:Checkbox({
 			Label = "Block Chase",
-			Value = false,
+			Value = true,
 			Callback = function(self, Value)
 				config.autoBlock.chase = Value
 			end,
@@ -538,7 +538,7 @@ do
 		do
 			itadoriHeader:Checkbox({
 				Label = "Cursed Strikes",
-				Value = false,
+				Value = true,
 				Callback = function(self, Value)
 					config.autoBlock.Itadori.blockCursedStrikes = Value
 				end,
@@ -588,7 +588,7 @@ do
 		do
 			megumiHeader:Checkbox({
 				Label = "Toad (frog)",
-				Value = false,
+				Value = true,
 				Callback = function(self, Value)
 					config.autoBlock.Megumi.blockToad = Value
 				end,
@@ -610,7 +610,7 @@ do
 		do
 			megumiHeader:Checkbox({
 				Label = "Wolf",
-				Value = false,
+				Value = true,
 				Callback = function(self, Value)
 					config.autoBlock.Megumi.blockDog = Value
 				end,
@@ -658,7 +658,7 @@ do
 		do
 			mahitoHeader:Checkbox({
 				Label = "Focus Strike",
-				Value = false,
+				Value = true,
 				Callback = function(self, Value)
 					config.autoBlock.Mahito.blockFocusStrike = Value
 				end,
@@ -699,7 +699,7 @@ do
 		do
 			mahitoHeader:Checkbox({
 				Label = "Bullets",
-				Value = false,
+				Value = true,
 				Callback = function(self, Value)
 					config.autoBlock.Mahito.blockSoulFire = Value
 				end,
@@ -740,7 +740,7 @@ do
 		do
 			mahitoHeader:Checkbox({
 				Label = "Special Dash",
-				Value = false,
+				Value = true,
 				Callback = function(self, Value)
 					config.autoBlock.Mahito.blockSpecialDash = Value
 				end,
@@ -793,7 +793,7 @@ do
 		do
 			gojoHeader:Checkbox({
 				Label = "Lapse Blue",
-				Value = false,
+				Value = true,
 				Callback = function(self, Value)
 					config.autoBlock.Gojo.blockLapseBlue = Value
 				end,
@@ -900,6 +900,11 @@ end
 
 
 --// misc. stuff
+MiscTab:Separator({
+
+})
+
+
 --(entering domains)
 do
 	local function toggle(val: boolean)
@@ -921,7 +926,7 @@ do
 
 	MiscTab:Checkbox({
 		Label = "Enter Domains",
-		Value = false,
+		Value = true,
 		Callback = function(self, Value)
 			toggle(Value)
 		end,
@@ -949,7 +954,7 @@ do
 
 	MiscTab:Checkbox({
 		Label = "Always Black Flash",
-		Value = false,
+		Value = true,
 		Callback = function(self, Value)
 			config.misc.alwaysBlackFlash = Value
 		end,
@@ -994,7 +999,7 @@ do
 
 	MiscTab:Checkbox({
 		Label = "Anti-Void",
-		Value = false,
+		Value = true,
 		Callback = function(self, Value)
 			config.misc.antiFall = Value
 			if Value then
@@ -1011,6 +1016,10 @@ end
 local Keybinds = Window:CreateTab({
 	Name = "Keybinds",
 	Visible = false 
+})
+
+Keybinds:Separator({
+
 })
 
 Keybinds:Keybind({
