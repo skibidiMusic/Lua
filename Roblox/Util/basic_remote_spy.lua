@@ -1,4 +1,7 @@
 -->> loadstring
+--[[
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/basic_remote_spy.lua'))()
+]]
 
 --//config
 
