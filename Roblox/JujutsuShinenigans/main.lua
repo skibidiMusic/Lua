@@ -66,6 +66,7 @@ local config = {
 
 		Gojo = {
 			blockLapseBlue = true,
+			blockReversalRed = true,
 		},
 		
 		whiteList = {
@@ -217,8 +218,11 @@ local function distanceFromCharacter(v: Model | BasePart | Vector3) : Vector3?
 	return diff
 end
 
-local function findFuturePos(v: BasePart, t: number?)
+local function findFuturePos(v: BasePart | Model, t: number?)
 	if not t then t = Player:GetNetworkPing() * .5 end
+	if v:IsA("Model") then
+		v = v.PrimaryPart
+	end
 	return v.Position + v.AssemblyLinearVelocity * t
 end
 
@@ -277,7 +281,7 @@ local function lookAt(enemy: Model, cameraEnabled: boolean, enemyPosMultiplier: 
 	end
 
 	game:GetService("RunService"):BindToRenderStep("lvfkma231231kaslslvlscas123", Enum.RenderPriority.Last.Value + 100, function()
-		local enemyFuturePosition = findFuturePos(enemy.PrimaryPart, Player:GetNetworkPing() * enemyPosMultiplier * 0.5)
+		local enemyFuturePosition = findFuturePos(enemy, Player:GetNetworkPing() * enemyPosMultiplier * 0.5)
 		localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position, enemyFuturePosition)
 	end)
 end
@@ -311,7 +315,7 @@ local function counter()
 	
 	local currentMoveset = localChar:GetAttribute("Moveset")
 	
-	if currentMoveset == "Itadori" then
+	if localChar:FindFirstChild"Moveset" and localChar:FindFirstChild("Moveset"):FindFirstChild("Manji Kick") then
 		local service = game.ReplicatedStorage.Knit.Knit.Services.ManjiKickService
 		local remote = service.RE.Activated
 		remote:FireServer()
@@ -827,7 +831,7 @@ do
 						if enemy:GetPivot().LookVector:Dot(-distance.Unit) > 0.25 then
 							--<< it probably IS us
 							task.wait(.25 - Player:GetNetworkPing())
-							block(enemy, .2, 1, true, true)
+							block(enemy, .4, 1, true, true)
 						end
 					end
 				end
@@ -836,6 +840,81 @@ do
 				remote.OnClientEvent:Connect(function(action: string, enemy: Model)
 					if action == "LapseBlue" then
 						blueDetected(enemy)
+					end
+				end)
+			)
+		end
+
+		--red (2)
+		do
+			gojoHeader:Checkbox({
+				Label = "Reversal Red",
+				Value = true,
+				Callback = function(self, Value)
+					config.autoBlock.Gojo.blockReversalRed = Value
+				end,
+			})
+
+			--<< projectile shot
+			local raycastParams = RaycastParams.new()
+			raycastParams.FilterDescendantsInstances = {workspace.Effects, workspace.Bullets}
+
+			local function redProjectileDetected(projectile: BasePart)
+				if not config.autoBlock.Gojo.blockReversalRed then return end
+
+				local appearTick = tick()
+				local thread = task.defer(function()
+					while task.wait() do
+						local localChar = Player.Character
+						if not localChar then continue end
+
+						if distanceFromCharacter(projectile).Magnitude < 15 then
+							if tick() - appearTick > 1.7 - Player:GetNetworkPing() or workspace:Raycast(projectile.CFrame.Position, projectile.CFrame.LookVector * Player:GetNetworkPing() * 30, raycastParams) then
+								debugConsole.print("explosion detected!")
+								block(projectile, .4, 1, false, true)
+								return
+							end
+						end
+					end
+				end)
+				projectile.Destroying:Connect(function()
+					task.cancel(thread)
+				end)
+			end
+			
+			--<< cast
+			local function redCasted(enemy: Model)
+				if not config.autoBlock.Gojo.blockReversalRed then return end
+
+				local localChar = Player.Character
+				if not localChar or enemy == localChar then return end
+
+				task.wait(.7 - Player:GetNetworkPing())
+
+				local dist = distanceFromCharacter(enemy)
+				if dist and math.abs(dist.Y) < 8 then
+					dist = normalizeToGround(dist)
+					if dist.Magnitude < 15 then
+						if dist.Magnitude < 8 or enemy:GetPivot().LookVector:Dot(-dist.Unit) > .3 then
+							block(enemy, .4, 1, true, true)
+						end
+					end
+				end
+			end
+
+			--<< hooks
+			disableJanitor:Add (
+				ServiceFolder.ReversalRedService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model)
+					if action == "Red" then
+						redCasted(enemy)
+					end
+				end)
+			)
+
+			disableJanitor:Add (
+				workspace.Bullets.ChildAdded:Connect(function(child: BasePart)
+					if child.Name == "RedProjectile" then
+						redProjectileDetected(child)
 					end
 				end)
 			)
@@ -942,7 +1021,7 @@ do
 		local localChar = Player.Character
 		if not localChar or localChar ~= character then return end
 		
-		task.wait(.3 - Player:GetNetworkPing())
+		task.wait(.15 - Player:GetNetworkPing())
 		remote:FireServer()
 	end
 	
@@ -1006,6 +1085,18 @@ do
 				spawnParts()
 			else
 				cleanUp()
+			end
+		end,
+	})
+end
+
+--<< clear parts
+do
+	MiscTab:Button({
+		Text = "Clear Parts (fix lag?)",
+		Callback = function(self)
+			for _, v in workspace.Map.Data:GetChildren() do
+				v:Destroy()
 			end
 		end,
 	})
