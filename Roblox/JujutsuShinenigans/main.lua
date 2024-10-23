@@ -28,11 +28,15 @@ local Player = game:GetService("Players").LocalPlayer
 
 
 -->> dep
-local ImGui = loadstring(game:HttpGet('https://github.com/depthso/Roblox-ImGUI/raw/main/ImGui.lua'))()
+--local fileManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/fileManager.lua'))()
+local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
 local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Janitor.lua'))()
 
 -->> main
+
 local disableJanitor = Janitor.new()
+
+-->> default config
 local config = {
 	autoBlock = {
 		enabled = false,
@@ -83,7 +87,7 @@ local config = {
 }
 
 
--->> gui
+-->> Gui Setup
 local Window = ImGui:CreateWindow({
 	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
@@ -91,8 +95,10 @@ local Window = ImGui:CreateWindow({
 	AutoSize = false,
 	NoClose = true
 })
+
 Window:Center()
 
+--(tabs)
 local AutoblockTab = Window:CreateTab({
 	Name = "Autoblock",
 	Visible = true 
@@ -103,15 +109,29 @@ local MiscTab = Window:CreateTab({
 	Visible = false 
 })
 
-
-
-
--->> code
---// debugging (mini-console)
 local ConsoleTab = Window:CreateTab({
 	Name = "Console (Output)",
 	Visible = false 
 })
+
+local KeybindsTab = Window:CreateTab({
+	Name = "Keybinds",
+	Visible = false 
+})
+
+local configsTab = Window:CreateTab({
+	Name = "Configs",
+	Visible = false 
+})
+
+local closeTab = Window:CreateTab({
+	Name = "Close",
+	Visible = false
+})
+
+
+-->> code
+--// debugging (mini-console)
 
 local debugConsole = {};
 
@@ -391,6 +411,7 @@ AutoblockTab:Separator({
 AutoblockTab:Checkbox({
 	Label = "Enabled",
 	Value = true,
+	saveFlag = "BlockEnabled",
 	Callback = function(self, Value)
 		config.autoBlock.enabled = Value
 	end,
@@ -399,6 +420,7 @@ AutoblockTab:Checkbox({
 AutoblockTab:Checkbox({
 	Label = "Try Countering",
 	Value = true,
+	saveFlag = "CounterToggle",
 	Callback = function(self, Value)
 		config.autoBlock.tryCounter = Value
 	end,
@@ -407,6 +429,7 @@ AutoblockTab:Checkbox({
 AutoblockTab:Checkbox({
 	Label = "Punish",
 	Value = true,
+	saveFlag = "PunishToggle",
 	Callback = function(self, Value)
 		config.autoBlock.punish = Value
 	end,
@@ -437,6 +460,7 @@ do
 		meleeBlockHeader:Checkbox({
 			Label = "Block Melee",
 			Value = true,
+			saveFlag = "BlockMelee",
 			Callback = function(self, Value)
 				config.autoBlock.Melee = Value
 			end,
@@ -489,6 +513,7 @@ do
 		meleeBlockHeader:Checkbox({
 			Label = "Block Chase",
 			Value = true,
+			saveFlag = "BlockChase",
 			Callback = function(self, Value)
 				config.autoBlock.chase = Value
 			end,
@@ -543,6 +568,7 @@ do
 			itadoriHeader:Checkbox({
 				Label = "Cursed Strikes",
 				Value = true,
+				saveFlag = "blockCursedStrikes",
 				Callback = function(self, Value)
 					config.autoBlock.Itadori.blockCursedStrikes = Value
 				end,
@@ -592,6 +618,7 @@ do
 		do
 			megumiHeader:Checkbox({
 				Label = "Toad (frog)",
+				saveFlag = "BlockToad",
 				Value = true,
 				Callback = function(self, Value)
 					config.autoBlock.Megumi.blockToad = Value
@@ -615,6 +642,7 @@ do
 			megumiHeader:Checkbox({
 				Label = "Wolf",
 				Value = true,
+				saveFlag = "BlockWolf",
 				Callback = function(self, Value)
 					config.autoBlock.Megumi.blockDog = Value
 				end,
@@ -663,6 +691,7 @@ do
 			mahitoHeader:Checkbox({
 				Label = "Focus Strike",
 				Value = true,
+				saveFlag = "MahitoFocusStrike",
 				Callback = function(self, Value)
 					config.autoBlock.Mahito.blockFocusStrike = Value
 				end,
@@ -704,6 +733,7 @@ do
 			mahitoHeader:Checkbox({
 				Label = "Bullets",
 				Value = true,
+				saveFlag = "MahitoBullets",
 				Callback = function(self, Value)
 					config.autoBlock.Mahito.blockSoulFire = Value
 				end,
@@ -745,6 +775,7 @@ do
 			mahitoHeader:Checkbox({
 				Label = "Special Dash",
 				Value = true,
+				saveFlag = "MahitoSpecialDash",
 				Callback = function(self, Value)
 					config.autoBlock.Mahito.blockSpecialDash = Value
 				end,
@@ -798,6 +829,7 @@ do
 			gojoHeader:Checkbox({
 				Label = "Lapse Blue",
 				Value = true,
+				saveFlag = "blockLapseBlue",
 				Callback = function(self, Value)
 					config.autoBlock.Gojo.blockLapseBlue = Value
 				end,
@@ -850,6 +882,7 @@ do
 			gojoHeader:Checkbox({
 				Label = "Reversal Red",
 				Value = true,
+				saveFlag = "BlockReversalRed",
 				Callback = function(self, Value)
 					config.autoBlock.Gojo.blockReversalRed = Value
 				end,
@@ -1006,6 +1039,7 @@ do
 	MiscTab:Checkbox({
 		Label = "Enter Domains",
 		Value = true,
+		saveFlag = "EnterDomains",
 		Callback = function(self, Value)
 			toggle(Value)
 		end,
@@ -1034,6 +1068,7 @@ do
 	MiscTab:Checkbox({
 		Label = "Always Black Flash",
 		Value = true,
+		saveFlag = "AlwaysBlackFlash",
 		Callback = function(self, Value)
 			config.misc.alwaysBlackFlash = Value
 		end,
@@ -1103,23 +1138,24 @@ do
 end
 
 
+
 -->> keybinds
-local Keybinds = Window:CreateTab({
-	Name = "Keybinds",
-	Visible = false 
-})
-
-Keybinds:Separator({
+KeybindsTab:Separator({
 
 })
 
-Keybinds:Keybind({
+KeybindsTab:Keybind({
 	Label = "Toggle UI",
 	Value = Enum.KeyCode.RightControl,
+	saveFlag = "ToggleUiKeybind",
 	Callback = function()
 		Window:SetVisible(not Window.Visible)
 	end,
 })
+
+
+-->> config saving & loading
+Window:CreateConfigSaveHandler()
 
 -->> unloading the gui
 local function disable()
@@ -1127,11 +1163,6 @@ local function disable()
 	Window:Destroy()
 	dir.disable = nil
 end
-
-local closeTab = Window:CreateTab({
-	Name = "Close",
-	Visible = false
-})
 
 closeTab:Separator({
 

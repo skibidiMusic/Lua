@@ -1,7 +1,7 @@
 -->> loadstrng
 --[[
     
-    local configSaver = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/configSaver.lua'))()
+    local fileManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/fileManager.lua'))()
 ]]
 
 -->> src
@@ -24,24 +24,24 @@ local function filePathFromName(folderPath: string, name: string)
     return self.folderPath .. "/" .. fileName .. ".txt"
 end
 
-local configSaver = {}
-configSaver.__index = configSaver
+local fileManager = {}
+fileManager.__index = fileManager
 
-function configSaver.new(folderPath: string)
+function fileManager.new(folderPath: string)
     if not isfolder(folderPath) then
         makefolder(folderPath)
     end
-    return setmetatable({folderPath = folderPath}, configSaver)
+    return setmetatable({folderPath = folderPath}, fileManager)
 end
 
-function configSaver.getSave(self, fileName: string)
+function fileManager.getSave(self, fileName: string)
     local filePath = filePathFromName(self.folderPath, fileName)
     if isfile(filePath) then
         return HttpService:JSONDecode(readfile(filePath))
     end
 end
 
-function configSaver.getSaves(self)
+function fileManager.getSaves(self)
     local files = listfiles(self.folderPath)
     local saves = {}
     for _, filePath in files do
@@ -51,16 +51,16 @@ function configSaver.getSaves(self)
     return saves
 end
 
-function configSaver.delete(self, fileName: string)
+function fileManager.delete(self, fileName: string)
     local filePath = filePathFromName(self.folderPath, fileName)
     if isfile(filePath) then
         delfile(filePath)
     end
 end
 
-function configSaver.save(self, fileName: string, configTable: {})
+function fileManager.save(self, fileName: string, configTable: {})
     local filePath = filePathFromName(self.folderPath, fileName)
     writefile(filePath, HttpService:JSONEncode(configTable))
 end
 
-return configSaver
+return fileManager

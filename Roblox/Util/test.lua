@@ -1,8 +1,10 @@
-local char = game.Players.Character
-if not char then return end 
+local files = listfiles("sakso")
+for i, v in files do
+    print(i, v)
+end
+print(readfile("sakso/hi.txt"))
 
-local currentMoveset = char:GetAttribute("Moveset")
-local service = game.ReplicatedStorage.Knit.Knit.Services[currentMoveset .. "Service"]
+print(string.sub("hey", 1, 3))
 
-local remote = service.RE.Activated
-remote:FireServer("Down")
+print(string.find("/sadasd/sadasda/hey/asdasd.exe", "."))
+
