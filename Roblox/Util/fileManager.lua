@@ -1,6 +1,7 @@
 -->> loadstrng
 --[[
-
+    
+    local configSaver = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/configSaver.lua'))()
 ]]
 
 -->> src
