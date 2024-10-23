@@ -334,7 +334,7 @@ local function setConfigFlag(self: any, configSaveData)
 end
 
 local function autoSaveConfig(configSaveData)
-   if configSaveData and configSaveData.autoSave then
+   if configSaveData and configSaveData.autoSave and not configSaveData.loadingSave then
         configSaveData.autoSave()
    end 
 end
@@ -1633,6 +1633,7 @@ function ImGui:CreateWindow(WindowConfig)
 
     -->> CONFIG HANDLER
     local configHandler = {};
+	configHandler.loadingSave = false
     configHandler.configIds = {}
 
     function WindowConfig:CreateConfigSaveHandler(configPath: string)
@@ -1648,6 +1649,7 @@ function ImGui:CreateWindow(WindowConfig)
         }
 
         local function loadConfig(name: string)
+			configHandler.loadingSave = true
             local save = saveFolder:getSave(name)
             if save then
                 for flag, value in save do
@@ -1657,6 +1659,7 @@ function ImGui:CreateWindow(WindowConfig)
                     end
                 end
             end
+			configHandler.loadingSave = false
         end
 
         local function saveConfig(name: string)
@@ -1731,6 +1734,13 @@ function ImGui:CreateWindow(WindowConfig)
             Text = "Save",
             Callback = function(self)
                 saveConfig(selectedSaveName)
+            end
+        })
+
+		row2:Button({
+            Text = "Delete",
+            Callback = function(self)
+                saveFolder:delete(selectedSaveName)
             end
         })
 
