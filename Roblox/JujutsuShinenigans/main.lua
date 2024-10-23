@@ -19,6 +19,7 @@ else
 end
 
 --> ref
+local UIS = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService"RunService"
 
@@ -85,6 +86,7 @@ local config = {
 
 	player = {
 		antiStun = true,
+		downSlam = true
 	}
 	
 	-->> Misc
@@ -474,7 +476,20 @@ do
 		local function meleeDetected(enemyChar: Model, COMBO: number?)
 			if not config.autoBlock.Melee then return end
 			local localChar = Player.Character
-			if localChar and localChar ~= enemyChar then
+			if localChar == enemyChar then
+				if COMBO == "3" and config.player.downSlam then
+					for i = 1, 150 do
+						task.wait()
+						local currentMoveset = localChar:GetAttribute("Moveset")
+						local service = game.ReplicatedStorage.Knit.Knit.Services[currentMoveset .. "Service"]
+					
+						local remote = service.RE.Activated
+						remote:FireServer("Down")
+					end
+				end
+				return
+			end
+			if localChar then
 				local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
 				if math.abs(diffVec.Y) < 4 then
 					diffVec = normalizeToGround(diffVec)
@@ -1152,15 +1167,14 @@ do
 	local currentCon;
 	disableJanitor:Add (
 		Player.CharacterAdded:Connect(function(character)
-			currentCon = character:WaitForChild"Info".ChildAdded:Connect(function(child)
-				if child.Name == "Stun" and config.player.antiStun then
-					child:Destroy()
-				end
+			local root = character:WaitForChild"HumanoidRootPart"
+			currentCon = root:GetPropertyChangedSignal("Anchored"):Connect(function()
+				root.Anchored = false
 			end)
 		end)
 	)
 
-	disableJanitor:Add ( function()
+	disableJanitor:Add(function()
 		if currentCon then
 			currentCon:Disconnect()
 		end
@@ -1169,11 +1183,10 @@ do
 	local function enable()
 		local char = Player.Character
 		if char then
-			for _, v in char:WaitForChild"Info":GetChildren() do
-				if v.Name == "Stun" then
-					v:Destroy()
-				end
-			end
+			local root = char:WaitForChild"HumanoidRootPart"
+			currentCon = root:GetPropertyChangedSignal("Anchored"):Connect(function()
+				root.Anchored = false
+			end)
 		end
 		config.player.antiStun = true
 	end
@@ -1192,6 +1205,18 @@ do
 			else
 				disable()
 			end
+		end,
+	})
+end
+
+--<< always downslam
+do
+	playerTab:Checkbox({
+		Label = "Always Downslam",
+		Value = true,
+		saveFlag = "alwaysDownslam",
+		Callback = function(self, Value)
+			config.player.downSlam = Value
 		end,
 	})
 end
