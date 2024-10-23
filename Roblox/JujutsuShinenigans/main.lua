@@ -119,11 +119,6 @@ local KeybindsTab = Window:CreateTab({
 	Visible = false 
 })
 
-local configsTab = Window:CreateTab({
-	Name = "Configs",
-	Visible = false 
-})
-
 local closeTab = Window:CreateTab({
 	Name = "Close",
 	Visible = false

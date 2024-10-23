@@ -1704,7 +1704,7 @@ function ImGui:CreateWindow(WindowConfig)
         })
 
         tab:Separator({
-            Text = "Save"
+            Text = "Selected Save"
         })
 
         row:Fill()
@@ -1735,6 +1735,10 @@ function ImGui:CreateWindow(WindowConfig)
         })
 
         row2:Fill()
+
+		tab:Separator({
+            Text = "Save List"
+        })
 
         local row3 = tab:Row()
         local previousCombo;
