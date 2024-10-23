@@ -1714,7 +1714,7 @@ function ImGui:CreateWindow(WindowConfig)
         local selectedSaveName = configHandlerSettings.lastSaveName;
         local inputText = row2:InputText({
             Text = configHandlerSettings.lastSaveName,
-            PlaceholderText = "Type save name",
+            PlaceHolder = "Type save name",
             Callback = function(self, v)
                 selectedSaveName = v;
             end

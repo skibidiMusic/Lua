@@ -1153,10 +1153,6 @@ KeybindsTab:Keybind({
 	end,
 })
 
-
--->> config saving & loading
-Window:CreateConfigSaveHandler("JJS_SAKSO")
-
 -->> unloading the gui
 local function disable()
 	disableJanitor:Cleanup()
@@ -1176,3 +1172,6 @@ closeTab:Button({
 })
 
 dir.disable = disable
+
+-->> config saving & loading
+Window:CreateConfigSaveHandler("JJS_SAKSO")
