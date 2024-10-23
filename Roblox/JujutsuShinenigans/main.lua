@@ -81,6 +81,10 @@ local config = {
 		alwaysBlackFlash = true, 
 		enterDomain = true,
 		antiFall = true,
+	},
+
+	player = {
+		antiStun = true,
 	}
 	
 	-->> Misc
@@ -102,6 +106,11 @@ Window:Center()
 local AutoblockTab = Window:CreateTab({
 	Name = "Autoblock",
 	Visible = true 
+})
+
+local playerTab = Window:CreateTab({
+	Name = "Player",
+	Visible = false 
 })
 
 local MiscTab = Window:CreateTab({
@@ -522,8 +531,8 @@ do
 				local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
 				if math.abs(diffVec.Y) < 15 then
 					diffVec = normalizeToGround(diffVec)
-					if diffVec.Magnitude < 35 then
-						if diffVec.Magnitude < 12 or diffVec.Unit:Dot(-enemyChar:GetPivot().LookVector) > 0.8  then
+					if diffVec.Magnitude < 38 then
+						if diffVec.Magnitude < 12 or diffVec.Unit:Dot(-enemyChar:GetPivot().LookVector) > 0.6  then
 							block(enemyChar, 0.5, 3, true, true)
 						end
 					end
@@ -1109,6 +1118,7 @@ do
 	MiscTab:Checkbox({
 		Label = "Anti-Void",
 		Value = true,
+		saveFlag = "AntiVoid",
 		Callback = function(self, Value)
 			config.misc.antiFall = Value
 			if Value then
@@ -1132,7 +1142,59 @@ do
 	})
 end
 
+--<< player tab
+playerTab:Separator({
+	Text = "Stuff for your player"
+})
 
+--<< anti stun
+do
+	local currentCon;
+	disableJanitor:Add (
+		Player.CharacterAdded:Connect(function(character)
+			currentCon = character:WaitForChild"Info".ChildAdded:Connect(function(child)
+				if child.Name == "Stun" and config.player.antiStun then
+					child:Destroy()
+				end
+			end)
+		end)
+	)
+
+	disableJanitor:Add ( function()
+		if currentCon then
+			currentCon:Disconnect()
+		end
+	end)
+
+	local function enable()
+		local char = Player.Character
+		if char then
+			for _, v in char:WaitForChild"Info":GetChildren() do
+				if v.Name == "Stun" then
+					v:Destroy()
+				end
+			end
+		end
+		config.player.antiStun = true
+	end
+
+	local function disable()
+		config.player.antiStun = false
+	end
+
+	playerTab:Checkbox({
+		Label = "Anti-Stun",
+		Value = true,
+		saveFlag = "AntiStun",
+		Callback = function(self, Value)
+			if Value then
+				enable()
+			else
+				disable()
+			end
+		end,
+	})
+end
 
 -->> keybinds
 KeybindsTab:Separator({
