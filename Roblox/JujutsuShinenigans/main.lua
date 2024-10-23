@@ -1155,7 +1155,7 @@ KeybindsTab:Keybind({
 
 
 -->> config saving & loading
-Window:CreateConfigSaveHandler()
+Window:CreateConfigSaveHandler("JJS_SAKSO")
 
 -->> unloading the gui
 local function disable()

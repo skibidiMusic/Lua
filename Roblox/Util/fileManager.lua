@@ -21,7 +21,7 @@ local function fileNameFromPath(path: string)
 end
 
 local function filePathFromName(folderPath: string, name: string)
-    return self.folderPath .. "/" .. fileName .. ".txt"
+    return folderPath .. "/" .. name .. ".txt"
 end
 
 local fileManager = {}
