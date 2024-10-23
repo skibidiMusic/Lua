@@ -45,6 +45,7 @@ function fileManager.getSaves(self)
     local files = listfiles(self.folderPath)
     local saves = {}
     for _, filePath in files do
+        if isfolder(filePath) then continue end
         local fileName = fileNameFromPath(filePath)
         saves[fileName] = HttpService:JSONDecode(readfile(filePath))
     end
