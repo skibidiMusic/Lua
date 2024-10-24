@@ -1526,7 +1526,7 @@ function ImGui:SetWindowProps(Properties, IgnoreWindows)
 end
 
 function ImGui:Notify(title: string, message: string, length: number?)
-	length = length or 5
+	length = ImGui.Animation.Time + (length or 5)
 
 	local notification = ImGui:CreateWindow({
 		Title = title,
@@ -1537,7 +1537,51 @@ function ImGui:Notify(title: string, message: string, length: number?)
 		NoClose = false,
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1 - 0.05, 0, 1 - 0.05, 0),
-		Size = UDim2.fromOffset(400, 0), --// Roblox property 
+		Size = UDim2.fromOffset(0, 0), --// Roblox property 
+
+		Colors = {
+			Window = {
+				BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+				BackgroundTransparency = 0.1,
+				ResizeGrip = {
+					TextColor3 = Color3.fromRGB(80, 80, 80)
+				},
+				
+				TitleBar = {
+					BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+					[{
+						Recursive = true,
+						Name = "ToggleButton"
+					}] = {
+						BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+					}
+				},
+				ToolBar = {
+					TabButton = {
+						BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+					}
+				},
+			},
+			CheckBox = {
+				Tickbox = {
+					BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+					Tick = {
+						ImageColor3 = Color3.fromRGB(255, 255, 255)
+					}
+				}
+			},
+			Slider = {
+				Grab = {
+					BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+				},
+				BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+			},
+			CollapsingHeader = {
+				TitleBar = {
+					BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+				}
+			}
+		}
 	})
 
 	local Content = notification:CreateTab({
@@ -1549,6 +1593,9 @@ function ImGui:Notify(title: string, message: string, length: number?)
 		TextWrapped = true,
 		RichText = true,
 	})
+
+	local windowUi = notification.Window
+	ImGui:Tween(windowUi, {Size = UDim2.fromOffset(400, 50)})
 
 	task.delay(length, function() 
 		notification:Close()
