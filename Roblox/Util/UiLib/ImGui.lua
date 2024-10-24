@@ -1587,17 +1587,15 @@ function ImGui:Notify(title: string, message: string, length: number?)
 	local Content = notification:CreateTab({
 		Visible = true
 	})
-	
-	Content:Label({
-		Text = message,
-		TextWrapped = true,
-		RichText = true,
-	})
-
-	task.wait()
 
 	local windowUi = notification.Window
-	ImGui:Tween(windowUi, {Size = UDim2.fromOffset(500, windowUi.AbsoluteSize.Y)})
+	ImGui:Tween(windowUi, {Size = UDim2.fromOffset(500, 50)}).Completed:Connect(function(playbackState)
+		Content:Label({
+			Text = message,
+			TextWrapped = true,
+			RichText = true,
+		})
+	end)
 
 	task.delay(length, function() 
 		notification:Close()
