@@ -1594,6 +1594,11 @@ function ImGui:Notify(title: string, message: string, length: number?)
 		RichText = true,
 	})
 
+	task.wait()
+	
+	local windowUi = notification.Window
+	ImGui:Tween(windowUi, {Size = UDim2.fromOffset(windowUi.AbsoluteSize.X, windowUi.AbsoluteSize.Y)})
+
 	local windowUi = notification.Window
 	ImGui:Tween(windowUi, {Size = UDim2.fromOffset(400, 0)})
 
