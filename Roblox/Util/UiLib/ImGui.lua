@@ -1537,7 +1537,7 @@ function ImGui:Notify(title: string, message: string, length: number?)
 		NoClose = false,
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1 - 0.05, 0, 1 - 0.05, 0),
-		Size = UDim2.fromOffset(500, 0), --// Roblox property 
+		Size = UDim2.fromOffset(0, 0), --// Roblox property 
 
 		Colors = {
 			Window = {
