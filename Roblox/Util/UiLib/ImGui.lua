@@ -1525,6 +1525,39 @@ function ImGui:SetWindowProps(Properties, IgnoreWindows)
 	return Module
 end
 
+function ImGui:Notify(title: string, message: string, length: number?)
+	length = length or 5
+
+	local notification = ImGui:CreateWindow({
+		Title = title,
+		TabsBar = false,
+		AutoSize = "Y",
+		NoCollapse = true,
+		NoResize = true,
+		NoClose = false,
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1 - 0.05, 0, 1 - 0.05, 0),
+		Size = UDim2.fromOffset(400, 0), --// Roblox property 
+	})
+
+	local Content = notification:CreateTab({
+		Visible = true
+	})
+	
+	Content:Label({
+		Text = message,
+		TextWrapped = true,
+		RichText = true,
+	})
+
+	task.delay(length, function() 
+		notification:Close()
+		notification:Destroy()
+	end)
+
+	return notification
+end
+
 function ImGui:CreateWindow(WindowConfig)
 	--// Create Window frame
 	local Window: Frame = Prefabs.Window:Clone()
@@ -1658,6 +1691,8 @@ function ImGui:CreateWindow(WindowConfig)
                         element:SetValue(value)
                     end
                 end
+			else
+				ImGui:Notify("Config", `There is no config with the name: ({name}), make sure you've saved it first.`, 6)
             end
 			configHandler.loadingSave = false
         end
@@ -1719,7 +1754,7 @@ function ImGui:CreateWindow(WindowConfig)
             Text = configHandlerSettings.lastSaveName,
             PlaceHolder = "Type save name",
             Callback = function(self, v)
-                selectedSaveName = v;
+                selectedSaveName = v;	
             end
         })
 
@@ -1788,6 +1823,7 @@ function ImGui:CreateWindow(WindowConfig)
 
         if configHandlerSettings.AutoLoadEnabled then
             loadConfig(configHandlerSettings.lastSaveName)
+			ImGui:Notify("Config", "Auto-loaded config: " .. configHandlerSettings.lastSaveName .. ".", 4)
         end
     end
 
