@@ -1595,7 +1595,7 @@ function ImGui:Notify(title: string, message: string, length: number?)
 	})
 
 	local windowUi = notification.Window
-	ImGui:Tween(windowUi, {Size = UDim2.fromOffset(400, 50)})
+	ImGui:Tween(windowUi, {Size = UDim2.fromOffset(400, 0)})
 
 	task.delay(length, function() 
 		notification:Close()
