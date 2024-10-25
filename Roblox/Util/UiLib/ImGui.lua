@@ -1832,7 +1832,6 @@ function ImGui:CreateWindow(WindowConfig)
             Text = "Save List"
         })
 
-        local row3 = tab:Row()
         local previousCombo;
 
         local function getSaves()
@@ -1848,7 +1847,7 @@ function ImGui:CreateWindow(WindowConfig)
             if previousCombo then
                 previousCombo:Destroy()
             end
-            previousCombo = row3:Combo({
+            previousCombo = tab:Combo({
                 Placeholder = "Select a save.",
                 Label = "Saves",
                 Items = getSaves(),
@@ -1858,7 +1857,7 @@ function ImGui:CreateWindow(WindowConfig)
             })
         end
 
-        local refreshButton = row3:Button({
+        local refreshButton = tab:Button({
             Text = "Refresh",
             Callback = function(self)
                 refreshConfigList()
@@ -1866,7 +1865,6 @@ function ImGui:CreateWindow(WindowConfig)
         })
 
         refreshConfigList()
-        row3:Fill()
 
         if configHandlerSettings.AutoLoadEnabled then
             loadConfig(configHandlerSettings.lastSaveName)

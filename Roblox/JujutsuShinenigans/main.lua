@@ -99,7 +99,53 @@ local Window = ImGui:CreateWindow({
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
 	Size = UDim2.new(0, 300, 0, 500),
 	AutoSize = false,
-	NoClose = true
+	NoClose = true,
+	--// Styles
+	NoGradientAll = true,
+	Colors = {
+		Window = {
+			BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+			BackgroundTransparency = 0.1,
+			ResizeGrip = {
+				TextColor3 = Color3.fromRGB(80, 80, 80)
+			},
+			
+			TitleBar = {
+				BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+				[{
+					Recursive = true,
+					Name = "ToggleButton"
+				}] = {
+					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+				}
+			},
+			ToolBar = {
+				TabButton = {
+					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+				}
+			},
+		},
+		CheckBox = {
+			Tickbox = {
+				BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+				Tick = {
+					ImageColor3 = Color3.fromRGB(255, 255, 255)
+				}
+			}
+		},
+		Slider = {
+			Grab = {
+				BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+			},
+			BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+		},
+		CollapsingHeader = {
+			TitleBar = {
+				BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+			}
+		}
+	}
+	
 })
 
 Window:Center()
