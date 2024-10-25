@@ -98,7 +98,7 @@ local Window = ImGui:CreateWindow({
 	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
 	Size = UDim2.new(0, 300, 0, 500),
-	AutoSize = false,
+	AutoSize = "X",
 	--NoClose = false,
 
 	--// Styles
@@ -519,16 +519,6 @@ do
 			if not config.autoBlock.Melee then return end
 			local localChar = Player.Character
 			if localChar == enemyChar then
-				if COMBO == "3" and config.player.downSlam then
-					for i = 1, 150 do
-						task.wait()
-						local currentMoveset = localChar:GetAttribute("Moveset")
-						local service = game.ReplicatedStorage.Knit.Knit.Services[currentMoveset .. "Service"]
-					
-						local remote = service.RE.Activated
-						remote:FireServer("Down")
-					end
-				end
 				return
 			end
 			if localChar then
@@ -1205,6 +1195,7 @@ playerTab:Separator({
 })
 
 --<< anti stun
+--[[
 do
 	local currentCon;
 	disableJanitor:Add (
@@ -1251,7 +1242,10 @@ do
 	})
 end
 
+]]
+
 --<< always downslam
+--[[
 do
 	playerTab:Checkbox({
 		Label = "Always Downslam",
@@ -1261,7 +1255,13 @@ do
 			config.player.downSlam = Value
 		end,
 	})
+	
+	UIS.InputBegan:Connect(function(input, gameProcessedEvent)
+		
+	end)
 end
+
+]]
 
 -->> keybinds
 KeybindsTab:Separator({
@@ -1285,7 +1285,8 @@ do
 				--ImGui:Notify("Press " .. `{toggleUiKeybind.Value}` .. " to re-open the gui." , 1)
 				return
 			end
-			ImGui:Notify("Press " .. `{toggleUiKeybind.Value}` .. " to re-open the gui." , 4)
+			wasClosedBefore = true
+			ImGui:Notify("Gui", "Press " .. `{toggleUiKeybind.Value.Name}` .. " to re-open the gui." , 4)
 		end
 	end
 end
@@ -1305,7 +1306,6 @@ dir.disable = disable
 -->> config saving & loading
 Window:CreateConfigSaveHandler("JJS_SAKSO")
 
-
 -->> unloading gui
 local closeTab = Window:CreateTab({
 	Name = "Unload",
@@ -1320,6 +1320,6 @@ closeTab:Button({
     Text = "Unload the cheat",
     Callback = function(self)
         disable()
-		ImGui:Notify("Unloaded the cheat. Re-execute if you want to use again." , 3)
+		ImGui:Notify("JJS-SAKSO", "Unloaded the cheat. Re-execute if you want to use again." , 3)
     end,
 })
