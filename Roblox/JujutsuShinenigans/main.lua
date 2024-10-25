@@ -99,7 +99,8 @@ local Window = ImGui:CreateWindow({
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
 	Size = UDim2.new(0, 300, 0, 500),
 	AutoSize = false,
-	NoClose = true,
+	--NoClose = false,
+
 	--// Styles
 	NoGradientAll = true,
 	Colors = {
@@ -145,7 +146,7 @@ local Window = ImGui:CreateWindow({
 			}
 		}
 	}
-	
+
 })
 
 Window:Center()
@@ -174,11 +175,6 @@ local ConsoleTab = Window:CreateTab({
 local KeybindsTab = Window:CreateTab({
 	Name = "Keybinds",
 	Visible = false 
-})
-
-local closeTab = Window:CreateTab({
-	Name = "Close",
-	Visible = false
 })
 
 
@@ -1269,24 +1265,52 @@ end
 
 -->> keybinds
 KeybindsTab:Separator({
-
+	"Press Backspace to Delete Keybind"
 })
 
-KeybindsTab:Keybind({
-	Label = "Toggle UI",
-	Value = Enum.KeyCode.RightControl,
-	saveFlag = "ToggleUiKeybind",
-	Callback = function()
-		Window:SetVisible(not Window.Visible)
-	end,
-})
+do
+	local toggleUiKeybind = KeybindsTab:Keybind({
+		Label = "Toggle UI",
+		Value = Enum.KeyCode.RightControl,
+		saveFlag = "ToggleUiKeybind",
+		Callback = function()
+			Window:SetVisible(not Window.Visible)
+		end,
+	})
+	
+	local wasClosedBefore = false
+	Window.CloseCallback = function()
+		if toggleUiKeybind.Value then
+			if wasClosedBefore then
+				--ImGui:Notify("Press " .. `{toggleUiKeybind.Value}` .. " to re-open the gui." , 1)
+				return
+			end
+			ImGui:Notify("Press " .. `{toggleUiKeybind.Value}` .. " to re-open the gui." , 4)
+		end
+	end
+end
 
--->> unloading the gui
+-->> disable (unload)
 local function disable()
 	disableJanitor:Cleanup()
+	Window:Close()
 	Window:Destroy()
 	dir.disable = nil
 end
+
+dir.disable = disable
+
+
+
+-->> config saving & loading
+Window:CreateConfigSaveHandler("JJS_SAKSO")
+
+
+-->> unloading gui
+local closeTab = Window:CreateTab({
+	Name = "Unload",
+	Visible = false
+})
 
 closeTab:Separator({
 
@@ -1296,10 +1320,6 @@ closeTab:Button({
     Text = "Unload the cheat",
     Callback = function(self)
         disable()
+		ImGui:Notify("Unloaded the cheat. Re-execute if you want to use again." , 3)
     end,
 })
-
-dir.disable = disable
-
--->> config saving & loading
-Window:CreateConfigSaveHandler("JJS_SAKSO")
