@@ -48,6 +48,9 @@ local TeleportsHeader = MainTab:CollapsingHeader({
 
 -->> stun the char
 local nullify_velocity = function(time_out : number)
+    if true then
+        return
+    end
 	local start = os.clock()
 	time_out = time_out or 5
 	repeat
@@ -98,20 +101,22 @@ do
     end    
 end
 
+local config = {}
+
 -->> auto shake thing
 local autoShake = {}
 do
     local selfJan = Janitor.new()
 
     local function buttonDetected(button: GuiButton)
-		if button.Name ~= "button" then return end
-        task.wait()
+		if not button:IsA("ImageButton") or button.Name ~= "button" then return end
+        task.wait(0.1)
         while button.Parent do
-            task.wait(.2)
-            local pos = button.Position
+            local pos = button.AbsolutePosition
             local size = button.AbsoluteSize
-            VIM:SendMouseButtonEvent(pos.X + (size.X / 2), pos.Y + (size.Y / 2), Enum.UserInputType.MouseButton1.Value, true, button.Parent, 1)
-            VIM:SendMouseButtonEvent(pos.X + (size.X / 2), pos.Y + (size.Y / 2), Enum.UserInputType.MouseButton1.Value, false, button.Parent, 1)
+            VIM:SendMouseButtonEvent(pos.X + size.X / 2, pos.Y + size.Y / 2, 0, true, Player, 0)
+            VIM:SendMouseButtonEvent(pos.X + size.X / 2, pos.Y + size.Y / 2, 0, false, Player, 0)
+            task.wait(0.1 + Player:GetNetworkPing())
         end
 	end
 
@@ -170,19 +175,24 @@ do
             local playerbar = bar:FindFirstChild("playerbar")
 
             if playerbar then
-                remote:FireServer(100, true)
+                remote:FireServer(100, false)
             end
         end
     end
 
 	autoMinigame.enable = function()
+        thread =  PlayerGui.ChildAdded:Connect(function(GUI)
+            if GUI:IsA("ScreenGui") and GUI.Name == "reel" then
+                task.wait(2)
+                 ReplicatedStorage:WaitForChild("events"):WaitForChild("reelfinished"):FireServer(100, false)
+            end
+        end)
 
-        thread = task.defer(loop)
 	end
 	
 	autoMinigame.disable = function()
         if thread then
-            task.cancel(thread)
+            thread:Disconnect()
         end
 	end
 

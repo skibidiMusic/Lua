@@ -1323,11 +1323,11 @@ closeTab:Button({
     end,
 })
 
+-->> config saving & loading
+Window:CreateConfigSaveHandler("JJS_SAKSO")
+
 --// wiz special technique
 if Player.Name == "IIlIllIIIIlIIIlllIIl" or Player.Name == "casckmaskcmwoda" then
 	task.wait(5)
 	ImGui:Notify("Sa", "Wiz sa nbr knks 31" , 5)
 end
-
--->> config saving & loading
-Window:CreateConfigSaveHandler("JJS_SAKSO")
