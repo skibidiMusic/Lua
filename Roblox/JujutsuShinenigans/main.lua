@@ -98,7 +98,7 @@ local Window = ImGui:CreateWindow({
 	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
 	Size = UDim2.new(0, 300, 0, 500),
-	AutoSize = "X",
+	AutoSize = false,
 	--NoClose = false,
 
 	--// Styles
