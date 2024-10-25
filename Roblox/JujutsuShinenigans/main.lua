@@ -1302,7 +1302,6 @@ end
 dir.disable = disable
 
 
-
 -->> config saving & loading
 Window:CreateConfigSaveHandler("JJS_SAKSO")
 
@@ -1323,3 +1322,9 @@ closeTab:Button({
 		ImGui:Notify("JJS-SAKSO", "Unloaded the cheat. Re-execute if you want to use again." , 3)
     end,
 })
+
+--// wiz special technique
+if Player.Name == "IIlIllIIIIlIIIlllIIl" then
+	task.wait(5)
+	ImGui:Notify("Sa", "Wiz sa nbr knks 31" , 5)
+end
