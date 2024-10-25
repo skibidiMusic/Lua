@@ -98,7 +98,7 @@ local Window = ImGui:CreateWindow({
 	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
 	Size = UDim2.new(0, 300, 0, 500),
-	AutoSize = "X",
+	AutoSize = false,
 	--NoClose = false,
 
 	--// Styles
@@ -310,7 +310,7 @@ local lookAtData = {
 
 local function stopLookingAt()
 	if not isLookingAt then return end
-	game:GetService("RunService"):UnbindFromRenderStep("lvfkma231231kaslslvlscas123")
+	game:GetService("RunService"):UnbindFromRenderStep("elkaka_und_dashQuel")
 	lookAtData.Humanoid.AutoRotate = true
 
 	if lookAtData.wasCameraEnabled then
@@ -348,7 +348,7 @@ local function lookAt(enemy: Model, cameraEnabled: boolean, enemyPosMultiplier: 
 		workspace.Camera.CameraSubject = enemy
 	end
 
-	game:GetService("RunService"):BindToRenderStep("lvfkma231231kaslslvlscas123", Enum.RenderPriority.Last.Value + 100, function()
+	game:GetService("RunService"):BindToRenderStep("elkaka_und_dashQuel", Enum.RenderPriority.Last.Value + 100, function()
 		local enemyFuturePosition = findFuturePos(enemy, Player:GetNetworkPing() * enemyPosMultiplier * 0.5)
 		localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position, enemyFuturePosition)
 	end)
@@ -1037,7 +1037,7 @@ do
     local function playerListChanged()
         if dropdown then dropdown:Destroy() end
         local players = game.Players:GetPlayers()
-        for i, v: Player in game.Players do
+        for i, v: Player in game.Players:GetPlayers() do
             players[i] = v.Name
         end
         dropdown = AutoblockTab:Combo({
@@ -1179,6 +1179,9 @@ end
 
 --<< clear parts
 do
+	--[[
+	
+	]]
 	MiscTab:Button({
 		Text = "Clear Parts (fix lag?)",
 		Callback = function(self)
@@ -1195,6 +1198,7 @@ playerTab:Separator({
 })
 
 --<< anti stun
+--[[
 do
 	local currentCon;
 	disableJanitor:Add (
@@ -1241,6 +1245,10 @@ do
 	})
 end
 
+]]
+
+--<< always downslam
+--[[
 do
 	playerTab:Checkbox({
 		Label = "Always Downslam",
@@ -1255,6 +1263,8 @@ do
 		
 	end)
 end
+
+]]
 
 -->> keybinds
 KeybindsTab:Separator({
@@ -1287,16 +1297,13 @@ end
 -->> disable (unload)
 local function disable()
 	disableJanitor:Cleanup()
-	Window:Close()
+	--Window:Close()
 	Window:Destroy()
 	dir.disable = nil
 end
 
 dir.disable = disable
 
-
--->> config saving & loading
-Window:CreateConfigSaveHandler("JJS_SAKSO")
 
 -->> unloading gui
 local closeTab = Window:CreateTab({
@@ -1317,9 +1324,10 @@ closeTab:Button({
 })
 
 --// wiz special technique
---[[
 if Player.Name == "IIlIllIIIIlIIIlllIIl" or Player.Name == "casckmaskcmwoda" then
 	task.wait(5)
 	ImGui:Notify("Sa", "Wiz sa nbr knks 31" , 5)
 end
-]]
+
+-->> config saving & loading
+Window:CreateConfigSaveHandler("JJS_SAKSO")
