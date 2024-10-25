@@ -19,7 +19,7 @@ else
 end
 
 --> ref
-local UIS = game:GetService("UserInputService")
+--local UIS = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService"RunService"
 
@@ -98,7 +98,7 @@ local Window = ImGui:CreateWindow({
 	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
 	Size = UDim2.new(0, 300, 0, 500),
-	AutoSize = false,
+	AutoSize = "X",
 	--NoClose = false,
 
 	--// Styles
@@ -1195,7 +1195,6 @@ playerTab:Separator({
 })
 
 --<< anti stun
---[[
 do
 	local currentCon;
 	disableJanitor:Add (
@@ -1242,10 +1241,6 @@ do
 	})
 end
 
-]]
-
---<< always downslam
---[[
 do
 	playerTab:Checkbox({
 		Label = "Always Downslam",
@@ -1260,8 +1255,6 @@ do
 		
 	end)
 end
-
-]]
 
 -->> keybinds
 KeybindsTab:Separator({
@@ -1324,7 +1317,9 @@ closeTab:Button({
 })
 
 --// wiz special technique
+--[[
 if Player.Name == "IIlIllIIIIlIIIlllIIl" or Player.Name == "casckmaskcmwoda" then
 	task.wait(5)
 	ImGui:Notify("Sa", "Wiz sa nbr knks 31" , 5)
 end
+]]
