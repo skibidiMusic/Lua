@@ -73,6 +73,10 @@ local config = {
 			blockLapseBlue = true,
 			blockReversalRed = true,
 		},
+
+		Hakari = {
+			blockDoors = true,
+		},
 		
 		whiteList = {
 		}
@@ -866,6 +870,47 @@ do
 			end) )
 		end
 
+	end
+
+	--(hakari)
+	do
+		local hakariHeader = skillBlockHeader:CollapsingHeader({
+			Title = "Hakari",
+			Open = false
+		})
+
+		-->> doors (1)
+		do
+			hakariHeader:Checkbox({
+				Label = "Doors",
+				Value = true,
+				saveFlag = "HakariDoors",
+				Callback = function(self, Value)
+					config.autoBlock.Hakari.blockDoors = Value
+				end,
+			})
+
+			local function doorsDetected(part: BasePart, init: boolean?)
+				if not config.autoBlock.Hakari.blockDoors then return end
+
+				local dist = distanceFromCharacter(part)
+				if dist and math.abs(dist.Y) < 12 and normalizeToGround(dist).Magnitude < 24  then
+					if init then
+						task.delay(.2 - Player:GetNetworkPing(), doorsDetected, part)
+					else
+						if normalizeToGround(dist).Magnitude < 12 then
+							block(part, .45, 0, false, true)
+						end
+					end
+				end
+			end
+
+			disableJanitor:Add( workspace.Effects.ChildAdded:Connect(function(v: Instance)
+				if v:IsA("BasePart") and v.Name == "Doors" then
+					doorsDetected(v, true)
+				end
+			end) )
+		end
 	end
 
 	--(gojo)
