@@ -895,21 +895,19 @@ do
 
 				local dist = distanceFromCharacter(part)
 				if dist and math.abs(dist.Y) < 12 and normalizeToGround(dist).Magnitude < 24  then
-					if init then
-						task.delay(.2 - Player:GetNetworkPing(), doorsDetected, part)
-					else
-						if normalizeToGround(dist).Magnitude < 12 then
-							block(part, .45, 0, false, true)
-						end
+					task.wait(.2 - Player:GetNetworkPing())
+					local dist = distanceFromCharacter(part)
+					if normalizeToGround(dist).Magnitude < 12 then
+						block(part, .45, 0, false, true)
 					end
 				end
 			end
 
 			disableJanitor:Add( workspace.Effects.ChildAdded:Connect(function(v: Instance)
 				if v:IsA("BasePart") and v.Name == "Doors" then
-					doorsDetected(v, true)
+					doorsDetected(v)
 				end
-			end) )
+			end))
 		end
 	end
 
