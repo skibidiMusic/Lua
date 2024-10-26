@@ -319,10 +319,10 @@ local function stopLookingAt()
 
 	if lookAtData.wasCameraEnabled then
 		workspace.Camera.CameraType = Enum.CameraType.Custom
-		if lookAtData.lastCameraSubject and lookAtData.lastCameraSubject.Parent then
+		if lookAtData.lastCameraSubject and lookAtData.lastCameraSubject.Parent == Player.Character and Player.Character ~= nil then
 			workspace.Camera.CameraSubject = lookAtData.lastCameraSubject
 		else
-			workspace.Camera.CameraSubject = Player.Character.Head
+			workspace.Camera.CameraSubject = Player.Character and Player.Character.Head
 		end
 	end
 end
@@ -352,9 +352,12 @@ local function lookAt(enemy: Model, cameraEnabled: boolean, enemyPosMultiplier: 
 		workspace.Camera.CameraSubject = enemy
 	end
 
+	local prevParent = enemy.Parent
 	game:GetService("RunService"):BindToRenderStep("elkaka_und_dashQuel", Enum.RenderPriority.Last.Value + 100, function()
-		local enemyFuturePosition = findFuturePos(enemy, Player:GetNetworkPing() * enemyPosMultiplier * 0.5)
-		localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position, enemyFuturePosition)
+		if enemy.Parent == prevParent then
+			local enemyFuturePosition = findFuturePos(enemy, Player:GetNetworkPing() * enemyPosMultiplier * 0.5)
+			localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position, enemyFuturePosition)
+		end
 	end)
 end
 
