@@ -1257,7 +1257,7 @@ do
 		if character.Info:FindFirstChild("Knockback") then return end
 		remote:FireServer()
 
-		task.wait(.45)
+		task.wait(.45 - Player:GetNetworkPing())
 
 		local thread = task.defer(function()
 			while task.wait() do
@@ -1267,6 +1267,7 @@ do
 
 		lookAt(character, false, 0)
 
+		task.wait(Player:GetNetworkPing())
 		remote:FireServer()
 
 		task.wait(.35)
