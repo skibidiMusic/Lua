@@ -90,7 +90,8 @@ local config = {
 
 	player = {
 		antiStun = true,
-		downSlam = true
+		downSlam = true,
+		infBlackFlash = true,
 	}
 	
 	-->> Misc
@@ -1242,6 +1243,50 @@ end
 playerTab:Separator({
 	Text = "Stuff for your player"
 })
+
+--<< inf black flash (not 100%)
+do
+	local remote = ServiceFolder.DivergentFistService.RE.Activated
+	
+	local function blackFlashDetected(localChar: Model, character: Model)
+		if not config.player.infBlackFlash then return end
+		if Player.Character ~= localChar then return end
+
+		task.wait(0.5 - Player:GetNetworkPing())
+
+		if character.Info:FindFirstChild("Knockback") then return end
+		remote:FireServer()
+
+		task.wait(.45)
+
+		local thread = task.defer(function()
+			while task.wait() do
+				localChar:PivotTo(character:GetPivot() * CFrame.new(Vector3.new(0,0 , 4)))
+			end
+		end)
+
+		remote:FireServer()
+
+		task.wait(.35)
+
+		task.cancel(thread)
+	end
+	
+	disableJanitor:Add( ServiceFolder.DivergentFistService.RE.Effects.OnClientEvent:Connect(function(effectName: string, localChar: Model, char: Model) 
+		if effectName == "BlackFlashHit" then
+			blackFlashDetected(localChar, char)
+		end
+	end) )
+
+	playerTab:Checkbox({
+		Label = "Inf Black Flash",
+		Value = true,
+		saveFlag = "InfBlackFlash",
+		Callback = function(self, Value)
+			config.player.infBlackFlash = Value
+		end,
+	})
+end
 
 --<< anti stun
 --[[
