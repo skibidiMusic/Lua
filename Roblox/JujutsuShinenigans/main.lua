@@ -1265,10 +1265,13 @@ do
 			end
 		end)
 
+		lookAt(character, false, 0)
+
 		remote:FireServer()
 
 		task.wait(.35)
 
+		stopLookingAt()
 		task.cancel(thread)
 	end
 	
