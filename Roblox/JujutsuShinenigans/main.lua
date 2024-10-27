@@ -1251,13 +1251,12 @@ do
 	local function blackFlashDetected(localChar: Model, character: Model)
 		if not config.player.infBlackFlash then return end
 		if Player.Character ~= localChar then return end
-
 		task.wait(0.5 - Player:GetNetworkPing())
 
-		if character.Info:FindFirstChild("Knockback") then return end
+		if character.Info:FindFirstChild("Knockback") or not character.Info:FindFirstChild("Stun") then return end
 		remote:FireServer()
 
-		task.wait(.45 - Player:GetNetworkPing())
+		task.wait(.25 - Player:GetNetworkPing())
 
 		local thread = task.defer(function()
 			while task.wait() do
@@ -1267,7 +1266,7 @@ do
 
 		lookAt(character, false, 0)
 
-		task.wait(Player:GetNetworkPing())
+		task.wait(.25 + Player:GetNetworkPing())
 		remote:FireServer()
 
 		task.wait(.35)
