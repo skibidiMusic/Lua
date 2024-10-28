@@ -386,7 +386,7 @@ local function attack(enemy: Model)
 end
 
 --(counter)
-local function counter()
+local function counter(enemy: Model?)
 	local localChar = Player.Character
 	if not localChar then return end
 	
@@ -397,7 +397,11 @@ local function counter()
 		local remote = service.RE.Activated
 		remote:FireServer()
 	elseif currentMoveset == "Hakari" then
-		
+		ServiceFolder.HakariService.RE.RightActivated:FireServer(enemy)
+	end
+	
+	if enemy then
+		lookAt(enemy, false, 1)
 	end
 end
 
@@ -440,7 +444,7 @@ local function block(enemy: Model, length: number, enemySpeedMultiplier: number?
 	if config.autoBlock.lookAtPlayer then lookAt(enemy, config.autoBlock.lockCamera, enemySpeedMultiplier) end
 	
 	if tryCounter and config.autoBlock.tryCounter then
-		counter()
+		counter(enemy)
 	end
 
 	blockData.loopThread = task.defer(function()
@@ -845,7 +849,7 @@ do
 				if style == 1 then
 					dashAttackDetected(enemy, false, nil, 8, 25, .5)
 				elseif Player.Character and Player.Character ~= enemy then
-					counter()
+					counter(enemy)
 				end
 			end
 		
