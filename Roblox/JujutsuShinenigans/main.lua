@@ -401,7 +401,7 @@ local function counter(enemy: Model?)
 	end
 	
 	if enemy then
-		lookAt(enemy, false, 1)
+		--lookAt(enemy, false, 1)
 	end
 end
 
