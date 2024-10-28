@@ -76,6 +76,7 @@ local config = {
 
 		Hakari = {
 			blockDoors = true,
+			blockBalls = true,
 		},
 		
 		whiteList = {
@@ -586,8 +587,9 @@ do
 				local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
 				if math.abs(diffVec.Y) < 15 then
 					diffVec = normalizeToGround(diffVec)
-					if diffVec.Magnitude < 38 then
+					if diffVec.Magnitude < 45 then
 						if diffVec.Magnitude < 12 or diffVec.Unit:Dot(-enemyChar:GetPivot().LookVector) > 0.6  then
+							task.wait(diffVec.Magnitude / 12)
 							block(enemyChar, 0.5, 3, true, true)
 						end
 					end
@@ -615,6 +617,30 @@ do
 		Open = false
 	})
 
+
+	--((global helper funcs))
+	local function dashAttackDetected(enemy: Model | BasePart, counter: boolean?, from: CFrame?, yLimit: number?, maxDistance: number, blockLength: number) --<< cursed strikes etc.
+		local localChar = Player.Character
+		if localChar and enemy ~= Player.Character then
+			from = from or ((enemy:IsA"Model" and enemy.PrimaryPart) or enemy).CFrame
+			local distance = distanceFromCharacter(from.Position)
+			if distance and math.abs(distance.Y) < (yLimit or 8) then
+				distance = normalizeToGround(distance)
+				if distance.Magnitude < maxDistance then
+					if distance.Magnitude < 10 then
+						block(enemy, blockLength, 1, true, counter)
+					elseif distance.Unit:Dot(-from.LookVector) > 0.7 then
+						block(enemy, blockLength, 1, true, counter)
+					end
+				end
+			end
+		end
+	end
+
+	local function bulletDetected() --<< soul fire etc.
+		
+	end
+
 	--(itadori)
 	do
 		local itadoriHeader = skillBlockHeader:CollapsingHeader({
@@ -636,20 +662,7 @@ do
 			local function cursedStrikesDetected(enemy: Model, from: CFrame)
 				if not config.autoBlock.Itadori.blockCursedStrikes then return end
 				if typeof(from) ~= "CFrame" then return end
-				local localChar = Player.Character
-				if localChar and enemy ~= Player.Character then
-					local distance = distanceFromCharacter(from.Position)
-					if distance and math.abs(distance.Y) < 8 then
-						distance = normalizeToGround(distance)
-						if distance.Magnitude < 40 then
-							if distance.Magnitude < 15 then
-								block(enemy, 0.5, 1, true)
-							elseif distance.Unit:Dot(-from.LookVector) > 0.5 then
-								block(enemy, 0.5, 1, true)
-							end
-						end
-					end
-				end
+				dashAttackDetected(enemy, false, from, 8, 40, .5)
 			end
 		
 			disableJanitor:Add( ServiceFolder.CursedStrikesService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
@@ -758,20 +771,7 @@ do
 
 			local function focusStrikeDetected(enemy: Model)
 				if not config.autoBlock.Mahito.blockFocusStrike then return end
-				local localChar = Player.Character
-				if localChar and enemy ~= Player.Character then
-					local distance = distanceFromCharacter(enemy)
-					if distance and math.abs(distance.Y) < 8 then
-						distance = normalizeToGround(distance)
-						if distance.Magnitude < 25 then
-							if distance.Magnitude < 15 then
-								block(enemy, 0.5, 1, true, true)
-							elseif distance.Unit:Dot(-enemy:GetPivot().LookVector) > 0.8 then
-								block(enemy, 0.5, 1, true, true)
-							end
-						end
-					end
-				end
+				dashAttackDetected(enemy, true, nil, 8, 30, .5)
 			end
 			
 			disableJanitor:Add( ServiceFolder.FocusStrikeService.RE.Effects.OnClientEvent:Connect(function(action: string, enemy: Model, cfRame: CFrame)
@@ -842,22 +842,10 @@ do
 
 			local function specialDashDetected(enemy: Model, style: number)
 				if not config.autoBlock.Mahito.blockSpecialDash then return end
-				local localChar = Player.Character
-				if localChar and enemy ~= Player.Character then
-					local distance = distanceFromCharacter(enemy)
-					if distance and math.abs(distance.Y) < 8 then
-						distance = normalizeToGround(distance)
-						if distance.Magnitude < 25 then
-							if distance.Magnitude < 8 or distance.Unit:Dot(-enemy:GetPivot().LookVector) > 0.8  then
-								if style == 1 then
-									block(enemy, 0.5, 1, true, false)
-								else
-									counter()
-								end
-		
-							end
-						end
-					end
+				if style == 1 then
+					dashAttackDetected(enemy, false, nil, 8, 25, .5)
+				elseif Player.Character and Player.Character ~= enemy then
+					counter()
 				end
 			end
 		
@@ -912,6 +900,62 @@ do
 					doorsDetected(v)
 				end
 			end))
+		end
+
+		-->> reserve balls (2)
+		do
+			hakariHeader:Checkbox({
+				Label = "Balls",
+				Value = true,
+				saveFlag = "HakariBalls",
+				Callback = function(self, Value)
+					config.autoBlock.Hakari.blockBalls = Value
+				end,
+			})
+
+			--<< projectile shot
+			local raycastParams = RaycastParams.new()
+			raycastParams.FilterDescendantsInstances = {workspace.Effects, workspace.Bullets}
+			
+
+			local function ballSpawning(enemy: Model)
+				if not config.autoBlock.Hakari.blockBalls then return end
+
+				task.wait(.25 - Player:GetNetworkPing())
+				if not Player.Character or enemy == Player.Character then return end
+
+				local dist = distanceFromCharacter(enemy)
+				if math.abs(dist.Y) < 3 then
+					dist = normalizeToGround(dist)
+					if dist.Magnitude < 70 then
+						if dist.Magnitude < 20 then
+							if dist.Unit:Dot(-enemy:GetPivot().LookVector) > 0.8 then
+								block(enemy, .3, 1, true, false) --<< countering is just unneccessary atp.
+							end
+							return
+						end
+
+						local dir = enemy:GetPivot().LookVector * dist.Magnitude
+						local raycast = workspace:Raycast(enemy:GetPivot().Position, dir, raycastParams) :: RaycastResult
+
+						if raycast then
+							if distanceFromCharacter(raycast.Position).Magnitude < 6 then
+								block(enemy, math.max(0.1 + 0.6 * dist.Magnitude / 65, .3), 1, true, true)
+							end
+							return
+						end
+
+						if dist.Unit:Dot(-enemy:GetPivot().LookVector) > 0.7 then
+							block(enemy, 0.6 * dist.Magnitude / 65, 1, true, true)
+						end
+					end
+				end
+			end
+
+			disableJanitor:Add ( ServiceFolder.ReserveBallService.RE.Effects.OnClientEvent:Connect(function(action: string, char: Model)
+				if action ~= "Swing" then return end
+				ballSpawning(char)
+			end) )
 		end
 	end
 
@@ -1256,7 +1300,7 @@ do
 		if character.Info:FindFirstChild("Knockback") or not character.Info:FindFirstChild("Stun") then return end
 		remote:FireServer()
 
-		task.wait(.25 - Player:GetNetworkPing())
+		task.wait(.15 - Player:GetNetworkPing())
 
 		local thread = task.defer(function()
 			while task.wait() do
