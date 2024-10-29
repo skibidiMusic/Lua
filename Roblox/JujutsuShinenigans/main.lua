@@ -396,7 +396,7 @@ local function counter(enemy: Model?)
 		local service = game.ReplicatedStorage.Knit.Knit.Services.ManjiKickService
 		local remote = service.RE.Activated
 		remote:FireServer()
-	elseif currentMoveset == "Hakari" then
+	elseif currentMoveset == "Hakari" and not localChar:GetAttribute("InUlt")  then
 		ServiceFolder.HakariService.RE.RightActivated:FireServer(enemy)
 	end
 	
@@ -540,11 +540,11 @@ do
 					diffVec = normalizeToGround(diffVec)
 					if enemyChar:GetAttribute("Moveset") == "Itadori" and enemyChar:GetAttribute("InUlt") then
 						if normalizeToGround(diffVec).Magnitude < 20 then	
-							block(enemyChar, 0.55, 1, diffVec.Magnitude < 10 and config.autoBlock.punish and COMBO == 4, true)
+							block(enemyChar, 0.55, 1, COMBO == 4, true)
 						end
 					else
 						if diffVec.Magnitude < 15 then	
-							block(enemyChar, 0.35, 1, config.autoBlock.punish and diffVec.Magnitude < 10)
+							block(enemyChar, 0.35, 1, true)
 						end 
 					end
 				end
@@ -584,6 +584,16 @@ do
 		})
 	
 		-->> hook
+		local function checkDistance(enemyChar)
+			local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
+			if math.abs(diffVec.Y) < 15 then
+				diffVec = normalizeToGround(diffVec)
+				if diffVec.Magnitude < 10 then
+					block(enemyChar, 0.5, 3, true, true)
+				end
+			end
+		end
+
 		local function chaseDetected(enemyChar: Model)
 			if not config.autoBlock.chase then return end
 			local localChar = Player.Character
@@ -593,8 +603,8 @@ do
 					diffVec = normalizeToGround(diffVec)
 					if diffVec.Magnitude < 45 then
 						if diffVec.Magnitude < 12 or diffVec.Unit:Dot(-enemyChar:GetPivot().LookVector) > 0.6  then
-							task.wait(diffVec.Magnitude / 12)
-							block(enemyChar, 0.5, 3, true, true)
+							task.wait(diffVec.Magnitude / 45)
+							checkDistance(enemyChar)
 						end
 					end
 				end
@@ -1001,7 +1011,7 @@ do
 				if not config.autoBlock.Gojo.blockLapseBlue then return end
 				local localChar = Player.Character
 				if not localChar then return end
-				if tick() - grabbedTick < .2 then
+				if tick() - grabbedTick < .2 + Player:GetNetworkPing() * .5 then
 					--<<< might be us
 					local distance = distanceFromCharacter(enemy)
 					if distance.Magnitude < 35 then
