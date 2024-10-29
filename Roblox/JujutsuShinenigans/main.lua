@@ -602,7 +602,7 @@ do
 				if math.abs(diffVec.Y) < 15 then
 					diffVec = normalizeToGround(diffVec)
 					if diffVec.Magnitude < 45 then
-						if diffVec.Magnitude < 12 or diffVec.Unit:Dot(-enemyChar:GetPivot().LookVector) > 0.6  then
+						if diffVec.Magnitude < 12 or diffVec.Unit:Dot(-enemyChar:GetPivot().LookVector) > 0.5  then
 							task.wait(diffVec.Magnitude / 45)
 							checkDistance(enemyChar)
 						end
