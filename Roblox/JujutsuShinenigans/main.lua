@@ -94,6 +94,7 @@ local config = {
 		downSlam = true,
 		infBlackFlash = true,
 		AutoTarget = true,
+		noDashCD = true,
 	}
 	
 	-->> Misc
@@ -1439,6 +1440,35 @@ do
 			saveFlag = "autoTarget",
 			Callback = function(self, Value)
 				config.player.AutoTarget = Value
+			end,
+		})
+	end
+end
+
+--<< no dash cd
+
+do
+	if debug and debug.setupvalue then
+		local controller = require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.MovementController)
+		local old = controller.DashRequest
+
+		controller.DashRequest = function(self)
+			if config.player.noDashCD then
+				debug.setupvalue(old, 3, 0)
+			end
+		    return old(self)
+		end
+
+		disableJanitor:Add ( function()
+			controller.DashRequest = old
+		end)
+
+		playerTab:Checkbox({
+			Label = "No Dash CD",
+			Value = true,
+			saveFlag = "noDashCD",
+			Callback = function(self, Value)
+				config.player.noDashCD = Value
 			end,
 		})
 	end
