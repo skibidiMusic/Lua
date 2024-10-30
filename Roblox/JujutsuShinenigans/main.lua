@@ -93,6 +93,7 @@ local config = {
 		antiStun = true,
 		downSlam = true,
 		infBlackFlash = true,
+		AutoTarget = true,
 	}
 	
 	-->> Misc
@@ -1347,6 +1348,99 @@ do
 			config.player.infBlackFlash = Value
 		end,
 	})
+end
+
+--<< Auto down slam
+do
+	if hookmetamethod ~= nil then
+		local function getRemote()
+			local char = game.Players.LocalPlayer.Character
+			if not char then return end
+		
+			local moveSet = char.GetAttribute(char, "Moveset")
+			if not moveSet then return end
+		
+			return ServiceFolder[moveSet .. "Service"].RE.Activated
+		end
+
+		local disabled = false
+		
+		local old;
+		old = hookmetamethod(game, "__namecall", function(self, ...): any
+			if not disabled and config.player.downSlam then
+				if not checkcaller() and getnamecallmethod() == "FireServer" then
+					local remote = getRemote()
+					if remote then
+						if self == remote then
+							local args = {...}
+							if args[1] == false then
+								return old(self, "Down")
+							end
+						end
+					end
+				end
+			end
+		   return old(self, ...)
+		end)
+
+		disableJanitor:Add (function()
+			disabled = true
+		end)
+
+		playerTab:Checkbox({
+			Label = "Auto-Downslam",
+			Value = true,
+			saveFlag = "downslam",
+			Callback = function(self, Value)
+				config.player.downSlam = Value
+			end,
+		})
+	end
+end
+
+--<< Auto Target
+do
+	if hookfunction ~= nil then
+		local ToolController = require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
+		
+		local disabled = false
+		local old; old = hookfunction(ToolController.GetTarget, function(self, ...)
+			if not disabled and not checkcaller() and config.player.AutoTarget then
+				local result = old(self, ...)
+				if not result then
+					local localChar = game.Players.LocalPlayer.Character
+					if localChar then
+						local closest; local dist = math.huge;
+						for _, v in workspace.Characters:GetChildren() do
+							if v ~= localChar then
+								local currentDist = (localChar:GetPivot().Position - v:GetPivot().Position).Magnitude
+								if currentDist < dist then
+									dist = currentDist
+									closest = v
+								end
+							end
+						end
+						result = closest
+					end
+				end
+				return result
+			end
+			return old(self, ...)
+		end)
+
+		disableJanitor:Add ( function()
+			disabled = true
+		end)
+
+		playerTab:Checkbox({
+			Label = "Auto-Target",
+			Value = true,
+			saveFlag = "autoTarget",
+			Callback = function(self, Value)
+				config.player.AutoTarget = Value
+			end,
+		})
+	end
 end
 
 --<< anti stun
