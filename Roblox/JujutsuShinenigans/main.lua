@@ -1404,7 +1404,8 @@ do
 		local ToolController = require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
 		
 		local disabled = false
-		local old; old = hookfunction(ToolController.GetTarget, function(self, ...)
+		local old = ToolController.GetTarget;
+		ToolController.GetTarget = function(self, ...)
 			if not disabled and not checkcaller() and config.player.AutoTarget then
 				local result = old(self, ...)
 				if not result then
@@ -1426,7 +1427,7 @@ do
 				return result
 			end
 			return old(self, ...)
-		end)
+		end
 
 		disableJanitor:Add ( function()
 			disabled = true
