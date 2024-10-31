@@ -1278,19 +1278,22 @@ do
 		return require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
 	end)
 	if not success then return end
+	
+	if getrawmetatable and newcclosure then
+		local meta = getrawmetatable(game)
+		local oldNamecall = meta.__namecall
 
-	if hookmetamethod then
 		local disabled = false
-		local old; old = hookmetamethod(game, "__namecall", function(self, ...)
-			if not disabled and not checkcaller() and config.misc.AntiCounter  then
+		meta.__namecall = newcclosure(function(self, ...)
+			if not disabled and not checkcaller() and config.player.AntiCounter  then
 				if getnamecallmethod() == "FireServer" and typeof(self) == "Instance" and self.ClassName == "RemoteEvent" and self.Name == "Activated" then
-					local target = ToolController:GetTarget() or getClosestCharacter()
-					if target and target.Info.FindFirstChild(target, "Counter") then
+					local target =  ToolController:GetTarget() or getClosestCharacter()
+					if target and target.Info:FindFirstChild("Counter") then
 						return --<< dont cast.
 					end
 				end
 			end
-			return old(self, ...)
+			return oldNamecall(self, ...)
 		end)
 
 		disableJanitor:Add ( function()
