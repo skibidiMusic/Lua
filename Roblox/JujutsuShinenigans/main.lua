@@ -1278,22 +1278,31 @@ do
 		return require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
 	end)
 	if not success then return end
-	
-	if getrawmetatable and newcclosure then
-		local meta = getrawmetatable(game)
-		local oldNamecall = meta.__namecall
 
+	--<< find if the target is countering.
+	local isTargetCountering;
+
+	disableJanitor:Add ( RunService.RenderStepped:Connect(function()
+		local target = ToolController:GetTarget() or getClosestCharacter()
+		if target and target.Info:FindFirstChild("Counter") then
+			isTargetCountering = target
+		else
+			isTargetCountering = nil
+		end
+	end) )
+
+	--<< can't m1 or use skills if target is countering.
+	if hookmetamethod then
 		local disabled = false
-		meta.__namecall = newcclosure(function(self, ...)
-			if not disabled and not checkcaller() and config.player.AntiCounter  then
+
+		local old;
+		old = hookmetamethod(game, "__namecall", function(self, ...)
+			if not disabled and not checkcaller() and config.player.AntiCounter and isTargetCountering then
 				if getnamecallmethod() == "FireServer" and typeof(self) == "Instance" and self.ClassName == "RemoteEvent" and self.Name == "Activated" then
-					local target =  ToolController:GetTarget() or getClosestCharacter()
-					if target and target.Info:FindFirstChild("Counter") then
-						return --<< dont cast.
-					end
+					return
 				end
 			end
-			return oldNamecall(self, ...)
+			return old(self, ...)
 		end)
 
 		disableJanitor:Add ( function()
@@ -1308,7 +1317,7 @@ do
 		if char == Player.Character then return end
 		local target = ToolController:GetTarget() or getClosestCharacter()
 		if target == char then
-			feintRemote:FireServer()
+			feintRemote.FireServer(feintRemote)
 			 --<< dont cast.
 		end
 	end
