@@ -18,23 +18,16 @@ else
     dir = env.jjsSakso
 end
 
---> ref
---local UIS = game:GetService("UserInputService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService"RunService"
+--> dep
+local RunService = game:GetService("RunService")
 
-local ServiceFolder = game.ReplicatedStorage.Knit.Knit.Services
-
-local Player = game:GetService("Players").LocalPlayer
-
-
--->> dep
---local fileManager = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/fileManager.lua'))()
 local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
 local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Janitor.lua'))()
 
--->> main
+local ServiceFolder = game.ReplicatedStorage.Knit.Knit.Services
+local Player = game:GetService("Players").LocalPlayer
 
+-->> main
 local disableJanitor = Janitor.new()
 
 -->> default config
@@ -95,6 +88,7 @@ local config = {
 		infBlackFlash = true,
 		AutoTarget = true,
 		noDashCD = true,
+		AntiCounter = true,
 	}
 	
 	-->> Misc
@@ -105,7 +99,7 @@ local config = {
 local Window = ImGui:CreateWindow({
 	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
-	Size = UDim2.new(0, 300, 0, 500),
+	Size = UDim2.new(0, 800, 0, 500),
 	AutoSize = false,
 	--NoClose = false,
 
@@ -175,11 +169,6 @@ local MiscTab = Window:CreateTab({
 	Visible = false 
 })
 
-local ConsoleTab = Window:CreateTab({
-	Name = "Console (Output)",
-	Visible = false 
-})
-
 local KeybindsTab = Window:CreateTab({
 	Name = "Keybinds",
 	Visible = false 
@@ -188,91 +177,6 @@ local KeybindsTab = Window:CreateTab({
 
 -->> code
 --// debugging (mini-console)
-
-local debugConsole = {};
-
-do
-	ConsoleTab:Separator({
-		Text = "This is for debuging"
-	})
-
-	local Row = ConsoleTab:Row()
-
-	local Console = ConsoleTab:Console({
-		Text = "Console",
-		ReadOnly = true,
-		LineNumbers = true,
-		Border = true,
-		Fill = false,
-		Enabled = true,
-		AutoScroll = true,
-		RichText = true,
-		MaxLines = 50
-	})
-
-	Row:Button({
-		Text = "Clear",
-		Callback = Console.Clear
-	})
-	
-	Row:Checkbox({
-		Label = "Pause",
-		Value = false,
-		Callback = function(self, Value)
-			Console.Enabled = not Value
-		end,
-	})	
-
-	Row:Checkbox({
-		Label = "AutoScroll",
-		Value = true,
-		Callback = function(self, Value)
-			Console.AutoScroll = Value
-		end,
-	})	
-
-	Row:Fill()
-
-	-->> functionality
-	local function ToString(v:any, depth: number?)
-		local dataType = typeof(v)
-		local str;
-	
-		if dataType == "Instance" then
-			dataType = v.ClassName
-			str = v:GetFullName()
-		else
-			if dataType == "table" then
-				depth = depth or 0
-				local depthShit = string.rep("\t", depth)
-				str = "{\n"
-				for i, c in v do
-					str = str .. string.format(depthShit .. "\t[%s]: %s,\n", tostring(i), ToString(c, depth + 1))
-				end
-				str = str .. depthShit .. "}"
-			elseif dataType == "string" then
-				str = string.format("%q", v)
-			else
-				str = tostring(v)
-			end
-		end
-	
-		return string.format("(%s) %s", dataType, str)
-	end
-
-    function debugConsole.advancedToString(v)
-        return ToString(v)
-    end
-
-	function debugConsole.print(...)
-		debugConsole.ui:AppendText(...)
-	end
-
-	debugConsole.ui = Console
-
-	ConsoleTab:Separator({})
-end
-
 
 --// Helper Funcs
 local function distanceFromCharacter(v: Model | BasePart | Vector3) : Vector3?
@@ -292,6 +196,23 @@ local function distanceFromCharacter(v: Model | BasePart | Vector3) : Vector3?
 
 	local diff = targetPos - character:GetPivot().Position
 	return diff
+end
+
+local function getClosestCharacter()
+	local localChar = game.Players.LocalPlayer.Character
+	if localChar then
+		local closest; local dist = math.huge;
+		for _, v in workspace.Characters:GetChildren() do
+			if v ~= localChar then
+				local currentDist = (localChar:GetPivot().Position - v:GetPivot().Position).Magnitude
+				if currentDist < dist then
+					dist = currentDist
+					closest = v
+				end
+			end
+		end
+		return closest
+	end
 end
 
 local function findFuturePos(v: BasePart | Model, t: number?)
@@ -318,7 +239,7 @@ local lookAtData = {
 
 local function stopLookingAt()
 	if not isLookingAt then return end
-	game:GetService("RunService"):UnbindFromRenderStep("elkaka_und_dashQuel")
+	RunService:UnbindFromRenderStep("elkaka_und_dashQuel")
 	lookAtData.Humanoid.AutoRotate = true
 
 	if lookAtData.wasCameraEnabled then
@@ -357,7 +278,7 @@ local function lookAt(enemy: Model, cameraEnabled: boolean, enemyPosMultiplier: 
 	end
 
 	local prevParent = enemy.Parent
-	game:GetService("RunService"):BindToRenderStep("elkaka_und_dashQuel", Enum.RenderPriority.Last.Value + 100, function()
+	RunService:BindToRenderStep("elkaka_und_dashQuel", Enum.RenderPriority.Last.Value + 100, function()
 		if enemy.Parent == prevParent then
 			local enemyFuturePosition = findFuturePos(enemy, Player:GetNetworkPing() * enemyPosMultiplier * 0.5)
 			localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position, enemyFuturePosition)
@@ -898,7 +819,7 @@ do
 				end,
 			})
 
-			local function doorsDetected(part: BasePart, init: boolean?)
+			local function doorsDetected(part: BasePart)
 				if not config.autoBlock.Hakari.blockDoors then return end
 
 				local dist = distanceFromCharacter(part)
@@ -911,11 +832,11 @@ do
 				end
 			end
 
-			disableJanitor:Add( workspace.Effects.ChildAdded:Connect(function(v: Instance)
-				if v:IsA("BasePart") and v.Name == "Doors" then
-					doorsDetected(v)
+			disableJanitor:Add ( ServiceFolder.ShutterDoorService.RE.Effects.OnClientEvent:Connect(function(method: string, part: BasePart)
+				if method == "Spawn" then
+					doorsDetected(part)
 				end
-			end))
+			end) )
 		end
 
 		-->> reserve balls (2)
@@ -1061,7 +982,7 @@ do
 
 						if distanceFromCharacter(projectile).Magnitude < 15 then
 							if tick() - appearTick > 1.7 - Player:GetNetworkPing() or workspace:Raycast(projectile.CFrame.Position, projectile.CFrame.LookVector * Player:GetNetworkPing() * 30, raycastParams) then
-								debugConsole.print("explosion detected!")
+								--debugConsole.print("explosion detected!")
 								block(projectile, .4, 1, false, true)
 								return
 							end
@@ -1351,9 +1272,72 @@ do
 	})
 end
 
+--<< Anti-Counter
+do
+	local success, ToolController = pcall(function()
+		return require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
+	end)
+	if not success then return end
+
+	if hookmetamethod then
+		local disabled = false
+		local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+			if not disabled and not checkcaller() and config.misc.AntiCounter  then
+				if getnamecallmethod() == "FireServer" and typeof(self) == "Instance" and self.ClassName == "RemoteEvent" and self.Name == "Activated" then
+					local target = ToolController:GetTarget() or getClosestCharacter()
+					if target and target.Info.FindFirstChild(target, "Counter") then
+						return --<< dont cast.
+					end
+				end
+			end
+			return old(self, ...)
+		end)
+
+		disableJanitor:Add ( function()
+			disabled = true
+		end )
+	end
+
+	-->> Itadori feint support
+	local feintRemote = ServiceFolder.ItadoriService.RE.RightActivated
+	local function onCounter(char: Model)
+		if not config.misc.AntiCounter then return end
+		if char == Player.Character then return end
+		local target = ToolController:GetTarget() or getClosestCharacter()
+		if target == char then
+			feintRemote:FireServer()
+			 --<< dont cast.
+		end
+	end
+	disableJanitor:Add(
+		ServiceFolder.HakariService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
+			if action == "Counter" then
+				onCounter(character)
+			end
+		end)
+	)
+	disableJanitor:Add(
+		ServiceFolder.ManjiKickService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
+			if action == "Startup" then
+				onCounter(character)
+			end
+		end)
+	)
+
+	--(ui)
+	playerTab:Checkbox({
+		Label = "AntiCounter",
+		Value = true,
+		saveFlag = "AntiCounter",
+		Callback = function(self, Value)
+			config.player.AntiCounter = Value
+		end,
+	})
+end
+
 --<< Auto down slam
 do
-	if hookmetamethod ~= nil then
+	if hookmetamethod then
 		local function getRemote()
 			local char = game.Players.LocalPlayer.Character
 			if not char then return end
@@ -1401,30 +1385,14 @@ end
 
 --<< Auto Target
 do
-	if hookfunction ~= nil then
+	if hookfunction then
 		local ToolController = require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
 		
 		local disabled = false
 		local old = ToolController.GetTarget;
 		ToolController.GetTarget = function(self, ...)
 			if not disabled and not checkcaller() and config.player.AutoTarget then
-				local result = old(self, ...)
-				if not result then
-					local localChar = game.Players.LocalPlayer.Character
-					if localChar then
-						local closest; local dist = math.huge;
-						for _, v in workspace.Characters:GetChildren() do
-							if v ~= localChar then
-								local currentDist = (localChar:GetPivot().Position - v:GetPivot().Position).Magnitude
-								if currentDist < dist then
-									dist = currentDist
-									closest = v
-								end
-							end
-						end
-						result = closest
-					end
-				end
+				local result = old(self, ...) or getClosestCharacter()
 				return result
 			end
 			return old(self, ...)
