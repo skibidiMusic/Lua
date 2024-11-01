@@ -1,1 +1,11 @@
-game:GetService("ReplicatedStorage").Knit.Knit.Services.MovementService.RE.Dash:FireServer("Right", true)
+local function a()
+    
+    do
+        return
+    end
+
+    print("wsp")
+
+end
+
+a()
