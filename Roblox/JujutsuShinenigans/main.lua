@@ -27,11 +27,71 @@ local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibi
 local ServiceFolder = game.ReplicatedStorage.Knit.Knit.Services
 local Player = game:GetService("Players").LocalPlayer
 
--->> main
+-->> hook control
 local disableJanitor = Janitor.new()
 
 -->> default config
 local config = {
+	combat = {
+		autoBlock = {
+			enabled = true,
+
+			tryCounter = true,
+			punish = true,
+
+			melee = true,
+			chase = true,
+
+			--// chars
+			Megumi = {
+				blockToad = true,
+				blockDog = true,
+			},
+		
+			Itadori = {
+				blockCursedStrikes = true,
+			},
+
+			Mahito = {
+				blockFocusStrike = true,
+				blockSoulFire = true,
+				blockSpecialDash = true
+			},
+
+			Gojo = {
+				blockLapseBlue = true,
+				blockReversalRed = true,
+			},
+
+			Hakari = {
+				blockDoors = true,
+				blockBalls = true,
+			},
+
+		},
+
+		player = {
+			downSlam = true,
+			alwaysBlackFlash = true, 
+			AutoTarget = true,
+			noDashCD = true,
+			AntiCounter = true,
+		},
+		
+		misc = {
+			infBlackFlash = true,
+			antiFall = true,
+			enterDomain = true,
+		},
+
+		whiteList = {
+				
+		}
+	},
+}
+
+--[[
+	local config = {
 	autoBlock = {
 		enabled = false,
 		tryDashIfNotBlockable = true,
@@ -93,90 +153,9 @@ local config = {
 	
 	-->> Misc
 }
-
-
--->> Gui Setup
-local Window = ImGui:CreateWindow({
-	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
-	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
-	Size = UDim2.new(0, 800, 0, 500),
-	AutoSize = false,
-	--NoClose = false,
-
-	--// Styles
-	NoGradientAll = true,
-	Colors = {
-		Window = {
-			BackgroundColor3 = Color3.fromRGB(40, 40, 40),
-			BackgroundTransparency = 0.1,
-			ResizeGrip = {
-				TextColor3 = Color3.fromRGB(80, 80, 80)
-			},
-			
-			TitleBar = {
-				BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-				[{
-					Recursive = true,
-					Name = "ToggleButton"
-				}] = {
-					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-				}
-			},
-			ToolBar = {
-				TabButton = {
-					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-				}
-			},
-		},
-		CheckBox = {
-			Tickbox = {
-				BackgroundColor3 = Color3.fromRGB(20, 20, 20),
-				Tick = {
-					ImageColor3 = Color3.fromRGB(255, 255, 255)
-				}
-			}
-		},
-		Slider = {
-			Grab = {
-				BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-			},
-			BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-		},
-		CollapsingHeader = {
-			TitleBar = {
-				BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-			}
-		}
-	}
-
-})
-
-Window:Center()
-
---(tabs)
-local AutoblockTab = Window:CreateTab({
-	Name = "Autoblock",
-	Visible = true 
-})
-
-local playerTab = Window:CreateTab({
-	Name = "Player",
-	Visible = false 
-})
-
-local MiscTab = Window:CreateTab({
-	Name = "Misc",
-	Visible = false 
-})
-
-local KeybindsTab = Window:CreateTab({
-	Name = "Keybinds",
-	Visible = false 
-})
-
+]]
 
 -->> code
---// debugging (mini-console)
 
 --// Helper Funcs
 local function distanceFromCharacter(v: Model | BasePart | Vector3) : Vector3?
@@ -351,7 +330,7 @@ local function stopBlock(keepBlocking: boolean?)
 end
 
 local function block(enemy: Model, length: number, enemySpeedMultiplier: number?, punish: boolean?, tryCounter: boolean?)
-	if not config.autoBlock.enabled or config.autoBlock.whiteList[enemy and enemy.Name] then return end
+	if not config.combat.autoblock.enabled or config.combat.whiteList[enemy and enemy.Name] then return end
 	
 	local localChar = Player.Character
 	if not localChar then return end
@@ -364,9 +343,9 @@ local function block(enemy: Model, length: number, enemySpeedMultiplier: number?
 	length = math.max(length - Player:GetNetworkPing() * 0.5, 0)
 
 
-	if config.autoBlock.lookAtPlayer then lookAt(enemy, config.autoBlock.lockCamera, enemySpeedMultiplier) end
+	if config.combat.autoblock.lookAtPlayer then lookAt(enemy, config.combat.autoblock.lockCamera, enemySpeedMultiplier) end
 	
-	if tryCounter and config.autoBlock.tryCounter then
+	if tryCounter and config.combat.autoblock.tryCounter then
 		counter(enemy)
 	end
 
@@ -385,37 +364,105 @@ local function block(enemy: Model, length: number, enemySpeedMultiplier: number?
 end
 
 
---// AUTOBLOCK
 
---few toggles
-AutoblockTab:Separator({
-	Text = "Tunes"
+-->> Gui Setup
+local Window = ImGui:CreateWindow({
+	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
+	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
+	Size = UDim2.new(0, 800, 0, 500),
+	AutoSize = false,
+	--NoClose = false,
+
+	--// Styles
+	NoGradientAll = true,
+	Colors = {
+		Window = {
+			BackgroundColor3 = Color3.fromRGB(40, 40, 40),
+			BackgroundTransparency = 0.1,
+			ResizeGrip = {
+				TextColor3 = Color3.fromRGB(80, 80, 80)
+			},
+			
+			TitleBar = {
+				BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+				[{
+					Recursive = true,
+					Name = "ToggleButton"
+				}] = {
+					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+				}
+			},
+			ToolBar = {
+				TabButton = {
+					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+				}
+			},
+		},
+		CheckBox = {
+			Tickbox = {
+				BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+				Tick = {
+					ImageColor3 = Color3.fromRGB(255, 255, 255)
+				}
+			}
+		},
+		Slider = {
+			Grab = {
+				BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+			},
+			BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+		},
+		CollapsingHeader = {
+			TitleBar = {
+				BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+			}
+		}
+	}
+
 })
 
-AutoblockTab:Checkbox({
+Window:Center()
+
+--(tabs)
+local CombatTab = Window:CreateTab({
+	Name = "Combat",
+	Visible = true 
+})
+local KeybindsTab = Window:CreateTab({
+	Name = "Keybinds",
+	Visible = false 
+})
+
+
+--// AUTOBLOCK
+CombatTab:Separator({
+	Text = "Autoblock"
+})
+
+CombatTab:Checkbox({
 	Label = "Enabled",
-	Value = true,
+	Value = config.combat.autoBlock.enabled,
 	saveFlag = "BlockEnabled",
 	Callback = function(self, Value)
-		config.autoBlock.enabled = Value
+		config.combat.autoBlock.enabled = Value
 	end,
 })
 
-AutoblockTab:Checkbox({
-	Label = "Try Countering",
-	Value = true,
+CombatTab:Checkbox({
+	Label = "Auto Counter",
+	Value = config.combat.autoBlock.tryCounter,
 	saveFlag = "CounterToggle",
 	Callback = function(self, Value)
-		config.autoBlock.tryCounter = Value
+		config.combat.autoBlock.tryCounter = Value
 	end,
 })
 
-AutoblockTab:Checkbox({
+CombatTab:Checkbox({
 	Label = "Punish",
-	Value = true,
+	Value = config.combat.autoBlock.punish,
 	saveFlag = "PunishToggle",
 	Callback = function(self, Value)
-		config.autoBlock.punish = Value
+		config.combat.autoBlock.punish = Value
 	end,
 })
 
@@ -433,7 +480,7 @@ local characterNames = {
 --// autoblock logic
 --(melee)
 do
-	local meleeBlockHeader = AutoblockTab:CollapsingHeader({
+	local meleeBlockHeader = CombatTab:CollapsingHeader({
 		Title = "Melee",
 		Open = false
 	})
@@ -442,17 +489,17 @@ do
 	do
 		-->> ui
 		meleeBlockHeader:Checkbox({
-			Label = "Block Melee",
-			Value = true,
+			Label = "Punches",
+			Value = config.combat.autoBlock.Melee,
 			saveFlag = "BlockMelee",
 			Callback = function(self, Value)
-				config.autoBlock.Melee = Value
+				config.combat.autoBlock.Melee = Value
 			end,
 		})
 	
 		-->> hook
 		local function meleeDetected(enemyChar: Model, COMBO: number?)
-			if not config.autoBlock.Melee then return end
+			if not config.combat.autoblock.Melee then return end
 			local localChar = Player.Character
 			if localChar == enemyChar then
 				return
@@ -498,11 +545,11 @@ do
 	do
 		-->> ui
 		meleeBlockHeader:Checkbox({
-			Label = "Block Chase",
-			Value = true,
+			Label = "Front Dash",
+			Value = config.combat.autoBlock.chase,
 			saveFlag = "BlockChase",
 			Callback = function(self, Value)
-				config.autoBlock.chase = Value
+				config.combat.autoBlock.chase = Value
 			end,
 		})
 	
@@ -518,7 +565,7 @@ do
 		end
 
 		local function chaseDetected(enemyChar: Model)
-			if not config.autoBlock.chase then return end
+			if not config.combat.autoblock.chase then return end
 			local localChar = Player.Character
 			if localChar and localChar ~= enemyChar then
 				local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
@@ -549,7 +596,7 @@ end
 
 --(blocking skills)
 do
-	local skillBlockHeader = AutoblockTab:CollapsingHeader({
+	local skillBlockHeader = CombatTab:CollapsingHeader({
 		Title = "Skills",
 		Open = false
 	})
@@ -589,15 +636,15 @@ do
 		do
 			itadoriHeader:Checkbox({
 				Label = "Cursed Strikes",
-				Value = true,
+				Value = config.combat.autoBlock.Itadori.blockCursedStrikes,
 				saveFlag = "blockCursedStrikes",
 				Callback = function(self, Value)
-					config.autoBlock.Itadori.blockCursedStrikes = Value
+					config.combat.autoBlock.Itadori.blockCursedStrikes = Value
 				end,
 			})
 
 			local function cursedStrikesDetected(enemy: Model, from: CFrame)
-				if not config.autoBlock.Itadori.blockCursedStrikes then return end
+				if not config.combat.autoblock.Itadori.blockCursedStrikes then return end
 				if typeof(from) ~= "CFrame" then return end
 				dashAttackDetected(enemy, false, from, 8, 40, .5)
 			end
@@ -628,14 +675,14 @@ do
 			megumiHeader:Checkbox({
 				Label = "Toad (frog)",
 				saveFlag = "BlockToad",
-				Value = true,
+				Value = config.combat.autoBlock.Megumi.blockToad,
 				Callback = function(self, Value)
-					config.autoBlock.Megumi.blockToad = Value
+					config.combat.autoBlock.Megumi.blockToad = Value
 				end,
 			})
 
 			local function toadDetected(enemy: Model)
-				if not config.autoBlock.Megumi.blockToad then return end
+				if not config.combat.autoblock.Megumi.blockToad then return end
 				task.delay(.4 - Player:GetNetworkPing() * 0.5, block, enemy, .5, 1, false, false)
 			end
 		
@@ -650,15 +697,15 @@ do
 		do
 			megumiHeader:Checkbox({
 				Label = "Wolf",
-				Value = true,
+				Value = config.combat.autoBlock.Megumi.blockDog,
 				saveFlag = "BlockWolf",
 				Callback = function(self, Value)
-					config.autoBlock.Megumi.blockDog = Value
+					config.combat.autoBlock.Megumi.blockDog = Value
 				end,
 			})
 
 			local function dogDetected(dogModel: Model, target: Model)
-				if not config.autoBlock.Megumi.blockDog then return end
+				if not config.combat.autoblock.Megumi.blockDog then return end
 				task.wait(.3 - Player:GetNetworkPing() * 0.5)
 				if distanceFromCharacter(target).Magnitude < 6 then
 					block(dogModel, .25, 1, false, true)
@@ -699,15 +746,15 @@ do
 		do
 			mahitoHeader:Checkbox({
 				Label = "Focus Strike",
-				Value = true,
+				Value = config.combat.autoblock.Mahito.blockFocusStrike,
 				saveFlag = "MahitoFocusStrike",
 				Callback = function(self, Value)
-					config.autoBlock.Mahito.blockFocusStrike = Value
+					config.combat.autoblock.Mahito.blockFocusStrike = Value
 				end,
 			})
 
 			local function focusStrikeDetected(enemy: Model)
-				if not config.autoBlock.Mahito.blockFocusStrike then return end
+				if not config.combat.autoblock.Mahito.blockFocusStrike then return end
 				dashAttackDetected(enemy, true, nil, 8, 30, .5)
 			end
 			
@@ -728,15 +775,15 @@ do
 		do
 			mahitoHeader:Checkbox({
 				Label = "Bullets",
-				Value = true,
+				Value = config.combat.autoblock.Mahito.blockSoulFire,
 				saveFlag = "MahitoBullets",
 				Callback = function(self, Value)
-					config.autoBlock.Mahito.blockSoulFire = Value
+					config.combat.autoblock.Mahito.blockSoulFire = Value
 				end,
 			})
 
 			local function soulFireDetected(enemy: Model)
-				if not config.autoBlock.Mahito.blockSoulFire then return end
+				if not config.combat.autoblock.Mahito.blockSoulFire then return end
 				local localChar = Player.Character
 				if localChar and localChar ~= enemy then
 					local distance = distanceFromCharacter(enemy)
@@ -770,15 +817,15 @@ do
 		do
 			mahitoHeader:Checkbox({
 				Label = "Special Dash",
-				Value = true,
+				Value = config.combat.autoblock.Mahito.blockSpecialDash,
 				saveFlag = "MahitoSpecialDash",
 				Callback = function(self, Value)
-					config.autoBlock.Mahito.blockSpecialDash = Value
+					config.combat.autoblock.Mahito.blockSpecialDash = Value
 				end,
 			})
 
 			local function specialDashDetected(enemy: Model, style: number)
-				if not config.autoBlock.Mahito.blockSpecialDash then return end
+				if not config.combat.autoblock.Mahito.blockSpecialDash then return end
 				if style == 1 then
 					dashAttackDetected(enemy, false, nil, 8, 25, .5)
 				elseif Player.Character and Player.Character ~= enemy then
@@ -812,15 +859,15 @@ do
 		do
 			hakariHeader:Checkbox({
 				Label = "Doors",
-				Value = true,
+				Value = config.combat.autoblock.Hakari.blockDoors,
 				saveFlag = "HakariDoors",
 				Callback = function(self, Value)
-					config.autoBlock.Hakari.blockDoors = Value
+					config.combat.autoblock.Hakari.blockDoors = Value
 				end,
 			})
 
 			local function doorsDetected(part: BasePart)
-				if not config.autoBlock.Hakari.blockDoors then return end
+				if not config.combat.autoblock.Hakari.blockDoors then return end
 
 				local dist = distanceFromCharacter(part)
 				if dist and math.abs(dist.Y) < 12 and normalizeToGround(dist).Magnitude < 24  then
@@ -843,10 +890,10 @@ do
 		do
 			hakariHeader:Checkbox({
 				Label = "Balls",
-				Value = true,
+				Value = config.combat.autoblock.Hakari.blockBalls,
 				saveFlag = "HakariBalls",
 				Callback = function(self, Value)
-					config.autoBlock.Hakari.blockBalls = Value
+					config.combat.autoblock.Hakari.blockBalls = Value
 				end,
 			})
 
@@ -856,7 +903,7 @@ do
 			
 
 			local function ballSpawning(enemy: Model)
-				if not config.autoBlock.Hakari.blockBalls then return end
+				if not config.combat.autoblock.Hakari.blockBalls then return end
 
 				task.wait(.25 - Player:GetNetworkPing())
 				if not Player.Character or enemy == Player.Character then return end
@@ -907,10 +954,10 @@ do
 		do
 			gojoHeader:Checkbox({
 				Label = "Lapse Blue",
-				Value = true,
+				Value = config.combat.autoblock.Gojo.blockLapseBlue,
 				saveFlag = "blockLapseBlue",
 				Callback = function(self, Value)
-					config.autoBlock.Gojo.blockLapseBlue = Value
+					config.combat.autoblock.Gojo.blockLapseBlue = Value
 				end,
 			})
 
@@ -931,7 +978,7 @@ do
 			)
 
 			local function blueDetected(enemy: Model)
-				if not config.autoBlock.Gojo.blockLapseBlue then return end
+				if not config.combat.autoblock.Gojo.blockLapseBlue then return end
 				local localChar = Player.Character
 				if not localChar then return end
 				if tick() - grabbedTick < .2 + Player:GetNetworkPing() * .5 then
@@ -960,10 +1007,10 @@ do
 		do
 			gojoHeader:Checkbox({
 				Label = "Reversal Red",
-				Value = true,
+				Value = config.combat.autoblock.Gojo.blockReversalRed,
 				saveFlag = "BlockReversalRed",
 				Callback = function(self, Value)
-					config.autoBlock.Gojo.blockReversalRed = Value
+					config.combat.autoblock.Gojo.blockReversalRed = Value
 				end,
 			})
 
@@ -972,7 +1019,7 @@ do
 			raycastParams.FilterDescendantsInstances = {workspace.Effects, workspace.Bullets}
 
 			local function redProjectileDetected(projectile: BasePart)
-				if not config.autoBlock.Gojo.blockReversalRed then return end
+				if not config.combat.autoblock.Gojo.blockReversalRed then return end
 
 				local appearTick = tick()
 				local thread = task.defer(function()
@@ -996,7 +1043,7 @@ do
 			
 			--<< cast
 			local function redCasted(enemy: Model)
-				if not config.autoBlock.Gojo.blockReversalRed then return end
+				if not config.combat.autoblock.Gojo.blockReversalRed then return end
 
 				local localChar = Player.Character
 				if not localChar or enemy == localChar then return end
@@ -1035,518 +1082,424 @@ do
 
 end
 
-
---(whitelist for autoblock)
+--// player functions
 do
-	AutoblockTab:Separator({
-		Text = "Whitelist"
+	CombatTab:Separator({
+		Text = "Player"
 	})
-
-    local whitelistRow = AutoblockTab:Row()
-
-    local function updateState(name: string)
-        if config.autoBlock.whiteList[name] then
-            config.autoBlock.whiteList[name]:Destroy()
-            config.autoBlock.whiteList[name] = nil
-        else
-            config.autoBlock.whiteList[name] = whitelistRow:Button({
-                Text = name,
-                Callback = function(self)
-                    updateState(name)
-                end,
-            })
-        end
-    end
-
-    AutoblockTab:Separator({})
-
-    local dropdown;
-
-    local function playerListChanged()
-        if dropdown then dropdown:Destroy() end
-        local players = game.Players:GetPlayers()
-        for i, v: Player in game.Players:GetPlayers() do
-            players[i] = v.Name
-        end
-        dropdown = AutoblockTab:Combo({
-            Placeholder = "Choose to add.",
-            Label = "Players",
-            Items = players,
-            Callback = function(self, Value)
-                updateState(Value)
-            end,
-        })
-    end
-
-    playerListChanged()
-
-    disableJanitor:Add( game.Players.PlayerAdded:Connect(function(player)
-        playerListChanged()
-    end) )
-
-    disableJanitor:Add( game.Players.PlayerRemoving:Connect(function(player)
-        playerListChanged()
-    end) )
-end
-
-
---// misc. stuff
-MiscTab:Separator({
-
-})
-
-
---(entering domains)
-do
-	local function toggle(val: boolean)
-		config.misc.enterDomain = val
-		if val then
-			disableJanitor:Add(workspace.Domains.ChildAdded:Connect(function(child: Instance) 
-				child.CanCollide = false
-			end), nil, "enterDomains") 
-			for _, v in workspace.Domains:GetChildren() do
-				v.CanCollide = false
-			end		
-		else
-			disableJanitor:Remove("enterDomains")
-			for _, v in workspace.Domains:GetChildren() do
-				v.CanCollide = true
-			end		
-		end
-	end
-
-	MiscTab:Checkbox({
-		Label = "Enter Domains",
-		Value = true,
-		saveFlag = "EnterDomains",
-		Callback = function(self, Value)
-			toggle(Value)
-		end,
-	})
-end
-
---(always black flash)
-do
-	local remote = ServiceFolder.DivergentFistService.RE.Activated
 	
-	local function blackFlashDetected(character: Model)
-		if not config.misc.alwaysBlackFlash then return end
-		local localChar = Player.Character
-		if not localChar or localChar ~= character then return end
-		
-		task.wait(.15 - Player:GetNetworkPing())
-		remote:FireServer()
-	end
-	
-	disableJanitor:Add( ServiceFolder.DivergentFistService.RE.Effects.OnClientEvent:Connect(function(effectName: string, char: Model) 
-		if effectName == "CurseBuild" then
-			blackFlashDetected(char)
-		end
-	end) )
+	--<< Anti-Counter
+	do
+		local success, ToolController = pcall(function()
+			return require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
+		end)
+		if not success then return end
 
-	MiscTab:Checkbox({
-		Label = "Always Black Flash",
-		Value = true,
-		saveFlag = "AlwaysBlackFlash",
-		Callback = function(self, Value)
-			config.misc.alwaysBlackFlash = Value
-		end,
-	})
-end
+		--<< find if the target is countering.
+		local isTargetCountering;
 
---(u cant fall off map)
-do
-	local partData = {
-		{size = Vector3.new(-17.25, 11.75, -533.115), pos = Vector3.new(740.5, 2.5, 372.771)},
-		{size = Vector3.new(145, 2.5, 1389.771), pos = Vector3.new(352.5, 11.75, -24.615)},
-		{size = Vector3.new(598, 2.5, 36.771), pos = Vector3.new(126, 11.75, 651.885)},
-		{size = Vector3.new(298, 2.5, 1091.271), pos = Vector3.new(-313.5, 11.75, 124.635)}
-	}
-	
-	local parts = {}
-
-	local function spawnParts()
-		for _, v in partData do
-			local part = Instance.new("Part")
-			part.Color = Color3.fromRGB(0, 0, 0)
-			part.Transparency = 0.9
-			part.Position = v.pos
-			part.Size = v.size
-			part.Anchored = true
-			part.CanCollide = true
-			part.CanTouch = false
-			part.CanQuery = false
-			part.Parent = workspace.Map.Core
-			table.insert(parts, part)
-		end
-	end
-
-	local function cleanUp()
-		for _, v in parts do
-			v:Destroy()
-		end
-		table.clear(parts)
-	end
-
-	disableJanitor:Add(cleanUp)
-
-	MiscTab:Checkbox({
-		Label = "Anti-Void",
-		Value = true,
-		saveFlag = "AntiVoid",
-		Callback = function(self, Value)
-			config.misc.antiFall = Value
-			if Value then
-				spawnParts()
+		disableJanitor:Add ( RunService.RenderStepped:Connect(function()
+			local target = ToolController:GetTarget() or getClosestCharacter()
+			if target and target.Info:FindFirstChild("Counter") then
+				isTargetCountering = target
 			else
-				cleanUp()
+				isTargetCountering = nil
 			end
-		end,
-	})
-end
+		end) )
 
---<< clear parts
-do
-	--[[
-	
-	]]
-	MiscTab:Button({
-		Text = "Clear Parts (fix lag?)",
-		Callback = function(self)
-			for _, v in workspace.Map.Data:GetChildren() do
-				v:Destroy()
-			end
-		end,
-	})
-end
+		--<< can't m1 or use skills if target is countering.
+		if hookmetamethod then
+			local disabled = false
 
---<< player tab
-playerTab:Separator({
-	Text = "Stuff for your player"
-})
-
---<< inf black flash (not 100%)
-do
-	local remote = ServiceFolder.DivergentFistService.RE.Activated
-	
-	local function blackFlashDetected(localChar: Model, character: Model)
-		if not config.player.infBlackFlash then return end
-		if Player.Character ~= localChar then return end
-		task.wait(0.5 - Player:GetNetworkPing())
-
-		if character.Info:FindFirstChild("Knockback") or not character.Info:FindFirstChild("Stun") then return end
-		remote:FireServer()
-
-		task.wait(.15 - Player:GetNetworkPing())
-
-		local thread = task.defer(function()
-			while task.wait() do
-				localChar:PivotTo(character:GetPivot() * CFrame.new(Vector3.new(0,0 , 4)))
-			end
-		end)
-
-		lookAt(character, false, 0)
-
-		task.wait(.25 + Player:GetNetworkPing())
-		remote:FireServer()
-
-		task.wait(.35)
-
-		stopLookingAt()
-		task.cancel(thread)
-	end
-	
-	disableJanitor:Add( ServiceFolder.DivergentFistService.RE.Effects.OnClientEvent:Connect(function(effectName: string, localChar: Model, char: Model) 
-		if effectName == "BlackFlashHit" then
-			blackFlashDetected(localChar, char)
-		end
-	end) )
-
-	playerTab:Checkbox({
-		Label = "Inf Black Flash",
-		Value = true,
-		saveFlag = "InfBlackFlash",
-		Callback = function(self, Value)
-			config.player.infBlackFlash = Value
-		end,
-	})
-end
-
---<< Anti-Counter
-do
-	local success, ToolController = pcall(function()
-		return require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
-	end)
-	if not success then return end
-
-	--<< find if the target is countering.
-	local isTargetCountering;
-
-	disableJanitor:Add ( RunService.RenderStepped:Connect(function()
-		local target = ToolController:GetTarget() or getClosestCharacter()
-		if target and target.Info:FindFirstChild("Counter") then
-			isTargetCountering = target
-		else
-			isTargetCountering = nil
-		end
-	end) )
-
-	--<< can't m1 or use skills if target is countering.
-	if hookmetamethod then
-		local disabled = false
-
-		local old;
-		old = hookmetamethod(game, "__namecall", function(self, ...)
-			if not disabled and not checkcaller() and config.player.AntiCounter and isTargetCountering then
-				if getnamecallmethod() == "FireServer" and typeof(self) == "Instance" and self.ClassName == "RemoteEvent" and self.Name == "Activated" then
-					return
+			local old;
+			old = hookmetamethod(game, "__namecall", function(self, ...)
+				if not disabled and not checkcaller() and config.combat.player.AntiCounter and isTargetCountering then
+					if getnamecallmethod() == "FireServer" and typeof(self) == "Instance" and self.ClassName == "RemoteEvent" and self.Name == "Activated" then
+						return
+					end
 				end
-			end
-			return old(self, ...)
-		end)
+				return old(self, ...)
+			end)
 
-		disableJanitor:Add ( function()
-			disabled = true
-		end )
-	end
-
-	-->> Itadori feint support
-	local feintRemote = ServiceFolder.ItadoriService.RE.RightActivated
-	local function onCounter(char: Model)
-		if not config.misc.AntiCounter then return end
-		if char == Player.Character then return end
-		local target = ToolController:GetTarget() or getClosestCharacter()
-		if target == char then
-			feintRemote.FireServer(feintRemote)
-			 --<< dont cast.
-		end
-	end
-	disableJanitor:Add(
-		ServiceFolder.HakariService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
-			if action == "Counter" then
-				onCounter(character)
-			end
-		end)
-	)
-	disableJanitor:Add(
-		ServiceFolder.ManjiKickService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
-			if action == "Startup" then
-				onCounter(character)
-			end
-		end)
-	)
-
-	--(ui)
-	playerTab:Checkbox({
-		Label = "AntiCounter",
-		Value = true,
-		saveFlag = "AntiCounter",
-		Callback = function(self, Value)
-			config.player.AntiCounter = Value
-		end,
-	})
-end
-
---<< Auto down slam
-do
-	if hookmetamethod then
-		local function getRemote()
-			local char = game.Players.LocalPlayer.Character
-			if not char then return end
-		
-			local moveSet = char.GetAttribute(char, "Moveset")
-			if not moveSet then return end
-		
-			return ServiceFolder[moveSet .. "Service"].RE.Activated
+			disableJanitor:Add ( function()
+				disabled = true
+			end )
 		end
 
-		local disabled = false
-		
-		local old;
-		old = hookmetamethod(game, "__namecall", function(self, ...): any
-			if not disabled and config.player.downSlam then
-				if not checkcaller() and getnamecallmethod() == "FireServer" then
-					local remote = getRemote()
-					if remote then
-						if self == remote then
-							local args = {...}
-							if args[1] == false then
-								return old(self, "Down")
+		-->> Itadori feint support
+		local feintRemote = ServiceFolder.ItadoriService.RE.RightActivated
+		local function onCounter(char: Model)
+			if not config.combat.misc.AntiCounter then return end
+			if char == Player.Character then return end
+			local target = ToolController:GetTarget() or getClosestCharacter()
+			if target == char then
+				feintRemote.FireServer(feintRemote)
+				 --<< dont cast.
+			end
+		end
+		disableJanitor:Add(
+			ServiceFolder.HakariService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
+				if action == "Counter" then
+					onCounter(character)
+				end
+			end)
+		)
+		disableJanitor:Add(
+			ServiceFolder.ManjiKickService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
+				if action == "Startup" then
+					onCounter(character)
+				end
+			end)
+		)
+
+		--(ui)
+		CombatTab:Checkbox({
+			Label = "AntiCounter",
+			Value = config.combat.player.AntiCounter,
+			saveFlag = "AntiCounter",
+			Callback = function(self, Value)
+				config.combat.player.AntiCounter = Value
+			end,
+		})
+	end
+	
+	--<< Downslam
+	do
+		if hookmetamethod then
+			local function getRemote()
+				local char = game.Players.LocalPlayer.Character
+				if not char then return end
+			
+				local moveSet = char.GetAttribute(char, "Moveset")
+				if not moveSet then return end
+			
+				return ServiceFolder[moveSet .. "Service"].RE.Activated
+			end
+	
+			local disabled = false
+			
+			local old;
+			old = hookmetamethod(game, "__namecall", function(self, ...): any
+				if not disabled and config.combat.player.downSlam then
+					if not checkcaller() and getnamecallmethod() == "FireServer" then
+						local remote = getRemote()
+						if remote then
+							if self == remote then
+								local args = {...}
+								if args[1] == false then
+									return old(self, "Down")
+								end
 							end
 						end
 					end
 				end
-			end
-		   return old(self, ...)
-		end)
-
-		disableJanitor:Add (function()
-			disabled = true
-		end)
-
-		playerTab:Checkbox({
-			Label = "Auto-Downslam",
-			Value = true,
-			saveFlag = "downslam",
-			Callback = function(self, Value)
-				config.player.downSlam = Value
-			end,
-		})
-	end
-end
-
---<< Auto Target
-do
-	if hookfunction then
-		local ToolController = require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
-		
-		local disabled = false
-		local old = ToolController.GetTarget;
-		ToolController.GetTarget = function(self, ...)
-			if not disabled and not checkcaller() and config.player.AutoTarget then
-				local result = old(self, ...) or getClosestCharacter()
-				return result
-			end
-			return old(self, ...)
-		end
-
-		disableJanitor:Add ( function()
-			disabled = true
-		end)
-
-		playerTab:Checkbox({
-			Label = "Auto-Target",
-			Value = true,
-			saveFlag = "autoTarget",
-			Callback = function(self, Value)
-				config.player.AutoTarget = Value
-			end,
-		})
-	end
-end
-
---<< no dash cd
-
-do
-	if debug and debug.setupvalue then
-		local controller = require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.MovementController)
-		local old = controller.DashRequest
-
-		controller.DashRequest = function(self)
-			if config.player.noDashCD then
-				debug.setupvalue(old, 3, 0)
-			end
-		    return old(self)
-		end
-
-		disableJanitor:Add ( function()
-			controller.DashRequest = old
-		end)
-
-		playerTab:Checkbox({
-			Label = "No Dash CD",
-			Value = true,
-			saveFlag = "noDashCD",
-			Callback = function(self, Value)
-				config.player.noDashCD = Value
-			end,
-		})
-	end
-end
-
---<< anti stun
---[[
-do
-	local currentCon;
-	disableJanitor:Add (
-		Player.CharacterAdded:Connect(function(character)
-			local root = character:WaitForChild"HumanoidRootPart"
-			currentCon = root:GetPropertyChangedSignal("Anchored"):Connect(function()
-				root.Anchored = false
+			   return old(self, ...)
 			end)
-		end)
+	
+			disableJanitor:Add (function()
+				disabled = true
+			end)
+	
+			playerTab:Checkbox({
+				Label = "Auto-Downslam",
+				Value = config.combat.player.downSlam,
+				saveFlag = "downslam",
+				Callback = function(self, Value)
+					config.combat.player.downSlam = Value
+				end,
+			})
+		end
+	end
+
+	--<< Always black flash
+	do
+		local remote = ServiceFolder.DivergentFistService.RE.Activated
+
+		local function blackFlashDetected(character: Model)
+			if not config.combat.player.alwaysBlackFlash then return end
+			local localChar = Player.Character
+			if not localChar or localChar ~= character then return end
+
+			task.wait(.15 - Player:GetNetworkPing())
+			remote:FireServer()
+		end
+
+		disableJanitor:Add( ServiceFolder.DivergentFistService.RE.Effects.OnClientEvent:Connect(function(effectName: string, char: Model) 
+			if effectName == "CurseBuild" then
+				blackFlashDetected(char)
+			end
+		end) )
+
+		CombatTab:Checkbox({
+			Label = "Always Black Flash",
+			Value = config.combat.player.alwaysBlackFlash,
+			saveFlag = "AlwaysBlackFlash",
+			Callback = function(self, Value)
+				config.combat.player.alwaysBlackFlash = Value
+			end,
+		})
+	end
+
+	--<< AutoTarget
+	do
+		if hookfunction then
+			local ToolController = require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
+
+			local disabled = false
+			local old = ToolController.GetTarget;
+			ToolController.GetTarget = function(self, ...)
+				if not disabled and not checkcaller() and config.combat.player.AutoTarget then
+					local result = old(self, ...) or getClosestCharacter()
+					return result
+				end
+				return old(self, ...)
+			end
+
+			disableJanitor:Add ( function()
+				disabled = true
+			end)
+
+			CombatTab:Checkbox({
+				Label = "Auto-Target",
+				Value = config.combat.player.AutoTarget,
+				saveFlag = "autoTarget",
+				Callback = function(self, Value)
+					config.combat.player.AutoTarget = Value
+				end,
+			})
+		end
+	end
+
+	--<< noDashCD
+	do
+		if debug and debug.setupvalue then
+			local controller = require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.MovementController)
+			local old = controller.DashRequest
+	
+			controller.DashRequest = function(self)
+				if config.combat.player.noDashCD then
+					debug.setupvalue(old, 3, 0)
+				end
+				return old(self)
+			end
+	
+			disableJanitor:Add ( function()
+				controller.DashRequest = old
+			end)
+	
+			CombatTab:Checkbox({
+				Label = "No Dash CD",
+				Value = config.combat.player.noDashCD,
+				saveFlag = "noDashCD",
+				Callback = function(self, Value)
+					config.combat.player.noDashCD = Value
+				end,
+			})
+		end
+	end
+end
+
+--// misc stuff.
+do
+	CombatTab:Separator({
+		Text = "Misc"
+	})
+	--<< inf black flash
+	do
+		local remote = ServiceFolder.DivergentFistService.RE.Activated
+		
+		local function blackFlashDetected(localChar: Model, character: Model)
+			if not config.combat.player.infBlackFlash then return end
+			if Player.Character ~= localChar then return end
+			task.wait(0.5 - Player:GetNetworkPing())
+	
+			if character.Info:FindFirstChild("Knockback") or not character.Info:FindFirstChild("Stun") then return end
+			remote:FireServer()
+	
+			task.wait(.15 - Player:GetNetworkPing())
+	
+			local thread = task.defer(function()
+				while task.wait() do
+					localChar:PivotTo(character:GetPivot() * CFrame.new(Vector3.new(0,0 , 4)))
+				end
+			end)
+	
+			lookAt(character, false, 0)
+	
+			task.wait(.25 + Player:GetNetworkPing())
+			remote:FireServer()
+	
+			task.wait(.35)
+	
+			stopLookingAt()
+			task.cancel(thread)
+		end
+		
+		disableJanitor:Add( ServiceFolder.DivergentFistService.RE.Effects.OnClientEvent:Connect(function(effectName: string, localChar: Model, char: Model) 
+			if effectName == "BlackFlashHit" then
+				blackFlashDetected(localChar, char)
+			end
+		end) )
+	
+		CombatTab:Checkbox({
+			Label = "Inf Black Flash",
+			Value = config.combat.misc.infBlackFlash,
+			saveFlag = "InfBlackFlash",
+			Callback = function(self, Value)
+				config.combat.misc.infBlackFlash = Value
+			end,
+		})
+	end
+
+	--<< anti fall
+	do
+		local partData = {
+			{size = Vector3.new(-17.25, 11.75, -533.115), pos = Vector3.new(740.5, 2.5, 372.771)},
+			{size = Vector3.new(145, 2.5, 1389.771), pos = Vector3.new(352.5, 11.75, -24.615)},
+			{size = Vector3.new(598, 2.5, 36.771), pos = Vector3.new(126, 11.75, 651.885)},
+			{size = Vector3.new(298, 2.5, 1091.271), pos = Vector3.new(-313.5, 11.75, 124.635)}
+		}
+		
+		local parts = {}
+	
+		local function spawnParts()
+			for _, v in partData do
+				local part = Instance.new("Part")
+				part.Color = Color3.fromRGB(0, 0, 0)
+				part.Transparency = 0.9
+				part.Position = v.pos
+				part.Size = v.size
+				part.Anchored = true
+				part.CanCollide = true
+				part.CanTouch = false
+				part.CanQuery = false
+				part.Parent = workspace.Map.Core
+				table.insert(parts, part)
+			end
+		end
+	
+		local function cleanUp()
+			for _, v in parts do
+				v:Destroy()
+			end
+			table.clear(parts)
+		end
+	
+		disableJanitor:Add(cleanUp)
+	
+		CombatTab:Checkbox({
+			Label = "Anti-Void",
+			Value = config.combat.misc.antiFall,
+			saveFlag = "AntiVoid",
+			Callback = function(self, Value)
+				config.combat.misc.antiFall = Value
+				if Value then
+					spawnParts()
+				else
+					cleanUp()
+				end
+			end,
+		})
+	end
+
+	--<< enterable domains
+	do
+		local function toggle(val: boolean)
+			config.combat.misc.enterDomain = val
+			if val then
+				disableJanitor:Add(workspace.Domains.ChildAdded:Connect(function(child: Instance) 
+					child.CanCollide = false
+				end), nil, "enterDomains") 
+				for _, v in workspace.Domains:GetChildren() do
+					v.CanCollide = false
+				end		
+			else
+				disableJanitor:Remove("enterDomains")
+				for _, v in workspace.Domains:GetChildren() do
+					v.CanCollide = true
+				end		
+			end
+		end
+	
+		CombatTab:Checkbox({
+			Label = "Enter Domains",
+			Value = config.combat.misc.enterDomain,
+			saveFlag = "EnterDomains",
+			Callback = function(self, Value)
+				toggle(Value)
+			end,
+		})
+	end
+end
+
+
+--// whitelist handler
+do
+	CombatTab:Separator({
+		Text = "Whitelist"
+	})
+
+	local dropdown = CombatTab:CollapsingHeader({
+		Title = "Players",
+		Open = false
+	})
+
+	local playerCheckboxes = {}
+
+	local function playerAdded(player: Players)
+		playerCheckboxes[player] = dropdown:Checkbox({
+			Label = player.Name,
+			Value = config.combat.whiteList[player.Name],
+			--saveFlag = "Whitelist_" .. player.Name,
+			Callback = function(self, Value)
+				config.combat.whiteList[player.Name] = Value
+			end,
+		})
+	end
+
+	local function playerRemoving(player: Player)
+		config.combat.whiteList[player.Name] = nil
+		playerCheckboxes[player]:Destroy()
+		playerCheckboxes[player] = nil
+	end
+
+	disableJanitor:Add (
+		game.Players.PlayerAdded:Connect(playerAdded)
 	)
 
-	disableJanitor:Add(function()
-		if currentCon then
-			currentCon:Disconnect()
-		end
-	end)
-
-	local function enable()
-		local char = Player.Character
-		if char then
-			local root = char:WaitForChild"HumanoidRootPart"
-			currentCon = root:GetPropertyChangedSignal("Anchored"):Connect(function()
-				root.Anchored = false
-			end)
-		end
-		config.player.antiStun = true
-	end
-
-	local function disable()
-		config.player.antiStun = false
-	end
-
-	playerTab:Checkbox({
-		Label = "Anti-Stun",
-		Value = true,
-		saveFlag = "AntiStun",
-		Callback = function(self, Value)
-			if Value then
-				enable()
-			else
-				disable()
-			end
-		end,
-	})
+	disableJanitor:Add (
+		game.Players.PlayerRemoving:Connect(playerRemoving)
+	)
 end
 
-]]
 
---<< always downslam
---[[
-do
-	playerTab:Checkbox({
-		Label = "Always Downslam",
-		Value = true,
-		saveFlag = "alwaysDownslam",
-		Callback = function(self, Value)
-			config.player.downSlam = Value
-		end,
-	})
-	
-	UIS.InputBegan:Connect(function(input, gameProcessedEvent)
-		
-	end)
-end
-
-]]
 
 -->> keybinds
-KeybindsTab:Separator({
-	"Press Backspace to Delete Keybind"
-})
-
 do
-	local toggleUiKeybind = KeybindsTab:Keybind({
-		Label = "Toggle UI",
-		Value = Enum.KeyCode.RightControl,
-		saveFlag = "ToggleUiKeybind",
-		Callback = function()
-			Window:SetVisible(not Window.Visible)
-		end,
+	KeybindsTab:Separator({
+		"Press Backspace to Delete Keybind"
 	})
 	
-	local wasClosedBefore = false
-	Window.CloseCallback = function()
-		if toggleUiKeybind.Value then
-			if wasClosedBefore then
-				--ImGui:Notify("Press " .. `{toggleUiKeybind.Value}` .. " to re-open the gui." , 1)
-				return
+	do
+		local toggleUiKeybind = KeybindsTab:Keybind({
+			Label = "Toggle UI",
+			Value = Enum.KeyCode.RightControl,
+			saveFlag = "ToggleUiKeybind",
+			Callback = function()
+				Window:SetVisible(not Window.Visible)
+			end,
+		})
+		
+		local wasClosedBefore = false
+		Window.CloseCallback = function()
+			if toggleUiKeybind.Value then
+				if wasClosedBefore then
+					--ImGui:Notify("Press " .. `{toggleUiKeybind.Value}` .. " to re-open the gui." , 1)
+					return
+				end
+				wasClosedBefore = true
+				ImGui:Notify("Gui", "Press " .. `{toggleUiKeybind.Value.Name}` .. " to re-open the gui." , 4)
 			end
-			wasClosedBefore = true
-			ImGui:Notify("Gui", "Press " .. `{toggleUiKeybind.Value.Name}` .. " to re-open the gui." , 4)
 		end
 	end
 end
@@ -1561,6 +1514,8 @@ end
 
 dir.disable = disable
 
+-->> config saving & loading
+Window:CreateConfigSaveHandler("JJS_SAKSO")
 
 -->> unloading gui
 local closeTab = Window:CreateTab({
@@ -1579,9 +1534,6 @@ closeTab:Button({
 		ImGui:Notify("JJS-SAKSO", "Unloaded the cheat. Re-execute if you want to use again." , 3)
     end,
 })
-
--->> config saving & loading
-Window:CreateConfigSaveHandler("JJS_SAKSO")
 
 --// wiz special technique
 if Player.Name == "IIlIllIIIIlIIIlllIIl" or Player.Name == "casckmaskcmwoda" then

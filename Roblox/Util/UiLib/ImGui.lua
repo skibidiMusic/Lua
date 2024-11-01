@@ -1711,6 +1711,14 @@ function ImGui:CreateWindow(WindowConfig)
 		return WindowConfig:SetOpen(Open)
 	end)	
 
+	-->> WHITELIST HANDLER
+	function WindowConfig:CreateWhitelistHandler()
+		
+		local self = {}
+		
+		return self
+	end
+
     -->> CONFIG HANDLER
     local configHandler = {};
 	configHandler.loadingSave = false
