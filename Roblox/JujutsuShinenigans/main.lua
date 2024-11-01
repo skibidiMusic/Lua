@@ -1310,7 +1310,7 @@ do
 		local remote = ServiceFolder.DivergentFistService.RE.Activated
 		
 		local function blackFlashDetected(localChar: Model, character: Model)
-			if not config.combat.player.infBlackFlash then return end
+			if not config.combat.misc.infBlackFlash then return end
 			if Player.Character ~= localChar then return end
 			task.wait(0.5 - Player:GetNetworkPing())
 	
