@@ -1448,6 +1448,7 @@ do
 	local playerCheckboxes = {}
 
 	local function playerAdded(player: Players)
+		if player == Player then return end --<< if player is the LocalPlayer
 		playerCheckboxes[player] = dropdown:Checkbox({
 			Label = player.Name,
 			Value = config.combat.whiteList[player.Name],
@@ -1471,6 +1472,10 @@ do
 	disableJanitor:Add (
 		game.Players.PlayerRemoving:Connect(playerRemoving)
 	)
+
+	for _, v in game.Players:GetPlayers() do
+		playerAdded(v)
+	end
 end
 
 
