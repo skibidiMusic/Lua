@@ -490,16 +490,16 @@ do
 		-->> ui
 		meleeBlockHeader:Checkbox({
 			Label = "Punches",
-			Value = config.combat.autoBlock.Melee,
+			Value = config.combat.autoBlock.melee,
 			saveFlag = "BlockMelee",
 			Callback = function(self, Value)
-				config.combat.autoBlock.Melee = Value
+				config.combat.autoBlock.melee = Value
 			end,
 		})
 	
 		-->> hook
 		local function meleeDetected(enemyChar: Model, COMBO: number?)
-			if not config.combat.autoblock.Melee then return end
+			if not config.combat.autoblock.melee then return end
 			local localChar = Player.Character
 			if localChar == enemyChar then
 				return
