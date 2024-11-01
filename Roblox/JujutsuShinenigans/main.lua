@@ -330,7 +330,7 @@ local function stopBlock(keepBlocking: boolean?)
 end
 
 local function block(enemy: Model, length: number, enemySpeedMultiplier: number?, punish: boolean?, tryCounter: boolean?)
-	if not config.combat.autoblock.enabled or config.combat.whiteList[enemy and enemy.Name] then return end
+	if not config.combat.autoBlock.enabled or config.combat.whiteList[enemy and enemy.Name] then return end
 	
 	local localChar = Player.Character
 	if not localChar then return end
@@ -343,9 +343,9 @@ local function block(enemy: Model, length: number, enemySpeedMultiplier: number?
 	length = math.max(length - Player:GetNetworkPing() * 0.5, 0)
 
 
-	if config.combat.autoblock.lookAtPlayer then lookAt(enemy, config.combat.autoblock.lockCamera, enemySpeedMultiplier) end
+	if config.combat.autoBlock.lookAtPlayer then lookAt(enemy, config.combat.autoBlock.lockCamera, enemySpeedMultiplier) end
 	
-	if tryCounter and config.combat.autoblock.tryCounter then
+	if tryCounter and config.combat.autoBlock.tryCounter then
 		counter(enemy)
 	end
 
@@ -434,9 +434,9 @@ local KeybindsTab = Window:CreateTab({
 })
 
 
---// AUTOBLOCK
+--// autoBlock
 CombatTab:Separator({
-	Text = "Autoblock"
+	Text = "autoBlock"
 })
 
 CombatTab:Checkbox({
@@ -477,7 +477,7 @@ local characterNames = {
 	Gojo = true,
 }
 
---// autoblock logic
+--// autoBlock logic
 --(melee)
 do
 	local meleeBlockHeader = CombatTab:CollapsingHeader({
@@ -499,7 +499,7 @@ do
 	
 		-->> hook
 		local function meleeDetected(enemyChar: Model, COMBO: number?)
-			if not config.combat.autoblock.melee then return end
+			if not config.combat.autoBlock.melee then return end
 			local localChar = Player.Character
 			if localChar == enemyChar then
 				return
@@ -565,7 +565,7 @@ do
 		end
 
 		local function chaseDetected(enemyChar: Model)
-			if not config.combat.autoblock.chase then return end
+			if not config.combat.autoBlock.chase then return end
 			local localChar = Player.Character
 			if localChar and localChar ~= enemyChar then
 				local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
@@ -644,7 +644,7 @@ do
 			})
 
 			local function cursedStrikesDetected(enemy: Model, from: CFrame)
-				if not config.combat.autoblock.Itadori.blockCursedStrikes then return end
+				if not config.combat.autoBlock.Itadori.blockCursedStrikes then return end
 				if typeof(from) ~= "CFrame" then return end
 				dashAttackDetected(enemy, false, from, 8, 40, .5)
 			end
@@ -682,7 +682,7 @@ do
 			})
 
 			local function toadDetected(enemy: Model)
-				if not config.combat.autoblock.Megumi.blockToad then return end
+				if not config.combat.autoBlock.Megumi.blockToad then return end
 				task.delay(.4 - Player:GetNetworkPing() * 0.5, block, enemy, .5, 1, false, false)
 			end
 		
@@ -705,7 +705,7 @@ do
 			})
 
 			local function dogDetected(dogModel: Model, target: Model)
-				if not config.combat.autoblock.Megumi.blockDog then return end
+				if not config.combat.autoBlock.Megumi.blockDog then return end
 				task.wait(.3 - Player:GetNetworkPing() * 0.5)
 				if distanceFromCharacter(target).Magnitude < 6 then
 					block(dogModel, .25, 1, false, true)
@@ -746,15 +746,15 @@ do
 		do
 			mahitoHeader:Checkbox({
 				Label = "Focus Strike",
-				Value = config.combat.autoblock.Mahito.blockFocusStrike,
+				Value = config.combat.autoBlock.Mahito.blockFocusStrike,
 				saveFlag = "MahitoFocusStrike",
 				Callback = function(self, Value)
-					config.combat.autoblock.Mahito.blockFocusStrike = Value
+					config.combat.autoBlock.Mahito.blockFocusStrike = Value
 				end,
 			})
 
 			local function focusStrikeDetected(enemy: Model)
-				if not config.combat.autoblock.Mahito.blockFocusStrike then return end
+				if not config.combat.autoBlock.Mahito.blockFocusStrike then return end
 				dashAttackDetected(enemy, true, nil, 8, 30, .5)
 			end
 			
@@ -775,15 +775,15 @@ do
 		do
 			mahitoHeader:Checkbox({
 				Label = "Bullets",
-				Value = config.combat.autoblock.Mahito.blockSoulFire,
+				Value = config.combat.autoBlock.Mahito.blockSoulFire,
 				saveFlag = "MahitoBullets",
 				Callback = function(self, Value)
-					config.combat.autoblock.Mahito.blockSoulFire = Value
+					config.combat.autoBlock.Mahito.blockSoulFire = Value
 				end,
 			})
 
 			local function soulFireDetected(enemy: Model)
-				if not config.combat.autoblock.Mahito.blockSoulFire then return end
+				if not config.combat.autoBlock.Mahito.blockSoulFire then return end
 				local localChar = Player.Character
 				if localChar and localChar ~= enemy then
 					local distance = distanceFromCharacter(enemy)
@@ -817,15 +817,15 @@ do
 		do
 			mahitoHeader:Checkbox({
 				Label = "Special Dash",
-				Value = config.combat.autoblock.Mahito.blockSpecialDash,
+				Value = config.combat.autoBlock.Mahito.blockSpecialDash,
 				saveFlag = "MahitoSpecialDash",
 				Callback = function(self, Value)
-					config.combat.autoblock.Mahito.blockSpecialDash = Value
+					config.combat.autoBlock.Mahito.blockSpecialDash = Value
 				end,
 			})
 
 			local function specialDashDetected(enemy: Model, style: number)
-				if not config.combat.autoblock.Mahito.blockSpecialDash then return end
+				if not config.combat.autoBlock.Mahito.blockSpecialDash then return end
 				if style == 1 then
 					dashAttackDetected(enemy, false, nil, 8, 25, .5)
 				elseif Player.Character and Player.Character ~= enemy then
@@ -859,15 +859,15 @@ do
 		do
 			hakariHeader:Checkbox({
 				Label = "Doors",
-				Value = config.combat.autoblock.Hakari.blockDoors,
+				Value = config.combat.autoBlock.Hakari.blockDoors,
 				saveFlag = "HakariDoors",
 				Callback = function(self, Value)
-					config.combat.autoblock.Hakari.blockDoors = Value
+					config.combat.autoBlock.Hakari.blockDoors = Value
 				end,
 			})
 
 			local function doorsDetected(part: BasePart)
-				if not config.combat.autoblock.Hakari.blockDoors then return end
+				if not config.combat.autoBlock.Hakari.blockDoors then return end
 
 				local dist = distanceFromCharacter(part)
 				if dist and math.abs(dist.Y) < 12 and normalizeToGround(dist).Magnitude < 24  then
@@ -890,10 +890,10 @@ do
 		do
 			hakariHeader:Checkbox({
 				Label = "Balls",
-				Value = config.combat.autoblock.Hakari.blockBalls,
+				Value = config.combat.autoBlock.Hakari.blockBalls,
 				saveFlag = "HakariBalls",
 				Callback = function(self, Value)
-					config.combat.autoblock.Hakari.blockBalls = Value
+					config.combat.autoBlock.Hakari.blockBalls = Value
 				end,
 			})
 
@@ -903,7 +903,7 @@ do
 			
 
 			local function ballSpawning(enemy: Model)
-				if not config.combat.autoblock.Hakari.blockBalls then return end
+				if not config.combat.autoBlock.Hakari.blockBalls then return end
 
 				task.wait(.25 - Player:GetNetworkPing())
 				if not Player.Character or enemy == Player.Character then return end
@@ -954,10 +954,10 @@ do
 		do
 			gojoHeader:Checkbox({
 				Label = "Lapse Blue",
-				Value = config.combat.autoblock.Gojo.blockLapseBlue,
+				Value = config.combat.autoBlock.Gojo.blockLapseBlue,
 				saveFlag = "blockLapseBlue",
 				Callback = function(self, Value)
-					config.combat.autoblock.Gojo.blockLapseBlue = Value
+					config.combat.autoBlock.Gojo.blockLapseBlue = Value
 				end,
 			})
 
@@ -978,7 +978,7 @@ do
 			)
 
 			local function blueDetected(enemy: Model)
-				if not config.combat.autoblock.Gojo.blockLapseBlue then return end
+				if not config.combat.autoBlock.Gojo.blockLapseBlue then return end
 				local localChar = Player.Character
 				if not localChar then return end
 				if tick() - grabbedTick < .2 + Player:GetNetworkPing() * .5 then
@@ -1007,10 +1007,10 @@ do
 		do
 			gojoHeader:Checkbox({
 				Label = "Reversal Red",
-				Value = config.combat.autoblock.Gojo.blockReversalRed,
+				Value = config.combat.autoBlock.Gojo.blockReversalRed,
 				saveFlag = "BlockReversalRed",
 				Callback = function(self, Value)
-					config.combat.autoblock.Gojo.blockReversalRed = Value
+					config.combat.autoBlock.Gojo.blockReversalRed = Value
 				end,
 			})
 
@@ -1019,7 +1019,7 @@ do
 			raycastParams.FilterDescendantsInstances = {workspace.Effects, workspace.Bullets}
 
 			local function redProjectileDetected(projectile: BasePart)
-				if not config.combat.autoblock.Gojo.blockReversalRed then return end
+				if not config.combat.autoBlock.Gojo.blockReversalRed then return end
 
 				local appearTick = tick()
 				local thread = task.defer(function()
@@ -1043,7 +1043,7 @@ do
 			
 			--<< cast
 			local function redCasted(enemy: Model)
-				if not config.combat.autoblock.Gojo.blockReversalRed then return end
+				if not config.combat.autoBlock.Gojo.blockReversalRed then return end
 
 				local localChar = Player.Character
 				if not localChar or enemy == localChar then return end
