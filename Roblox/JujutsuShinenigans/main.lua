@@ -481,6 +481,16 @@ local characterNames = {
 --// autoBlock logic
 --(melee)
 do
+	local characterMeleeActionNames = {
+		Megumi = "Swing2",
+		Mahoraga = "Swing",
+		Mahito = "Swing3",
+		Itadori = "Swing2",
+		Hakari = "Swing2",
+		Gojo = "Swing2",
+		Choso = "Swing",
+	}
+
 	local meleeBlockHeader = CombatTab:CollapsingHeader({
 		Title = "Melee",
 		Open = false
@@ -522,22 +532,14 @@ do
 			end
 		end
 	
-		for name in characterNames do
+		for name, actionName in characterMeleeActionNames do
 			local service = ServiceFolder:FindFirstChild(name .. "Service")
 			if service then
-				if name == "Mahoraga" or name == "Mahito" or name == "Choso" then
-					disableJanitor:Add(service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model, combo: number, finish: string?)
-						if action == "Swing" then
-							meleeDetected(character)
-						end
-					end))
-				else
-					disableJanitor:Add(service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model, combo: number, finish: string?)
-						if action == "Swing2" then
-							meleeDetected(character, combo)
-						end
-					end))
-				end
+				disableJanitor:Add(service.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model, combo: number, finish: string?)
+					if action == actionName then
+						meleeDetected(character, combo)
+					end
+				end))
 			end
 		end
 	end
@@ -1324,7 +1326,7 @@ do
 
 				while true do
 					local dt = task.wait()
-					localChar:PivotTo(CFrame.new():Lerp(character:GetPivot() * CFrame.new(Vector3.new(0,0 , 4)), dt * 2))
+					localChar:PivotTo(localChar:GetPivot():Lerp(character:GetPivot() * CFrame.new(Vector3.new(0,0 , 4)), dt * 20))
 				end
 			end)
 	
