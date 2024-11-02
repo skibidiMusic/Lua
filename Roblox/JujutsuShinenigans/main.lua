@@ -836,7 +836,7 @@ do
 					dashAttackDetected(enemy, false, nil, 8, 25, .5)
 				elseif Player.Character and Player.Character ~= enemy then
 					task.wait(.25 - Player:GetNetworkPing())
-					counter(enemy)
+					dashAttackDetected(enemy, true, nil, 8, 25, 0)
 				end
 			end
 		
