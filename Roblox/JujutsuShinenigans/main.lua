@@ -299,7 +299,10 @@ local function counter(enemy: Model?)
 		local remote = service.RE.Activated
 		remote:FireServer()
 	elseif currentMoveset == "Hakari" and not localChar:GetAttribute("InUlt")  then
-		ServiceFolder.HakariService.RE.RightActivated:FireServer(enemy)
+		local dist = distanceFromCharacter(enemy)
+		if normalizeToGround(dist).Magnitude < 12 then
+			ServiceFolder.HakariService.RE.RightActivated:FireServer(enemy)
+		end
 	end
 	
 	if enemy then
@@ -832,6 +835,7 @@ do
 				if style == 1 then
 					dashAttackDetected(enemy, false, nil, 8, 25, .5)
 				elseif Player.Character and Player.Character ~= enemy then
+					task.wait(.25 - Player:GetNetworkPing())
 					counter(enemy)
 				end
 			end
