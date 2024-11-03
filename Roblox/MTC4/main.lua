@@ -119,23 +119,25 @@ end
 
 --<< esp workaround
 do
-	local function highlightAdded(highlight)
-		task.wait()
-		highlight.FillColor = highlight.OutlineColor
+	local function highlightAdded(highlight, tank)
+		task.wait(1)
+		highlight.FillColor = tank:GetAttribute("Team")
 		highlight.OutlineColor = Color3.new(1, 1, 1)
-		highlight.OutlineTransparency = .9
+		highlight.OutlineTransparency = .1
 		highlight.FillTransparency = .65
 		highlight.DepthMode = Enum.HighlightDepthMode.Occluded
 	end
 
 	local function vehicleAdded(v: Model)
-		if v:FindFirstChild("Comical") and v.Comical:FindFirstChild("Highlight") then
-			highlightAdded(v.Comical.Highlight)
+		for _, a in v:GetDescendants() do
+			if a:IsA("Highlight") then
+				highlightAdded(a, v)
+			end
 		end
 
 		v.DescendantAdded:Connect(function(descendant)
 			if descendant:IsA("Highlight") then
-				highlightAdded(descendant)
+				highlightAdded(descendant, v)
 			end
 		end)
 	end
