@@ -1134,41 +1134,40 @@ do
 			end
 		end
 
-					-->> Itadori feint support
-					local feintRemote = ServiceFolder.ItadoriService.RE.RightActivated
-					local function onCounter(char: Model)
-						if not config.combat.misc.AntiCounter then return end
-						if char == Player.Character then return end
-						local target = success and ToolController:GetTarget() or getClosestCharacter()
-						if target == char then
-							feintRemote.FireServer(feintRemote)
-							 --<< dont cast.
-						end
-					end
-					disableJanitor:Add(
-						ServiceFolder.HakariService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
-							if action == "Counter" then
-								onCounter(character)
-							end
-						end)
-					)
-					disableJanitor:Add(
-						ServiceFolder.ManjiKickService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
-							if action == "Startup" then
-								onCounter(character)
-							end
-						end)
-					)
-		
-					--(ui)
-					CombatTab:Checkbox({
-						Label = "AntiCounter",
-						Value = config.combat.player.AntiCounter,
-						saveFlag = "AntiCounter",
-						Callback = function(self, Value)
-							config.combat.player.AntiCounter = Value
-						end,
-					})
+		-->> Itadori feint support
+		local feintRemote = ServiceFolder.ItadoriService.RE.RightActivated
+		local function onCounter(char: Model)
+			if not config.combat.misc.AntiCounter then return end
+			if char == Player.Character then return end
+			local target = success and ToolController:GetTarget() or getClosestCharacter()
+			if target == char then
+				feintRemote.FireServer(feintRemote)
+				 --<< dont cast.
+			end
+		end
+		disableJanitor:Add(
+			ServiceFolder.HakariService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
+				if action == "Counter" then
+					onCounter(character)
+				end
+			end)
+		)
+		disableJanitor:Add(
+			ServiceFolder.ManjiKickService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
+				if action == "Startup" then
+					onCounter(character)
+				end
+			end)
+		)
+		--(ui)
+		CombatTab:Checkbox({
+			Label = "AntiCounter",
+			Value = config.combat.player.AntiCounter,
+			saveFlag = "AntiCounter",
+			Callback = function(self, Value)
+				config.combat.player.AntiCounter = Value
+			end,
+		})
 	end
 	
 	--<< Downslam

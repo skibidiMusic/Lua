@@ -19,18 +19,22 @@ end
 
 -->> dep
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
 local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Janitor.lua'))()
 
 local vehiclesHolder = workspace.SpawnedVehicles
+local Player = game.Players.LocalPlayer
+local PlayerGui = Player.PlayerGui
 
 -->> hook control
 local unloadJanitor = Janitor.new()
 
+
 -->> Window Set-up
 local Window = ImGui:CreateWindow({
-	Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS",
+	Title = "MTC4 SAKSO",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
 	Size = UDim2.new(0, 800, 0, 500),
 	AutoSize = false,
@@ -82,24 +86,108 @@ local Window = ImGui:CreateWindow({
 		}
 	}
 
+}); Window:Center()
+
+-->> Tabs
+local seatsTab = Window:CreateTab({
+	Name = "Better Seating",
+	Visible = false 
 })
 
-Window:Center()
-
-local mainTab = Window:CreateTab({
-	Name = "Main",
-	Visible = true 
+local KeybindsTab = Window:CreateTab({
+	Name = "Keybinds",
+	Visible = false 
 })
+
+
+-->> functionality
+local function getClosestVehicle()
+	local localChar = game.Players.LocalPlayer.Character
+	if not localChar then return end
+
+	local closestDist = math.huge; local closestVehicle;
+	for _, v in vehiclesHolder:GetChildren() do
+		local dist = (localChar:GetPivot().Position - v:GetPivot().Position).Magnitude
+		if dist < closestDist then
+			closestDist = dist
+			closestVehicle = v
+		end
+	end
+
+	return closestVehicle
+end
+
+--<< esp workaround
+do
+	local function highlightAdded(highlight)
+		task.wait()
+		highlight.FillColor = highlight.OutlineColor
+		highlight.OutlineColor = Color3.new(1, 1, 1)
+		highlight.OutlineTransparency = .9
+		highlight.FillTransparency = .65
+		highlight.DepthMode = Enum.HighlightDepthMode.Occluded
+	end
+
+	local function vehicleAdded(v: Model)
+		if v:FindFirstChild("Comical") and v.Comical:FindFirstChild("Highlight") then
+			highlightAdded(v.Comical.Highlight)
+		end
+
+		v.DescendantAdded:Connect(function(descendant)
+			if descendant:IsA("Highlight") then
+				highlightAdded(descendant)
+			end
+		end)
+	end
+
+	unloadJanitor:Add( vehiclesHolder.ChildAdded:Connect(function(v)
+		vehicleAdded(v)
+	end ) )
+
+	for _, v in vehiclesHolder:GetChildren() do
+		vehicleAdded(v)
+	end
+end
+
+-->> camera stuff
+--[[
+do
+	local defaultSensivity =  UserInputService.MouseDeltaSensitivity
+
+	local enabled = true
+
+	--<< tank sens.
+	unloadJanitor:Add (
+		RunService.RenderStepped:Connect(function()
+			if PlayerGui.GunAim.Aim.Visible and enabled then
+				UserInputService.MouseDeltaSensitivity = defaultSensivity
+			end
+		end)
+	)
+	
+	cameraTab:Checkbox({
+		Label = "CameraSens",
+		Value = true,
+		saveFlag = "CameraSensEnabled",
+		Callback = function(self, Value)
+			enabled = Value
+		end,
+	})
+end
+]]
+
 
 -->> seat picker
 do
-    mainTab:Separator({
+    seatsTab:Separator({
         Text = "Yes"
     })
 
     local closestVehicle : Model;
 
-    unloadJanitor:Add ( RunService.Heartbeat:Connect(function(deltaTime)
+    --[[
+	
+	unloadJanitor:Add ( RunService.Heartbeat:Connect(function(deltaTime)
         local localChar = game.Players.LocalPlayer.Character
         if not localChar then return end
 
@@ -113,8 +201,11 @@ do
         end
     end) )
 
+	]]
+
     local function pickSeat(name: string)
-        if closestVehicle  then
+		local closestVehicle = getClosestVehicle()
+        if closestVehicle then
             for _, v: Instance in closestVehicle:GetDescendants() do
                 if v:IsA("VehicleSeat") and v.Name == name then
                     v.SeatEvt:FireServer()
@@ -124,7 +215,7 @@ do
     end
 
     local function createSeatPicker(name: string, defaultKey: Enum.KeyCode)
-        local Row = mainTab:Row({
+        local Row = seatsTab:Row({
 
         })
 
@@ -149,17 +240,13 @@ do
     end
 
     --<< keybinds
-    createSeatPicker("Commander", Enum.KeyCode.L)
-    createSeatPicker("Loader", Enum.KeyCode.O)
+    createSeatPicker("Commander", Enum.KeyCode.N)
+    createSeatPicker("Loader", Enum.KeyCode.Y)
     createSeatPicker("Gunner", Enum.KeyCode.U)
     createSeatPicker("Driver", Enum.KeyCode.P)
 end
 
-local KeybindsTab = Window:CreateTab({
-	Name = "Keybinds",
-	Visible = false 
-})
-
+-->> keubinds (close / reopen UI)
 do
 	KeybindsTab:Separator({
 		"Press Backspace to Delete Keybind"
