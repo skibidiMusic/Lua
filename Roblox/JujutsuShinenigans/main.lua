@@ -20,6 +20,7 @@ end
 
 --> dep
 local RunService = game:GetService("RunService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
 local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Janitor.lua'))()
@@ -35,6 +36,9 @@ local config = {
 	combat = {
 		autoBlock = {
 			enabled = true,
+
+			--<< constant
+			lookAtPlayer = true,
 
 			tryCounter = true,
 			punish = true,
@@ -76,6 +80,11 @@ local config = {
 			AutoTarget = true,
 			noDashCD = true,
 			AntiCounter = true,
+			noStun = {
+				enabled = true,
+				jump = true,
+				sprint = true
+			}
 		},
 		
 		misc = {
@@ -268,23 +277,51 @@ end
 disableJanitor:Add(stopLookingAt)
 
 --(attacking)
-local function attack(enemy: Model)
+local function attack(enemy: Model, goBehindEnemy: boolean?)
 	local char = Player.Character
-	if not char then return end 
-	
-	local diff = distanceFromCharacter(enemy)
-	if diff.Magnitude > 8 then
-		return
-	end
+	if not char then return end
 
 	local currentMoveset = char:GetAttribute("Moveset")
 	local service = game.ReplicatedStorage.Knit.Knit.Services[currentMoveset .. "Service"]
 
 	local remote = service.RE.Activated
-	remote:FireServer("Down")
 
-	lookAt(enemy)
-	task.delay(.1, stopLookingAt)
+	if goBehindEnemy then
+		local diff = distanceFromCharacter(enemy)
+		if diff.Magnitude > 16 then
+			return
+		end
+
+		local goBehindThread = task.defer(function()
+			local totalT = 0
+			while true do
+				local dt = task.wait()
+				totalT += dt
+				remote:FireServer("Down")
+				char:PivotTo(char:GetPivot():Lerp(enemy:GetPivot() * CFrame.new(Vector3.new(0,0 , 4)), dt * 16))
+			end
+		end)
+
+		lookAt(enemy)
+
+		task.wait(.35)
+		task.cancel(goBehindThread)
+		stopLookingAt()
+	else
+		local diff = distanceFromCharacter(enemy)
+		if diff.Magnitude > 8 then
+			return
+		end
+	
+		remote:FireServer("Down")
+		lookAt(enemy)
+		task.delay(.1, stopLookingAt)
+	end	
+end
+
+
+do
+	
 end
 
 --(counter)
@@ -299,7 +336,7 @@ local function counter(enemy: Model?)
 		local remote = service.RE.Activated
 		remote:FireServer()
 	elseif currentMoveset == "Hakari" and not localChar:GetAttribute("InUlt")  then
-		local dist = distanceFromCharacter(enemy)
+		local dist = distanceFromCharacter(findFuturePos(enemy))
 		if normalizeToGround(dist).Magnitude < 12 then
 			ServiceFolder.HakariService.RE.RightActivated:FireServer(enemy)
 		end
@@ -353,15 +390,16 @@ local function block(enemy: Model, length: number, enemySpeedMultiplier: number?
 	end
 
 	blockData.loopThread = task.defer(function()
-		while task.wait(0.025) do
+		while true do
 			blockRemotes.Activated:FireServer()
+			task.wait(0.025)
 		end
 	end)
 
 	blockData.delayThread = task.delay(length, function()
 		stopBlock(game.UserInputService:IsKeyDown(Enum.KeyCode.F))
 		if punish then
-			attack(enemy)
+			attack(enemy, false)
 		end
 	end)
 end
@@ -560,28 +598,40 @@ do
 		})
 	
 		-->> hook
-		local function checkDistance(enemyChar)
-			local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
-			if math.abs(diffVec.Y) < 15 then
-				diffVec = normalizeToGround(diffVec)
-				if diffVec.Magnitude < 10 then
-					block(enemyChar, 0.5, 3, true, true)
-				end
-			end
-		end
-
 		local function chaseDetected(enemyChar: Model)
 			if not config.combat.autoBlock.chase then return end
 			local localChar = Player.Character
 			if localChar and localChar ~= enemyChar then
-				local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
-				if math.abs(diffVec.Y) < 15 then
-					diffVec = normalizeToGround(diffVec)
-					if diffVec.Magnitude < 45 then
-						if diffVec.Magnitude < 12 or diffVec.Unit:Dot(-enemyChar:GetPivot().LookVector) > 0.5  then
-							task.wait(diffVec.Magnitude / 45)
-							checkDistance(enemyChar)
-						end
+				local t = tick()
+
+				local isInRadius = false
+				local function enteredRadius()
+					if not isInRadius then
+						isInRadius = true
+						block(enemyChar, 2.5, 3, true, true)
+					end
+				end
+
+				local function outOfRadius()
+					if isInRadius then
+						isInRadius = false
+						stopBlock()
+					end
+				end
+
+
+				while task.wait() do
+					if not (tick() - t < .5 or enemyChar.Info:FindFirstChild("InSkill")) then
+						outOfRadius()
+						attack(enemyChar, true)
+						return
+					end
+
+					local diffVec : Vector3 = distanceFromCharacter(findFuturePos(enemyChar.PrimaryPart))
+					if diffVec and math.abs(diffVec.Y) < 8 and normalizeToGround(diffVec).Magnitude < 25 then
+						enteredRadius()
+					else
+						outOfRadius()
 					end
 				end
 			end
@@ -1207,7 +1257,7 @@ do
 				disabled = true
 			end)
 	
-			playerTab:Checkbox({
+			CombatTab:Checkbox({
 				Label = "Auto-Downslam",
 				Value = config.combat.player.downSlam,
 				saveFlag = "downslam",
@@ -1303,6 +1353,69 @@ do
 				end,
 			})
 		end
+	end
+
+	--<< no Stun
+	do
+		local dropdown = CombatTab:CollapsingHeader({
+			Title = "No-Stun",
+			Open = false
+		})
+
+		dropdown:Checkbox({
+			Label = "Enabled",
+			Value = config.combat.player.noStun.enabled,
+			saveFlag = "nostunenabled",
+			Callback = function(self, Value)
+				config.combat.player.noStun.enabled = Value
+			end,
+		})
+
+		dropdown:Checkbox({
+			Label = "Jump",
+			Value = config.combat.player.noStun.jump,
+			saveFlag = "nostunjump",
+			Callback = function(self, Value)
+				config.combat.player.noStun.jump = Value
+			end,
+		})
+
+		dropdown:Checkbox({
+			Label = "Sprint",
+			Value = config.combat.player.noStun.sprint,
+			saveFlag = "nostunsprint",
+			Callback = function(self, Value)
+				config.combat.player.noStun.sprint = Value
+			end,
+		})
+
+		disableJanitor:Add (
+			task.defer(function()
+				while true do
+					task.wait()
+					local charInfo = Player.Character and Player.Character:FindFirstChild("Info")
+					if charInfo then
+						if config.combat.player.noStun.enabled then
+							local values = {
+								Stun = true,
+								NoSprint = config.combat.player.noStun.sprint,
+								NoJump = config.combat.player.noStun.jump,
+								InSkill = true,
+							}
+
+							for name, bool in values do
+								if bool then
+									local val =charInfo:FindFirstChild(name)
+									if val then
+										val:Destroy()
+									end
+								end
+							end
+						end
+					end
+				end
+			end)
+		)
 	end
 end
 
@@ -1493,6 +1606,24 @@ do
 	KeybindsTab:Separator({
 		"Press Backspace to Delete Keybind"
 	})
+
+	do
+		--<< go behind enemy and attack
+		local goBehindEnemyKeybind = KeybindsTab:Keybind({
+			Label = "Attack Closest Enemy",
+			Value = Enum.KeyCode.C,
+			saveFlag = "goBehindEnemyKeybind",
+			Callback = function()
+				attack(getClosestCharacter(), true)
+			end,
+		})
+
+		disableJanitor:Add( 
+			function()
+				goBehindEnemyKeybind.Callback = nil
+			end
+		)
+	end
 	
 	do
 		local toggleUiKeybind = KeybindsTab:Keybind({

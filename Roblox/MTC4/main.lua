@@ -15,9 +15,18 @@ if dir then
 else
     env.mtcSakso = {}
     dir = env.mtcSakso
+	for k, v in pairs(getgc(true)) do
+		if pcall(function() return rawget(v, "indexInstance") end) and type(rawget(v, "indexInstance")) == "table" and (rawget(v, "indexInstance"))[1] == "kick" then
+		setreadonly(v, false)
+			v.tvk = {
+				"kick", function() return game.Workspace:WaitForChild("") end
+			}
+		end
+	end
 end
 
 -->> dep
+
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -121,7 +130,7 @@ end
 do
 	local function highlightAdded(highlight, tank)
 		task.wait(1)
-		highlight.FillColor = tank:GetAttribute("Team")
+		highlight.FillColor = Color3.new(tank:GetAttribute("Team").Color)
 		highlight.OutlineColor = Color3.new(1, 1, 1)
 		highlight.OutlineTransparency = .1
 		highlight.FillTransparency = .65
