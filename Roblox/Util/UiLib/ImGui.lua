@@ -408,7 +408,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 	function ContainerClass:ScrollingBox(Config)
 		Config = Config or {}
 		local Box = Prefabs.ScrollBox:Clone()
-		local ContainClass = ImGui:ContainerClass(Box, Config, Window) 
+		local ContainClass = ImGui:ContainerClass(Box, Config, Window, configSaveData) 
 		return self:NewInstance(Box, ContainClass)
 	end
 
@@ -545,7 +545,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 			Config:SetModel(Model)
 		end
 
-		local ContainClass = ImGui:ContainerClass(Holder, Config, Window) 
+		local ContainClass = ImGui:ContainerClass(Holder, Config, Window, configSaveData) 
 		return self:NewInstance(Holder, ContainClass)
 	end
 
@@ -738,7 +738,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 				local Stroke = Column:FindFirstChildOfClass("UIStroke")
 				Stroke.Enabled = Config.Border ~= false
 
-				local ContainClass = ImGui:ContainerClass(Column, CConfig, Window) 
+				local ContainClass = ImGui:ContainerClass(Column, CConfig, Window, configSaveData) 
 				return ContainerClass:NewInstance(Column, ContainClass, Row)
 			end
 
@@ -842,7 +842,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 		--// Open
 		Config:SetOpen(Config.Open or false)
 
-		local ContainClass = ImGui:ContainerClass(Container, Config, Window) 
+		local ContainClass = ImGui:ContainerClass(Container, Config, Window, configSaveData) 
 		return self:NewInstance(Header, ContainClass)
 	end
 
@@ -899,7 +899,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 			return Config
 		end
 
-		local ContainClass = ImGui:ContainerClass(Row, Config, Window) 
+		local ContainClass = ImGui:ContainerClass(Row, Config, Window, configSaveData) 
 		return self:NewInstance(Row, ContainClass)
 	end
 

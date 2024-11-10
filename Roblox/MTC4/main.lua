@@ -15,14 +15,8 @@ if dir then
 else
     env.mtcSakso = {}
     dir = env.mtcSakso
-	for k, v in pairs(getgc(true)) do
-		if pcall(function() return rawget(v, "indexInstance") end) and type(rawget(v, "indexInstance")) == "table" and (rawget(v, "indexInstance"))[1] == "kick" then
-		setreadonly(v, false)
-			v.tvk = {
-				"kick", function() return game.Workspace:WaitForChild("") end
-			}
-		end
-	end
+	-->> bypass adonis anti-cheat
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
 end
 
 -->> dep
@@ -129,12 +123,7 @@ end
 --<< esp workaround
 do
 	local function highlightAdded(highlight, tank)
-		task.wait(1)
-		highlight.FillColor = Color3.new(tank:GetAttribute("Team").Color)
-		highlight.OutlineColor = Color3.new(1, 1, 1)
-		highlight.OutlineTransparency = .1
-		highlight.FillTransparency = .65
-		highlight.DepthMode = Enum.HighlightDepthMode.Occluded
+		highlight:Destroy()
 	end
 
 	local function vehicleAdded(v: Model)
@@ -158,6 +147,14 @@ do
 	for _, v in vehiclesHolder:GetChildren() do
 		vehicleAdded(v)
 	end
+
+	local mainHighlight = Instance.new("Highlight")
+	mainHighlight.FillColor = Color3.new(tank:GetAttribute("Team").Color)
+	mainHighlight.OutlineColor = Color3.new(1, 1, 1)
+	mainHighlight.OutlineTransparency = .1
+	mainHighlight.FillTransparency = .65
+	mainHighlight.DepthMode = Enum.HighlightDepthMode.Occluded
+	mainHighlight.Parent = vehiclesHolder
 end
 
 -->> camera stuff
