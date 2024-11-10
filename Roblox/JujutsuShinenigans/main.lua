@@ -287,8 +287,10 @@ local function attack(enemy: Model, goBehindEnemy: boolean?)
 	local remote = service.RE.Activated
 
 	if goBehindEnemy then
+		if char.Info:FindFirstChild("Stun") then return end
+
 		local diff = distanceFromCharacter(enemy)
-		if diff.Magnitude > 16 then
+		if diff.Magnitude > 8 then
 			return
 		end
 
@@ -623,7 +625,9 @@ do
 				while task.wait() do
 					if not (tick() - t < .5 or enemyChar.Info:FindFirstChild("InSkill")) then
 						outOfRadius()
-						attack(enemyChar, true)
+						if config.combat.autoBlock.enabled then
+							attack(enemyChar, false)
+						end
 						return
 					end
 
