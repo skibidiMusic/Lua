@@ -16,7 +16,7 @@ else
     env.mtcSakso = {}
     dir = env.mtcSakso
 	-->> bypass adonis anti-cheat
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
+	--loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
 end
 
 -->> dep
@@ -110,6 +110,9 @@ local function getClosestVehicle()
 
 	local closestDist = math.huge; local closestVehicle;
 	for _, v in vehiclesHolder:GetChildren() do
+		if not  v:IsA("Model") then
+			continue
+		end
 		local dist = (localChar:GetPivot().Position - v:GetPivot().Position).Magnitude
 		if dist < closestDist then
 			closestDist = dist
@@ -123,6 +126,7 @@ end
 --<< esp workaround
 do
 	local function highlightAdded(highlight, tank)
+		if highlight.Parent.Name ~= "Comical" then return end
 		highlight:Destroy()
 	end
 
@@ -149,7 +153,7 @@ do
 	end
 
 	local mainHighlight = Instance.new("Highlight")
-	mainHighlight.FillColor = Color3.new(tank:GetAttribute("Team").Color)
+	mainHighlight.FillColor = Color3.new(1,0,0)
 	mainHighlight.OutlineColor = Color3.new(1, 1, 1)
 	mainHighlight.OutlineTransparency = .1
 	mainHighlight.FillTransparency = .65

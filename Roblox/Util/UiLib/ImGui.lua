@@ -1082,7 +1082,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 
 		Keybind.Activated:Connect(function()
 			ValueText.Text = "..."
-			local NewKey = UserInputService.InputBegan:wait()
+			local NewKey = UserInputService.InputBegan:Wait()
 			if not UserInputService.WindowFocused then return end 
 
 			if NewKey.KeyCode.Name == "Unknown" then
@@ -1102,6 +1102,9 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 		end)
 
 		ObjectClass = self:NewInstance(Keybind, Config)
+		ObjectClass.Destroying:Connect(function()
+			Config.Connection:Disconnect()
+		end)
 		return ObjectClass
 	end
 

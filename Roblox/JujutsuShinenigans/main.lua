@@ -18,6 +18,14 @@ else
     dir = env.jjsSakso
 end
 
+-->> quick fix for require using atlantis
+local require = function(v)
+	setidentity(2)
+	local m = require(v)
+	setidentity(8)
+	return m
+end
+
 --> dep
 local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
