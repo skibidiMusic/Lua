@@ -145,7 +145,7 @@ local TYPE_DEFAULTS = {
 function Janitor.new(): Janitor
 	return setmetatable({
 		CurrentlyCleaning = false;
-	}, Janitor) :: never
+	}, Janitor)
 end
 
 --[=[
@@ -243,7 +243,7 @@ local function Add<T>(self: Private, object: T, methodName: BooleanOrString?, in
 			warn(string.format(INVALID_METHOD_NAME, typeOf, tostring(newMethodName), debug.traceback(nil, 2)))
 		end
 	else
-		if not (object :: never)[newMethodName] then
+		if not (object)[newMethodName] then
 			warn(
 				string.format(
 					METHOD_NOT_FOUND_ERROR,
@@ -727,12 +727,12 @@ local function GetFenv(self: Private): () -> (any, BooleanOrString)
 				return object, methodName
 			end
 		end
-	end :: never
+	end
 end
 
 local function Cleanup(self: Private)
 	if not self.CurrentlyCleaning then
-		self.CurrentlyCleaning = nil :: never
+		self.CurrentlyCleaning = nil
 
 		local get = GetFenv(self)
 		local object, methodName = get()
@@ -757,7 +757,7 @@ local function Cleanup(self: Private)
 					end
 				end
 			else
-				local objectMethod = (object :: never)[methodName] :: (object: unknown) -> ()
+				local objectMethod = (object)[methodName] :: (object: any) -> ()
 				if objectMethod then
 					if self.SuppressInstanceReDestroy and methodName == "Destroy" and typeof(object) == "Instance" then
 						pcall(objectMethod, object)
@@ -816,7 +816,7 @@ Private.Cleanup = Cleanup
 ]=]
 function Janitor:Destroy()
 	Cleanup(self)
-	table.clear(self :: never)
+	table.clear(self)
 	setmetatable(self :: any, nil)
 end
 
@@ -880,7 +880,7 @@ end
 ]=]
 Private.LinkToInstance = LinkToInstance;
 
-(Janitor :: never).LegacyLinkToInstance = LinkToInstance
+(Janitor).LegacyLinkToInstance = LinkToInstance
 
 --[=[
 	Links several instances to a new Janitor, which is then returned.

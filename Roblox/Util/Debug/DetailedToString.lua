@@ -1,11 +1,3 @@
--->> loadstring
-
---[[
-    
-]]
-
--->> src
-
 local function ToString(v:any, depth: number?)
     local dataType = typeof(v)
     local str;
