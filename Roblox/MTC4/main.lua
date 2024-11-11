@@ -1,8 +1,9 @@
--->> LOADSTRING
+--loadstring
+--[[
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/MTC4/main.lua'))()
+]]
 
--->> SOURCE
-
--->> fix repeats
+--src
 local env = getgenv() :: {};
 
 local dir = env.mtcSakso
@@ -15,27 +16,34 @@ if dir then
 else
     env.mtcSakso = {}
     dir = env.mtcSakso
-	-->> bypass adonis anti-cheat
-	--loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
 end
 
--->> dep
+-->> quick fix for require using atlantis
+local require = function(v)
+	setidentity(2)
+	local m = require(v)
+	setidentity(8)
+	return m
+end
 
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 
 local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
 local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Janitor.lua'))()
 
-local vehiclesHolder = workspace.SpawnedVehicles
+do
+	-- adonis bypass (thanks to this dude)
+	loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
+end
+
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+
 local Player = game.Players.LocalPlayer
 local PlayerGui = Player.PlayerGui
 
--->> hook control
-local unloadJanitor = Janitor.new()
 
-
--->> Window Set-up
+local UnloadJanitor = Janitor.new()
 local Window = ImGui:CreateWindow({
 	Title = "MTC4 SAKSO",
 	Position = UDim2.new(0.5, 0, 0, 70), --// Roblox property 
@@ -91,42 +99,51 @@ local Window = ImGui:CreateWindow({
 
 }); Window:Center()
 
--->> Tabs
-local seatsTab = Window:CreateTab({
-	Name = "Better Seating",
-	Visible = false 
-})
+
+
+--vehicle
+do
+	local VehicleTab = Window:CreateTab({
+		Name = "Vehicles",
+		Visible = false 
+	})
+
+	local SpawnedVehicles = workspace:WaitForChild("SpawnedVehicles")
+	local function getClosestVehicle()
+		local localChar = game.Players.LocalPlayer.Character
+		if not localChar then return end
+	
+		local closestDist = math.huge; local closestVehicle;
+		for _, v in SpawnedVehicles:GetChildren() do
+			if not  v:IsA("Model") then
+				continue
+			end
+			local dist = (localChar:GetPivot().Position - v:GetPivot().Position).Magnitude
+			if dist < closestDist then
+				closestDist = dist
+				closestVehicle = v
+			end
+		end
+	
+		return closestVehicle
+	end
+
+	
+	
+end
 
 local KeybindsTab = Window:CreateTab({
 	Name = "Keybinds",
 	Visible = false 
 })
 
-
 -->> functionality
-local function getClosestVehicle()
-	local localChar = game.Players.LocalPlayer.Character
-	if not localChar then return end
 
-	local closestDist = math.huge; local closestVehicle;
-	for _, v in vehiclesHolder:GetChildren() do
-		if not  v:IsA("Model") then
-			continue
-		end
-		local dist = (localChar:GetPivot().Position - v:GetPivot().Position).Magnitude
-		if dist < closestDist then
-			closestDist = dist
-			closestVehicle = v
-		end
-	end
-
-	return closestVehicle
-end
 
 --<< esp workaround
 do
 	local function highlightAdded(highlight, tank)
-		if highlight.Parent.Name ~= "Comical" then return end
+		if not highlight.Parent:IsA("Folder") or highlight.Parent.Name ~= "Comical" then return end
 		highlight:Destroy()
 	end
 
@@ -156,7 +173,7 @@ do
 	mainHighlight.FillColor = Color3.new(1,0,0)
 	mainHighlight.OutlineColor = Color3.new(1, 1, 1)
 	mainHighlight.OutlineTransparency = .1
-	mainHighlight.FillTransparency = .65
+	mainHighlight.FillTransparency = .5
 	mainHighlight.DepthMode = Enum.HighlightDepthMode.Occluded
 	mainHighlight.Parent = vehiclesHolder
 end

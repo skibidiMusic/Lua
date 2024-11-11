@@ -92,6 +92,10 @@ local config = {
 				enabled = true,
 				jump = true,
 				sprint = true
+			},
+			lockOn = {
+				camera = false,
+				character = true
 			}
 		},
 		
@@ -106,71 +110,6 @@ local config = {
 		}
 	},
 }
-
---[[
-	local config = {
-	autoBlock = {
-		enabled = false,
-		tryDashIfNotBlockable = true,
-		
-		tryCounter = true, --< attempts a counter instead of blocking when counter is available
-		punish = true, --< auto melees after a block
-		
-		lookAtPlayer = true, --< makes your character look to the player while blocking (prevent attacks from behind)
-		lockCamera = false, --< makes your camera look at the player who tired to attack u (useless basically)
-		
-		Melee = true, --< block melee attacks
-		chase = true, --< block chase attacks (front dash)
-
-		--// chars
-		Megumi = {
-			blockToad = true,
-			blockDog = true,
-		},
-		
-		Itadori = {
-			blockCursedStrikes = true,
-
-		},
-		
-		Mahito = {
-			blockFocusStrike = true,
-			blockSoulFire = true,
-			blockSpecialDash = true
-		},
-
-		Gojo = {
-			blockLapseBlue = true,
-			blockReversalRed = true,
-		},
-
-		Hakari = {
-			blockDoors = true,
-			blockBalls = true,
-		},
-		
-		whiteList = {
-		}
-	},
-
-	misc = {
-		alwaysBlackFlash = true, 
-		enterDomain = true,
-		antiFall = true,
-	},
-
-	player = {
-		antiStun = true,
-		downSlam = true,
-		infBlackFlash = true,
-		AutoTarget = true,
-		noDashCD = true,
-		AntiCounter = true,
-	}
-	
-	-->> Misc
-}
-]]
 
 -->> code
 
@@ -228,7 +167,6 @@ end
 --(locking to a player when blocking etc.)
 local isLookingAt = false;
 local lookAtData = {
-	wasCameraEnabled = true, 
 	lastCameraSubject = nil;
 	Humanoid = nil;
 }
@@ -237,15 +175,6 @@ local function stopLookingAt()
 	if not isLookingAt then return end
 	RunService:UnbindFromRenderStep("elkaka_und_dashQuel")
 	lookAtData.Humanoid.AutoRotate = true
-
-	if lookAtData.wasCameraEnabled then
-		workspace.Camera.CameraType = Enum.CameraType.Custom
-		if lookAtData.lastCameraSubject and lookAtData.lastCameraSubject.Parent == Player.Character and Player.Character ~= nil then
-			workspace.Camera.CameraSubject = lookAtData.lastCameraSubject
-		else
-			workspace.Camera.CameraSubject = Player.Character and Player.Character.Head
-		end
-	end
 end
 
 local function lookAt(enemy: Model, cameraEnabled: boolean, enemyPosMultiplier: number?)
@@ -265,19 +194,11 @@ local function lookAt(enemy: Model, cameraEnabled: boolean, enemyPosMultiplier: 
 	lookAtData.Humanoid = hum
 	hum.AutoRotate = false
 
-	lookAtData.wasCameraEnabled = cameraEnabled
-
-	if cameraEnabled then
-		lookAtData.lastCameraSubject = workspace.Camera.CameraSubject
-		workspace.Camera.CameraType = Enum.CameraType.Watch
-		workspace.Camera.CameraSubject = enemy
-	end
-
 	local prevParent = enemy.Parent
 	RunService:BindToRenderStep("elkaka_und_dashQuel", Enum.RenderPriority.Last.Value + 100, function()
 		if enemy.Parent == prevParent then
 			local enemyFuturePosition = findFuturePos(enemy, Player:GetNetworkPing() * enemyPosMultiplier * 0.5)
-			localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position, enemyFuturePosition)
+			localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position,  normalizeToGround(enemyFuturePosition) + Vector3.new(0, Player.Character.PrimaryPart.CFrame.Position.Y, 0))
 		end
 	end)
 end
@@ -323,7 +244,7 @@ local function attack(enemy: Model, goBehindEnemy: boolean?)
 			return
 		end
 	
-		remote:FireServer("Down")
+		remote:FireServer("Up")
 		lookAt(enemy)
 		task.delay(.1, stopLookingAt)
 	end	
@@ -349,6 +270,11 @@ local function counter(enemy: Model?)
 		local dist = distanceFromCharacter(findFuturePos(enemy))
 		if normalizeToGround(dist).Magnitude < 12 then
 			ServiceFolder.HakariService.RE.RightActivated:FireServer(enemy)
+		end
+	elseif currentMoveset == "Mahito" then
+		local dist = distanceFromCharacter(findFuturePos(enemy))
+		if normalizeToGround(dist).Magnitude < 10 then
+			ServiceFolder.HeadSplitterService.RE.Activated:FireServer()
 		end
 	end
 	
@@ -576,7 +502,7 @@ do
 						end
 					else
 						if diffVec.Magnitude < 15 then	
-							block(enemyChar, 0.35, 1, true)
+							block(enemyChar, 0.35, 1, true, true)
 						end 
 					end
 				end
@@ -1162,65 +1088,39 @@ do
 		local success, ToolController = pcall(function()
 			return require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
 		end)
-		
-		if success then
-			--<< find if the target is countering.
-			local isTargetCountering;
 
-			disableJanitor:Add ( RunService.RenderStepped:Connect(function()
-				local target = ToolController:GetTarget() or getClosestCharacter()
-				if target and target.Info:FindFirstChild("Counter") then
-					isTargetCountering = target
-				else
-					isTargetCountering = nil
-				end
-			end) )
-
-			--<< can't m1 or use skills if target is countering.
-			if hookmetamethod then
-				local disabled = false
-
-				local old;
-				old = hookmetamethod(game, "__namecall", function(self, ...)
-					if not disabled and not checkcaller() and config.combat.player.AntiCounter and isTargetCountering then
-						if getnamecallmethod() == "FireServer" and typeof(self) == "Instance" and self.ClassName == "RemoteEvent" and self.Name == "Activated" then
-							return
-						end
-					end
-					return old(self, ...)
-				end)
-
-				disableJanitor:Add ( function()
-					disabled = true
-				end )
-			end
-		end
-
-		-->> Itadori feint support
 		local feintRemote = ServiceFolder.ItadoriService.RE.RightActivated
-		local function onCounter(char: Model)
-			if not config.combat.misc.AntiCounter then return end
-			if char == Player.Character then return end
+		local isTargetCountering;
+		disableJanitor:Add ( RunService.RenderStepped:Connect(function()
 			local target = success and ToolController:GetTarget() or getClosestCharacter()
-			if target == char then
+			if target and target:FindFirstChild"Info" and target.Info:FindFirstChild("Counter") then
+				isTargetCountering = target
+				-->> spam itadori feint if target is countering
+				if not config.combat.player.AntiCounter then return end
 				feintRemote.FireServer(feintRemote)
-				 --<< dont cast.
+			else
+				isTargetCountering = nil
 			end
+		end))
+
+		if hookmetamethod then
+			local disabled = false
+
+			local old;
+			old = hookmetamethod(game, "__namecall", function(self, ...)
+				if not disabled and not checkcaller() and config.combat.player.AntiCounter and isTargetCountering then
+					if getnamecallmethod() == "FireServer" and typeof(self) == "Instance" and self.ClassName == "RemoteEvent" and self.Name == "Activated" then
+						return
+					end
+				end
+				return old(self, ...)
+			end)
+
+			disableJanitor:Add ( function()
+				disabled = true
+			end )
 		end
-		disableJanitor:Add(
-			ServiceFolder.HakariService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
-				if action == "Counter" then
-					onCounter(character)
-				end
-			end)
-		)
-		disableJanitor:Add(
-			ServiceFolder.ManjiKickService.RE.Effects.OnClientEvent:Connect(function(action: string, character: Model)
-				if action == "Startup" then
-					onCounter(character)
-				end
-			end)
-		)
+
 		--(ui)
 		CombatTab:Checkbox({
 			Label = "AntiCounter",
@@ -1311,9 +1211,8 @@ do
 
 	--<< AutoTarget
 	do
-		if hookfunction then
-			local ToolController = require(game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController) 
-
+		local success, ToolController = pcall(require, game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController)
+		if success then
 			local disabled = false
 			local old = ToolController.GetTarget;
 			ToolController.GetTarget = function(self, ...)
@@ -1323,11 +1222,9 @@ do
 				end
 				return old(self, ...)
 			end
-
 			disableJanitor:Add ( function()
 				disabled = true
 			end)
-
 			CombatTab:Checkbox({
 				Label = "Auto-Target",
 				Value = config.combat.player.AutoTarget,
@@ -1338,6 +1235,33 @@ do
 			})
 		end
 	end
+
+	--<< Lock On
+	do
+		local t, MovementController = pcall(require, game.Players.LocalPlayer.PlayerScripts.Controllers.Character.MovementController)
+		if t then
+			local success, ToolController = pcall(require, game.Players.LocalPlayer.PlayerScripts.Controllers.Character.ToolController)
+
+			local dropdown = CombatTab:CollapsingHeader({
+				Title = "Lock On",
+				Open = false
+			})
+
+			local lockOnKeybind = dropdown:Keybind({
+				Label = "Keybind",
+				Value = Enum.KeyCode.LeftAlt,
+				saveFlag = "lockOnKeybind",
+				Callback = function()
+					if MovementController.LockOn then
+						MovementController.LockOn = nil
+					else
+						local target = success and ToolController:GetTarget() or getClosestCharacter() 
+						MovementController.LockOn = target
+					end
+				end,
+			})
+		end
+	end	
 
 	--<< noDashCD
 	do
