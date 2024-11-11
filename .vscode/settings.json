@@ -1,0 +1,26 @@
+{
+    "robloxLsp.diagnostics.globals": [
+        "setidentity",
+        "getgenv",
+        "hookmetamethod",
+        "getnamecallmethod",
+        "checkcaller",
+        "isfolder",
+        "makefolder",
+        "isfile",
+        "readfile",
+        "listfiles",
+        "delfile",
+        "writefile",
+        "WebSocket",
+        "Websocket",
+        "websocket",
+        "syn",
+        "cloneref",
+        "gethui",
+        "gethui",
+        "gethui",
+        "http",
+        "http_request",
+    ]
+}
