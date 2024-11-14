@@ -335,7 +335,7 @@ end
 
 local function autoSaveConfig(configSaveData, saveFlag)
 	if not saveFlag then return end
-	print("attempting to save autoSave")
+	--print("attempting to save autoSave")
   	if configSaveData and configSaveData.autoSave and not configSaveData.loadingSave then
     	configSaveData.autoSave()
    	end 
@@ -1760,7 +1760,7 @@ function ImGui:CreateWindow(WindowConfig)
 
         function configHandler.autoSave()
             if configHandlerSettings.AutoSaveEnabled then
-				print("saving autosave")
+				--print("saving autosave")
                 saveConfig("AutoSave")
             end
         end
