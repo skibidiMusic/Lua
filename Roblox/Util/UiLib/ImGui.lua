@@ -333,11 +333,12 @@ local function setConfigFlag(self: any, configSaveData)
     end
 end
 
-local function autoSaveConfig(configSaveData)
+local function autoSaveConfig(configSaveData, saveFlag)
+	if not saveFlag then return end
 	print("attempting to save autoSave")
-   if configSaveData and configSaveData.autoSave and not configSaveData.loadingSave then
-        configSaveData.autoSave()
-   end 
+  	if configSaveData and configSaveData.autoSave and not configSaveData.loadingSave then
+    	configSaveData.autoSave()
+   	end 
 end
 
 function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
@@ -454,7 +455,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 
         function Config:SetValue(v)
             Config:SetTicked(v)
-            autoSaveConfig(configSaveData)
+            autoSaveConfig(configSaveData, Config.saveFlag)
         end
 
         function Config:GetValue()
@@ -578,7 +579,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 			TextBox.Text = tostring(Text)
 			Config.Value = Text
             Callback(Text)
-            autoSaveConfig(configSaveData)
+            autoSaveConfig(configSaveData, Config.saveFlag)
 			return Config
 		end
 
@@ -977,7 +978,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 			ValueText.Text = ValueFormat:format(Value, MaxValue) 
 
 			Callback(Value)
-            autoSaveConfig(configSaveData)
+            autoSaveConfig(configSaveData, Config.saveFlag)
 			return Config
 		end
 		Config:SetValue(Value)
@@ -1072,7 +1073,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 			ValueText.Text = NewKey.Name
 			Config.Value = NewKey
 
-            autoSaveConfig(configSaveData)
+            autoSaveConfig(configSaveData, Config.saveFlag)
 
 			if NewKey == Enum.KeyCode.Backspace then
 				ValueText.Text = "Not set"
@@ -1143,7 +1144,7 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 			Config.Selected = Value
 
 
-			return Callback(DictValue or Value) and autoSaveConfig(configSaveData)
+			return Callback(DictValue or Value) and autoSaveConfig(configSaveData, Config.saveFlag)
 		end
 
 		function Config:SetOpen(Open: true)
