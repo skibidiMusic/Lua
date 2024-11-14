@@ -1,6 +1,6 @@
 -->> LOADSTRING
 --[[
-	loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/JujutsuShinenigans/main.lua'))()
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/JujutsuShinenigans/Init.lua'))()
 ]]
 
 -->> SRC
@@ -1018,10 +1018,13 @@ do
 						local localChar = Player.Character
 						if not localChar then continue end
 
-						if distanceFromCharacter(projectile).Magnitude < 15 then
-							if tick() - appearTick > 1.7 - Player:GetNetworkPing() or workspace:Raycast(projectile.CFrame.Position, projectile.CFrame.LookVector * Player:GetNetworkPing() * 30, raycastParams) then
-								--debugConsole.print("explosion detected!")
-								block(projectile, .4, 1, false, true)
+						local dist = distanceFromCharacter(projectile)
+						if dist < 15 then
+							
+							if dist < 8 or 
+							tick() - appearTick > 1.7 or
+							workspace:Raycast(projectile.CFrame.Position, projectile.CFrame.LookVector * Player:GetNetworkPing() * 30, raycastParams) then
+								block(projectile, .3, 1, false, true)
 								return
 							end
 						end
@@ -1039,13 +1042,13 @@ do
 				local localChar = Player.Character
 				if not localChar or enemy == localChar then return end
 
-				task.wait(.7 - Player:GetNetworkPing())
+				task.wait(.5 - Player:GetNetworkPing())
 
 				local dist = distanceFromCharacter(enemy)
 				if dist and math.abs(dist.Y) < 8 then
 					dist = normalizeToGround(dist)
 					if dist.Magnitude < 15 then
-						if dist.Magnitude < 8 or enemy:GetPivot().LookVector:Dot(-dist.Unit) > .3 then
+						if dist.Magnitude < 8 or enemy:GetPivot().LookVector:Dot(-dist.Unit) > .5 then
 							block(enemy, .4, 1, true, true)
 						end
 					end
