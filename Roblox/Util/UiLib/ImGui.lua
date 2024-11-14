@@ -455,7 +455,6 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 
         function Config:SetValue(v)
             Config:SetTicked(v)
-            autoSaveConfig(configSaveData, Config.saveFlag)
         end
 
         function Config:GetValue()
@@ -479,6 +478,8 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 
 			--// Fire callback
 			Callback(Value)
+
+			autoSaveConfig(configSaveData, Config.saveFlag)
 			
 			return Config
 		end
