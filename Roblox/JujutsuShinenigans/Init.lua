@@ -31,7 +31,7 @@ local RunService = game:GetService("RunService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
-local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Janitor.lua'))()
+local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Misc/Janitor.lua'))()
 
 local ServiceFolder = game.ReplicatedStorage.Knit.Knit.Services
 local Player = game:GetService("Players").LocalPlayer
@@ -91,7 +91,8 @@ local config = {
 			noStun = {
 				enabled = true,
 				jump = true,
-				sprint = true
+				sprint = true,
+				noRagdoll = false
 			},
 			lockOn = {
 				camera = false,
@@ -196,7 +197,7 @@ local function lookAt(enemy: Model, cameraEnabled: boolean, enemyPosMultiplier: 
 
 	local prevParent = enemy.Parent
 	RunService:BindToRenderStep("elkaka_und_dashQuel", Enum.RenderPriority.Last.Value + 100, function()
-		if enemy.Parent == prevParent then
+		if enemy.Parent == prevParent and distanceFromCharacter(enemy).Magnitude < 50 then
 			local enemyFuturePosition = findFuturePos(enemy, Player:GetNetworkPing() * enemyPosMultiplier * 0.5)
 			localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position,  normalizeToGround(enemyFuturePosition) + Vector3.new(0, Player.Character.PrimaryPart.CFrame.Position.Y, 0))
 		end
@@ -250,11 +251,6 @@ local function attack(enemy: Model, goBehindEnemy: boolean?)
 	end	
 end
 
-
-do
-	
-end
-
 --(counter)
 local function counter(enemy: Model?)
 	local localChar = Player.Character
@@ -271,7 +267,7 @@ local function counter(enemy: Model?)
 		if normalizeToGround(dist).Magnitude < 12 then
 			ServiceFolder.HakariService.RE.RightActivated:FireServer(enemy)
 		end
-	elseif currentMoveset == "Mahito" then
+	elseif true then
 		local dist = distanceFromCharacter(findFuturePos(enemy))
 		if normalizeToGround(dist).Magnitude < 10 then
 			ServiceFolder.HeadSplitterService.RE.Activated:FireServer()
@@ -1325,26 +1321,50 @@ do
 			end,
 		})
 
+		dropdown:Checkbox({
+			Label = "NoRagdoll",
+			Value = config.combat.player.noStun.noRagdoll,
+			saveFlag = "noragdolll",
+			Callback = function(self, Value)
+				config.combat.player.noStun.noRagdoll = Value
+			end,
+		})
+
 		disableJanitor:Add (
 			task.defer(function()
 				while true do
 					task.wait()
-					local charInfo = Player.Character and Player.Character:FindFirstChild("Info")
-					if charInfo then
-						if config.combat.player.noStun.enabled then
-							local values = {
-								Stun = true,
-								NoSprint = config.combat.player.noStun.sprint,
-								NoJump = config.combat.player.noStun.jump,
-								InSkill = true,
-							}
+					if not config.combat.player.noStun.enabled then continue end
+					local char = Player.Character
+					if not char then continue end
 
-							for name, bool in values do
-								if bool then
-									local val =charInfo:FindFirstChild(name)
-									if val then
-										val:Destroy()
-									end
+					if config.combat.player.noStun.noRagdoll then
+						char:SetAttribute("Ragdoll", 0)
+						if char:FindFirstChild("RagdollConstraints") then
+							char:FindFirstChild("RagdollConstraints").Parent = nil
+							for _, v in char:GetDescendants() do
+								if v:IsA("Motor6D") then
+									v.Enabled = true
+								end
+							end
+						end
+					end
+
+
+					local charInfo = char:FindFirstChild("Info")
+					if charInfo then
+						local values = {
+							Stun = true,
+							NoSprint = config.combat.player.noStun.sprint,
+							NoJump = config.combat.player.noStun.jump,
+							InSkill = true,
+						}
+
+						for name, bool in values do
+							if bool then
+								local val =charInfo:FindFirstChild(name)
+								if val then
+									val:Destroy()
 								end
 							end
 						end
