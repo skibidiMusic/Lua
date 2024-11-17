@@ -1,6 +1,6 @@
 -->> LOADSTRING
 --[[
-	loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/JujutsuShinenigans/Init.lua'))()
+	loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/JujutsuShinenigans/Rewrite.lua'))()
 ]]
 
 -->> SRC
@@ -291,6 +291,7 @@ do
 
                 hum.AutoRotate = false
                 localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position,  util.normalizeToGround(target) + Vector3.new(0, Player.Character.PrimaryPart.CFrame.Position.Y, 0))
+                print("wsg")
                 return
             end
             hum.AutoRotate = true
