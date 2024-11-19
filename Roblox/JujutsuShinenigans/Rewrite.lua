@@ -4,6 +4,7 @@
 ]]
 
 -->> SRC
+--https://github.com/depthso/Roblox-ImGUI/wiki/Elements
 local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
 local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Misc/Janitor.lua'))()
 
@@ -16,13 +17,11 @@ else
 end
 
 --atlantis require fix
-do
-    local require = function(v)
-        setidentity(2)
-        local m = require(v)
-        setidentity(8)
-        return m
-    end
+local require = function(v)
+    setidentity(2)
+    local m = require(v)
+    setidentity(8)
+    return m
 end
 
 
@@ -31,6 +30,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ServiceFolder = ReplicatedStorage.Knit.Knit.Services
 local Player = game:GetService("Players").LocalPlayer
+local UserInputService = game:GetService("UserInputService")
 
 
 local Window = ImGui:CreateWindow({Title = "JUJUT-SAKSO SHIT-A-NIGGA-NS", Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false,})
@@ -1422,7 +1422,7 @@ do
             )
         end
     end
-    
+
     --misc
     do
         CombatTab:Separator({

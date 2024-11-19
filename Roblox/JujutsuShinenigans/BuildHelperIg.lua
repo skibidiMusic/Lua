@@ -15,6 +15,7 @@ local function update(increment: number)
     end
 end
 
+--https://github.com/depthso/Roblox-ImGUI/wiki/Elements
 local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
 local Window = ImGui:CreateWindow({Title = "Build helper sakso", Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false,})
 Window:Center()
@@ -73,5 +74,18 @@ Window.CloseCallback = function()
         ImGui:Notify("Gui", "Press " .. `{toggleUiKeybind.Value.Name}` .. " to re-open the gui." , 4)
     end
 end
+
+local unloadTab = Window:CreateTab({
+    Name = "Unload",
+    Visible = false 
+})
+
+unloadTab:Button({
+	Text = "Unload",
+	Callback = function(self)
+		Window:Destroy()
+	end,
+})
+
 
 Window:CreateConfigSaveHandler("MR_SAKSO_BEAT_JJS")
