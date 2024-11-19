@@ -580,7 +580,6 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 			TextBox.Text = tostring(Text)
 			Config.Value = Text
             Callback(Text)
-            autoSaveConfig(configSaveData, Config.saveFlag)
 			return Config
 		end
 
@@ -590,6 +589,10 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 			local Value = TextBox.Text
 			Config.Value = Value
 			return Callback(Value)
+		end)
+
+		TextBox.FocusLost:Connect(function(enterPressed, inputThatCausedFocusLoss)
+			autoSaveConfig(configSaveData, Config.saveFlag)
 		end)
 
 		function Config:Clear()
