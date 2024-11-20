@@ -571,7 +571,6 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
 		end
 
         -->> autosave ETC.
-        setConfigFlag(Config, configSaveData)
         function Config:GetValue()
             return Config.Value
         end
@@ -582,6 +581,8 @@ function ImGui:ContainerClass(Frame: Frame, Class, Window, configSaveData)
             Callback(Text)
 			return Config
 		end
+
+		setConfigFlag(Config, configSaveData)
 
         --//
 

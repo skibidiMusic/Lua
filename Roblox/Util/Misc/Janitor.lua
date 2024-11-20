@@ -1,3 +1,8 @@
+--ldstrng
+--[[
+	local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Misc/Janitor.lua'))()
+]]
+
 --!optimize 2
 --!strict
 
