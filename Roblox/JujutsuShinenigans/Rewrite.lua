@@ -289,8 +289,11 @@ do
                 end
                 if not target or target.Magnitude < 0.01 or util.distanceFromCharacter(target).Magnitude > 100 then continue end
 
+                target = util.normalizeToGround(target) + Vector3.new(0, Player.Character.PrimaryPart.CFrame.Position.Y, 0)
+                if target.Magnitude < 0.01 then continue end
+                
                 hum.AutoRotate = false
-                localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position,  util.normalizeToGround(target) + Vector3.new(0, Player.Character.PrimaryPart.CFrame.Position.Y, 0))
+                localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position, target)
                 print("wsg")
                 return
             end
