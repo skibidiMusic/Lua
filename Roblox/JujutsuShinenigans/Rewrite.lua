@@ -289,12 +289,14 @@ do
                 end
                 if not target or target.Magnitude < 0.01 then continue end
 
-                target = util.normalizeToGround(target) + Vector3.new(0, Player.Character.PrimaryPart.CFrame.Position.Y, 0)
+                local xz = util.normalizeToGround(target) 
+                if xz == util.normalizeToGround(localChar.PrimaryPart.CFrame.Position) then continue end
+
+                target = xz + Vector3.new(0, Player.Character.PrimaryPart.CFrame.Position.Y, 0)
                 if target.Magnitude < 0.01 then continue end
                 
                 hum.AutoRotate = false
                 localChar.PrimaryPart.CFrame = CFrame.lookAt(localChar.PrimaryPart.CFrame.Position, target)
-                print("wsg")
                 return
             end
             hum.AutoRotate = true
@@ -314,15 +316,17 @@ do
         function block:Destroy(punish: boolean?)
             table.remove(block.instances, table.find(block.instances, self))
             setmetatable(self, nil)
-            if punish and self.target then
-                for _, v in block.instances do
-                    if v.enabled and v.target then
-                        return
-                    end
+            for _, v in block.instances do
+                if v.enabled and v.target then
+                    return
                 end
-                block.isBlocking = false
-                block.lockOn.target = nil
+            end
+            block.isBlocking = false
+            block.lockOn.target = nil
+            if not UserInputService:IsKeyDown(Enum.KeyCode.F) then
                 blockRemotes.Deactivated:FireServer()
+            end
+            if punish and self.target then
                 combat.attack(self.target)
             end
         end
@@ -543,10 +547,20 @@ do
             local function chaseDetected(enemyChar: Model)
                 if not enabled then return end
                 local localChar = Player.Character
-                if localChar and localChar ~= enemyChar then
+                if localChar --[[ and localChar ~= enemyChar]] then
                     local t = tick()
+
+                    while task.wait() do
+                        if not enemyChar.Info:FindFirstChild"InSkill" then
+                            if tick() - t > .33 then
+                                return
+                            end
+                        else
+                            break
+                        end
+                    end
     
-                    local blockInstance = combat.block(enemyChar, 2.5, 3, false, false, false)
+                    local blockInstance = combat.block(enemyChar, 2.5, 3, true, false, false)
 
                     local isInRadius = false
                     local function enteredRadius()
@@ -565,9 +579,8 @@ do
                         end
                     end
     
-    
                     while task.wait() do
-                        if not (tick() - t < .5 or enemyChar.Info:FindFirstChild("InSkill")) then
+                        if not (enemyChar.Info:FindFirstChild("InSkill")) or tick() - t > .75 - Player:GetNetworkPing() then
                             outOfRadius()
                             blockInstance:Destroy(true)
                             return
