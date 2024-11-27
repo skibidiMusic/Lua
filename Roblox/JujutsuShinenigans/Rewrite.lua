@@ -547,7 +547,7 @@ do
             local function chaseDetected(enemyChar: Model)
                 if not enabled then return end
                 local localChar = Player.Character
-                if localChar --[[ and localChar ~= enemyChar]] then
+                if localChar and localChar ~= enemyChar then
                     local t = tick()
 
                     while task.wait() do
