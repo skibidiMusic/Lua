@@ -580,7 +580,7 @@ do
                     end
     
                     while task.wait() do
-                        if not (enemyChar.Info:FindFirstChild("InSkill")) or tick() - t > .75 - Player:GetNetworkPing() then
+                        if not (enemyChar.Info:FindFirstChild("InSkill")) or tick() - t > .9 - Player:GetNetworkPing() then
                             outOfRadius()
                             blockInstance:Destroy(true)
                             return
