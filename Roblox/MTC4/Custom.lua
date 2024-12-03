@@ -255,7 +255,7 @@ do
                     local function vitalPartAdded(t: NumberValue)
                         self.Jan:Add(task.defer(function()
                             if string.match(t.Name, "Track") then return end
-                            if not t:IsA("NumberValue") then return end
+                            if typeof(t.Value) ~= "number" then return end
 
                             local model = DamageModules:FindFirstChild(t.Name, true)
                             if not model then
@@ -266,6 +266,8 @@ do
                                     end
                                 until model
                             end
+
+                            print(model:GetFullName())
     
                             local ui = createVitalPartGui(model)
                             ui._VitalPart.Enabled = vitalParts
