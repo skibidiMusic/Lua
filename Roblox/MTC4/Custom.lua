@@ -267,7 +267,7 @@ do
                                 until model
                             end
 
-                            print(model:GetFullName())
+                            --print(model:GetFullName())
     
                             local ui = createVitalPartGui(model)
                             ui._VitalPart.Enabled = vitalParts
