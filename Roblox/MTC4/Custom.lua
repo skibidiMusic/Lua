@@ -13,6 +13,9 @@ if MTC_SAKSO then
     end
 else
     getgenv().MTC_SAKSO = {}
+    if hookmetamethod then
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
+    end
 end
 
 local hooks = Janitor.new()
@@ -20,8 +23,6 @@ MTC_SAKSO.unload = function()
     MTC_SAKSO.unload = nil
     hooks:Cleanup()
 end
-
-
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
