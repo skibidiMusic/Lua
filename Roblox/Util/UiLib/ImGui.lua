@@ -2054,7 +2054,7 @@ function ImGui:CreateModal(Config)
 	return Config
 end
 
-local GuiParent = IsStudio and PlayerGui or gethui() or CoreGui
+local GuiParent = PlayerGui
 ImGui.ScreenGui = ImGui:CreateInstance("ScreenGui", GuiParent, {
 	DisplayOrder = 9999,
 	ResetOnSpawn = false
