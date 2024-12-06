@@ -1805,16 +1805,16 @@ function ImGui:CreateWindow(WindowConfig)
 
         row:Fill()
 
-        local row2 = tab:Row()
-
-        local selectedSaveName = configHandlerSettings.lastSaveName;
-        local inputText = row2:InputText({
+		local selectedSaveName = configHandlerSettings.lastSaveName;
+        local inputText = tab:InputText({
             Text = configHandlerSettings.lastSaveName,
             PlaceHolder = "Type save name",
             Callback = function(self, v)
                 selectedSaveName = v;	
             end
         })
+
+        local row2 = tab:Row()
 
         row2:Button({
             Text = "Load",
