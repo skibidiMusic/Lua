@@ -114,7 +114,7 @@ do
         TextLabel_2.TextStrokeTransparency = 0.500
         TextLabel_2.TextWrapped = true
 
-        Sakso.Parent = v
+        Sakso.Parent = CoreGui
         return Sakso
     end
 
@@ -132,7 +132,7 @@ do
         Converted["_VitalPart"].Size = UDim2.new(50, 1000, 1, 0)
         Converted["_VitalPart"].ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         Converted["_VitalPart"].Name = "VitalPart"
-        Converted["_VitalPart"].Parent = v
+        Converted["_VitalPart"].Parent = CoreGui
 
         Converted["_TextLabel"].Font = Enum.Font.SourceSans
         Converted["_TextLabel"].RichText = true
@@ -627,51 +627,6 @@ local KeybindsTab = Window:CreateTab({
 	Name = "Ui",
 	Visible = false 
 })
-
--->> functionality
-
-
---<< esp workaround
---[[
-
-
-do
-	local function highlightAdded(highlight, tank)
-		if not highlight.Parent:IsA("Folder") or highlight.Parent.Name ~= "Comical" then return end
-		highlight:Destroy()
-	end
-
-	local function vehicleAdded(v: Model)
-		for _, a in v:GetDescendants() do
-			if a:IsA("Highlight") then
-				highlightAdded(a, v)
-			end
-		end
-
-		v.DescendantAdded:Connect(function(descendant)
-			if descendant:IsA("Highlight") then
-				highlightAdded(descendant, v)
-			end
-		end)
-	end
-
-	UnloadJanitor:Add( vehiclesHolder.ChildAdded:Connect(function(v)
-		vehicleAdded(v)
-	end ) )
-
-	for _, v in :GetChildren() do
-		vehicleAdded(v)
-	end
-
-	local mainHighlight = Instance.new("Highlight")
-	mainHighlight.FillColor = Color3.new(1,0,0)
-	mainHighlight.OutlineColor = Color3.new(1, 1, 1)
-	mainHighlight.OutlineTransparency = .1
-	mainHighlight.FillTransparency = .5
-	mainHighlight.DepthMode = Enum.HighlightDepthMode.Occluded
-	mainHighlight.Parent = vehiclesHolder
-end
-]]
 
 --keybinds
 do
