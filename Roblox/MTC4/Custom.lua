@@ -30,6 +30,7 @@ local CoreGui = game:GetService("CoreGui")
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -627,7 +628,7 @@ do
         end
     end
 
-    --FLY (stole 80% from infinite yield)
+    --FLY and TP (stole 80% from infinite yield)
     do
 		local dropdown = VehicleTab:CollapsingHeader({
 			Title = "Fly",
@@ -699,17 +700,68 @@ do
         BV.velocity = Vector3.new(0, 0, 0)
         BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
 
-        local function flyCheck()
-            if not enabled or not LocalPlayer.Character then return end
+        local function GetVehicleRoot()
+            if not LocalPlayer.Character then return end
             local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
             if not hum or not hum.SeatPart or hum.SeatPart.Name ~= "Driver" then return end
 
             local Mass = hum.SeatPart.Parent:FindFirstChild("Mass")
-            return Mass
+            return Mass :: BasePart?
         end
 
+        --CLICK TP
+        --[[
+                do
+            local Mouse = LocalPlayer:GetMouse()
+            if Mouse then
+                local tpEnabled = false
+
+                local dropdown = VehicleTab:CollapsingHeader({
+                    Title = "Teleport",
+                    Open = false
+                })
+        
+                local checkBox = dropdown:Checkbox({
+                    Label = "Enabled",
+                    Value = tpEnabled,
+                    saveFlag = "tpEnabledReals",
+                    Callback = function(self, Value)
+                        tpEnabled = Value
+                    end,
+                })
+        
+                dropdown:Keybind({
+                    Label = "Keybind",
+                    Value = Enum.KeyCode.Insert,
+                    saveFlag = "Tp" .. "keybind",
+                    Callback = function()
+                        checkBox:Toggle()
+                    end,
+                })
+
+                hooks:Add(UserInputService.InputEnded:Connect(function(input, gameProcessedEvent)
+                    if not gameProcessedEvent and input.UserInputType == Enum.UserInputType.MouseButton1 then
+                        if tpEnabled then
+                            local root = GetVehicleRoot()
+                            if not root then return end
+                            local hitPosition = Mouse.Hit.Position
+                            local newCFrame = CFrame.new(
+                                hitPosition + Vector3.new(0, (root.Size.Y + 20) ,0)
+                            ) * root.CFrame.Rotation
+                            TweenService:Create(root, TweenInfo.new(1), {CFrame = newCFrame}):Play()
+                        end
+                    end
+                end))
+            end
+        end
+        ]]
+
+        --NOCLIP
+
+
+        --FLY LOOP
         hooks:Add(RunService.Heartbeat:Connect(function()
-            local shouldFly = flyCheck()
+            local shouldFly = if enabled then GetVehicleRoot() else nil
             if shouldFly ~= currentFlying then
                 currentFlying = shouldFly
                 BG.Parent = shouldFly
@@ -878,6 +930,30 @@ do
         end,
     })
 
+end
+
+--Mod detection
+do
+    local modRanks = {
+        "Moderator",
+        "Non TC Dev",
+        "TC Dev",
+        "Administrator",
+        "Owner",
+        "Game Admin"
+    }
+
+    local function playerDetected(v: Player)
+        local rank = v:GetRoleInGroup(13466988)
+        if table.find(modRanks, rank) then
+            ImGui:Notify("Moderator Detector", "A fatass moderator is in the server!!v!!11! 💀☠️🙏, Name: " .. v.Name .. " Rank: " .. rank , 10)
+        end
+    end
+
+    hooks:Add(Players.PlayerAdded:Connect(playerDetected))
+    for _, v in Players:GetPlayers() do
+        task.defer(playerDetected,(v))
+    end
 end
 
 --ui tab
