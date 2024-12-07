@@ -28,6 +28,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local CollectionService = game:GetService("CollectionService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -485,58 +486,115 @@ do
 	end
 
     --modifications
-    do
-        local dropdown = VehicleTab:CollapsingHeader({
-			Title = "Modifications",
-			Open = false
-		})
+    if hookfunction and getrenv and ReplicatedStorage:WaitForChild("DriveData", 10) then
+        do
+            local modifications = {}
+            
+            local modificationsEnabled = true
+    
+            do
+                local mt = {}
+                mt.__index = function(self, i)
+                    if modificationsEnabled then
+                        if modifications[i] ~= nil then
+                            return modifications[i]
+                        end
+                    end
+                    return self.__base[i]
+                end
 
-        local function createVal(name: string, val: number, enabled: boolean, enabledCallback: () -> nil, valCallback: () -> nil)
-            dropdown:Separator({
-                Text = name
+                local disabled = false
+                local DriveData = ReplicatedStorage:FindFirstChild("DriveData")
+
+                local old; old = hookfunction(getrenv().require, function(self: ModuleScript, ...)
+                    if not disabled and not checkcaller() and typeof(self) == "Instance" and self:IsA("ModuleScript") and self:IsDescendantOf(DriveData) then
+                        local self = old(self, ...)
+                        return setmetatable({__base = self}, mt)
+                    end
+                    return old(...)
+                end)
+
+                hooks:Add(function()
+                    disabled = true
+                    modificationsEnabled = false
+                end)
+            end
+    
+            local dropdown = VehicleTab:CollapsingHeader({
+                Title = "Modifications",
+                Open = false
             })
+
             dropdown:Checkbox({
-                Label = "Enabled",
-                Value = enabled,
-                saveFlag = name.."enabled_sakso",
-                Callback = enabledCallback,
-            })
-
-            dropdown:InputText({
-                PlaceHolder = tostring(val),
-                ClearTextOnFocus = false,
-                saveFlag = name.."valSakso",
-                Callback = function(self, Value)
-                    valCallback(tonumber(Value) or val)
+                Label = "All Enabled",
+                Value = modificationsEnabled,
+                saveFlag = "modsEnabledReal",
+                Callback = function(_, v)
+                    modificationsEnabled = v
                 end,
             })
 
-            task.defer(valCallback, (val))
-        end
-
-        --speed
-        do
-            local disabled = false
-            local speedMult = 1
-            local old; old = hookmetamethod(game, "__index", function(self: VehicleSeat, index, ...)
-                if not disabled and not checkcaller() and typeof(index) == "string" and (index == "Throttle" or index == "Steer" or index == "SteerFloat" or index == "ThrottleFloat") and typeof(self) == "Instance" and self:IsA("VehicleSeat") and self.Name == "Driver" then
-                    return old(self, index, ...) * speedMult
+    
+            local function createVal(name: string, val: number, enabled: boolean, enabledCallback: () -> nil, valCallback: () -> nil, min, max)
+                dropdown:Separator({
+                    Text = name
+                })
+                dropdown:Checkbox({
+                    Label = "Enabled",
+                    Value = enabled,
+                    saveFlag = name.."enabled_sakso",
+                    Callback = enabledCallback,
+                })
+    
+                if min and max then
+                    dropdown:Slider({
+                        Label = "Amount",
+                        Format = "%.d/%s", 
+                        Value = val,
+                        MinValue = min,
+                        MaxValue = max,
+                        saveFlag = name.."valSakso",
+                    
+                        Callback = function(self, Value)
+                            valCallback(Value)
+                        end,
+                    })
+                else
+                    dropdown:InputText({
+                        PlaceHolder = tostring(val),
+                        ClearTextOnFocus = false,
+                        saveFlag = name.."valSakso",
+                        Callback = function(self, Value)
+                            valCallback(tonumber(Value) or val)
+                        end,
+                    })
                 end
-                return old(self, index, ...)
-            end)
-    
-            createVal("SpeedMultiplier", 1, false, function(_, v)
-                disabled = not v
-            end, function(v)
-                speedMult = v
-            end)
-    
-            hooks:Add(function()
-                disabled = true
-            end)
-        end
 
+    
+                task.defer(valCallback, (val))
+            end
+    
+            --speed
+            do
+                local speedVal = 30
+
+                createVal("Speed", 1, false, function(_, v)
+                    if v then
+                        modifications["speed"] = speedVal
+                    else
+                        modifications["speed"] = nil
+                    end
+                end, function(v)
+                    speedVal = v
+                    if modifications["speed"] then
+                        modifications.speed = speedVal
+                    end
+                end, 0, 1000)
+            end
+    
+        end
     end
+
 end
 
 --gunner
