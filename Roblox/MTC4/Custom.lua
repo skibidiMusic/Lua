@@ -27,6 +27,7 @@ end
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
+local CollectionService = game:GetService("CollectionService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -482,6 +483,60 @@ do
 		createSeatPicker("Gunner", Enum.KeyCode.U)
 		createSeatPicker("Driver", Enum.KeyCode.P)
 	end
+
+    --modifications
+    do
+        local dropdown = VehicleTab:CollapsingHeader({
+			Title = "Modifications",
+			Open = false
+		})
+
+        local function createVal(name: string, val: number, enabled: boolean, enabledCallback: () -> nil, valCallback: () -> nil)
+            dropdown:Separator({
+                Text = name
+            })
+            dropdown:Checkbox({
+                Label = "Enabled",
+                Value = enabled,
+                saveFlag = name.."enabled_sakso",
+                Callback = enabledCallback,
+            })
+
+            dropdown:InputText({
+                PlaceHolder = tostring(val),
+                ClearTextOnFocus = false,
+                saveFlag = name.."valSakso",
+                Callback = function(self, Value)
+                    valCallback(tonumber(Value) or val)
+                end,
+            })
+
+            task.defer(valCallback, (val))
+        end
+
+        --speed
+        do
+            local disabled = false
+            local speedMult = 1
+            local old; old = hookmetamethod(game, "__index", function(self: VehicleSeat, index, ...)
+                if not disabled and not checkcaller() and typeof(index) == "string" and (index == "Throttle" or index == "Steer" or index == "SteerFloat" or index == "ThrottleFloat") and typeof(self) == "Instance" and self:IsA("VehicleSeat") and self.Name == "Driver" then
+                    return old(self, index, ...) * speedMult
+                end
+                return old(self, index, ...)
+            end)
+    
+            createVal("SpeedMultiplier", 1, false, function(_, v)
+                disabled = not v
+            end, function(v)
+                speedMult = v
+            end)
+    
+            hooks:Add(function()
+                disabled = true
+            end)
+        end
+
+    end
 end
 
 --gunner
