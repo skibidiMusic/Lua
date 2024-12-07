@@ -661,7 +661,7 @@ do
             Format = "%.d/%s", 
             Value = flySpeed,
             MinValue = 1,
-            MaxValue = 500,
+            MaxValue = 40,
             saveFlag = "flySpeed",
         
             Callback = function(self, Value)
