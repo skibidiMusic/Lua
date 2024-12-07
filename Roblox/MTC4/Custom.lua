@@ -638,12 +638,21 @@ do
         local currentFlying = nil
         local flySpeed = 50
 
+        local checkBox = dropdown:Checkbox({
+            Label = "Enabled",
+            Value = enabled,
+            saveFlag = "FlyEnabledReal",
+            Callback = function(self, Value)
+                enabled = Value
+            end,
+        })
+
         dropdown:Keybind({
             Label = "Keybind",
             Value = Enum.KeyCode.Asterisk,
             saveFlag = "Fly" .. "keybind",
             Callback = function()
-                enabled = not enabled
+                checkBox:Toggle()
             end,
         })
 
@@ -666,23 +675,17 @@ do
         local lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
 
         local inputMap = {
-            W = "F",
-            A = "L",
-            S = "B",
-            D  = "R",
-            E = "Q",
-            Q = "E"
+            W = {"F", 1},
+            A = {"L", -1},
+            S = {"B", -1},
+            D  = {"R", 1},
+            E = {"Q", 2},
+            Q = {"E", -2}
         }
         
         local function handleInput()
-            for key, name in inputMap do
-                if name == "E" then
-                    CONTROL[name] = UserInputService:IsKeyDown(Enum.KeyCode[key]) and flySpeed * -2 or 0
-                elseif name == "Q" then
-                    CONTROL[name] = UserInputService:IsKeyDown(Enum.KeyCode[key]) and flySpeed * 2 or 0
-                else
-                    CONTROL[name] = UserInputService:IsKeyDown(Enum.KeyCode[key]) and flySpeed or 0
-                end
+            for key, vals in inputMap do
+                CONTROL[vals[1]] = UserInputService:IsKeyDown(Enum.KeyCode[key]) and flySpeed * vals[2] or 0
             end
         end
 
