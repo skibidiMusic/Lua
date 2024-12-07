@@ -29,6 +29,7 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -490,6 +491,14 @@ do
         do
             local modifications = {}
             
+            --[[
+            accelMult = 10;
+            forwardSpeedMult = 10;
+            backwardSpeedMult = 10;
+            rpmConstant = 1;
+            turnAccelBoost = 5;
+            ]]
+            
             local modificationsEnabled = true
     
             do
@@ -506,12 +515,14 @@ do
                 local disabled = false
                 local DriveData = ReplicatedStorage:FindFirstChild("DriveData")
 
-                local old; old = hookfunction(getrenv().require, function(self: ModuleScript, ...)
+                local old; old = hookfunction(getrenv().require, function(self: ModuleScript)
                     if not disabled and not checkcaller() and typeof(self) == "Instance" and self:IsA("ModuleScript") and self:IsDescendantOf(DriveData) then
-                        local self = old(self, ...)
-                        return setmetatable({__base = self}, mt)
+                        local x = old(self)
+                        local new = table.clone(x)
+                        new.powerDat = setmetatable({__base = x.powerDat}, mt)
+                        return new
                     end
-                    return old(...)
+                    return old(self)
                 end)
 
                 hooks:Add(function()
@@ -576,25 +587,155 @@ do
     
             --speed
             do
-                local speedVal = 30
+                local speedVal = 1
 
-                createVal("Speed", 1, false, function(_, v)
+                createVal("SpeedMultiplier", 1, false, function(_, v)
                     if v then
-                        modifications["speed"] = speedVal
+                        modifications.forwardSpeedMult = speedVal
+                        modifications.backwardSpeedMult = speedVal
                     else
-                        modifications["speed"] = nil
+                        modifications.forwardSpeedMult = nil
+                        modifications.backwardSpeedMult = nil
                     end
                 end, function(v)
                     speedVal = v
-                    if modifications["speed"] then
-                        modifications.speed = speedVal
+                    if modifications.forwardSpeedMult then
+                        modifications.forwardSpeedMult = speedVal
+                        modifications.backwardSpeedMult = speedVal
                     end
-                end, 0, 1000)
+                end, 0, 20)
+            end
+
+            --accel
+            do
+                local accelVal = 1
+
+                createVal("AccelMultiplier", 1, false, function(_, v)
+                    if v then
+                        modifications.accelMult = accelVal
+                    else
+                        modifications.accelMult = nil
+                    end
+                end, function(v)
+                    accelVal = v
+                    if modifications.accelMult then
+                        modifications.accelMult = accelVal
+                    end
+                end, 0, 20)
             end
     
         end
     end
 
+    --FLY (stole 80% from infinite yield)
+    do
+		local dropdown = VehicleTab:CollapsingHeader({
+			Title = "Fly",
+			Open = false
+		})
+
+        local enabled = true
+        local currentFlying = nil
+        local flySpeed = 50
+
+        dropdown:Keybind({
+            Label = "Keybind",
+            Value = Enum.KeyCode.Asterisk,
+            saveFlag = "Fly" .. "keybind",
+            Callback = function()
+                enabled = not enabled
+            end,
+        })
+
+        dropdown:Slider({
+            Label = "Speed",
+            Format = "%.d/%s", 
+            Value = flySpeed,
+            MinValue = 1,
+            MaxValue = 500,
+            saveFlag = "flySpeed",
+        
+            Callback = function(self, Value)
+                flySpeed = Value
+            end,
+        })
+
+
+
+        local CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+        local lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+
+        local inputMap = {
+            W = "F",
+            A = "L",
+            S = "B",
+            D  = "R",
+            E = "Q",
+            Q = "E"
+        }
+        
+        local function handleInput()
+            for key, name in inputMap do
+                if name == "E" then
+                    CONTROL[name] = UserInputService:IsKeyDown(Enum.KeyCode[key]) and flySpeed * -2 or 0
+                elseif name == "Q" then
+                    CONTROL[name] = UserInputService:IsKeyDown(Enum.KeyCode[key]) and flySpeed * 2 or 0
+                else
+                    CONTROL[name] = UserInputService:IsKeyDown(Enum.KeyCode[key]) and flySpeed or 0
+                end
+            end
+        end
+
+        
+        local SPEED = 0
+
+        local BG = Instance.new('BodyGyro')
+        local BV = Instance.new('BodyVelocity')
+        BG.P = 9e4
+        BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+        BV.velocity = Vector3.new(0, 0, 0)
+        BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
+
+        local function flyCheck()
+            if not enabled or not LocalPlayer.Character then return end
+            local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if not hum or not hum.SeatPart or hum.SeatPart.Name ~= "Driver" then return end
+
+            local Mass = hum.SeatPart.Parent:FindFirstChild("Mass")
+            return Mass
+        end
+
+        hooks:Add(RunService.Heartbeat:Connect(function()
+            local shouldFly = flyCheck()
+            if shouldFly ~= currentFlying then
+                currentFlying = shouldFly
+                BG.Parent = shouldFly
+                BV.Parent = shouldFly
+                if not shouldFly then
+                    CONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+                    lCONTROL = {F = 0, B = 0, L = 0, R = 0, Q = 0, E = 0}
+                    SPEED = 0
+                end
+            end
+            if shouldFly then
+                handleInput()
+                if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0 then
+                    SPEED = 50
+                elseif not (CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 or CONTROL.Q + CONTROL.E ~= 0) and SPEED ~= 0 then
+                    SPEED = 0
+                end
+                if (CONTROL.L + CONTROL.R) ~= 0 or (CONTROL.F + CONTROL.B) ~= 0 or (CONTROL.Q + CONTROL.E) ~= 0 then
+                    BV.velocity = ((workspace.CurrentCamera.CFrame.LookVector * (CONTROL.F + CONTROL.B)) + ((workspace.CurrentCamera.CFrame * CFrame.new(CONTROL.L + CONTROL.R, (CONTROL.F + CONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).Position) - workspace.CurrentCamera.CFrame.Position)) * SPEED
+                    lCONTROL = {F = CONTROL.F, B = CONTROL.B, L = CONTROL.L, R = CONTROL.R}
+                elseif (CONTROL.L + CONTROL.R) == 0 and (CONTROL.F + CONTROL.B) == 0 and (CONTROL.Q + CONTROL.E) == 0 and SPEED ~= 0 then
+                    BV.velocity = ((workspace.CurrentCamera.CFrame.LookVector * (lCONTROL.F + lCONTROL.B)) + ((workspace.CurrentCamera.CFrame * CFrame.new(lCONTROL.L + lCONTROL.R, (lCONTROL.F + lCONTROL.B + CONTROL.Q + CONTROL.E) * 0.2, 0).Position) - workspace.CurrentCamera.CFrame.Position)) * SPEED
+                else
+                    BV.velocity = Vector3.new(0, 0, 0)
+                end
+                BG.CFrame = workspace.CurrentCamera.CFrame
+            end
+        end))
+    end
 end
 
 --gunner

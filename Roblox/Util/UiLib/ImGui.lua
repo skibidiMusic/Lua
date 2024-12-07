@@ -1744,7 +1744,8 @@ function ImGui:CreateWindow(WindowConfig)
             if save then
                 for flag, value in save do
                     local element = configHandler.configIds[flag]
-                    if element:GetValue() ~= value then
+					if not element then continue end
+                    if  element:GetValue() ~= value then
                         element:SetValue(value)
                     end
                 end
