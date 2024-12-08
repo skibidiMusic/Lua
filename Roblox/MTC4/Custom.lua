@@ -538,11 +538,11 @@ do
             })
 
             dropdown:Checkbox({
-                Label = "All Enabled",
-                Value = modificationsEnabled,
+                Label = "All Disabled",
+                Value = not modificationsEnabled,
                 saveFlag = "modsEnabledReal",
                 Callback = function(_, v)
-                    modificationsEnabled = v
+                    modificationsEnabled = not v
                 end,
             })
 
@@ -801,135 +801,323 @@ do
 	})
 
     -- crosshair
-    gunnerTab:Separator({
-        Text = "True Aim Crosshair"
-    })
-
-    local currentUi = nil
-    local crosshairEnabled = true
-
-    local function uiAdded(gunAim: ScreenGui)
-        local mobileFrame = gunAim:WaitForChild("MobileFrame") :: Frame
-        local mobileGui = mobileFrame:WaitForChild("mobilegui") :: ScreenGui
-        local crosshair = mobileGui:WaitForChild("crosshair") :: ImageLabel
-
-        mobileFrame:WaitForChild("ButtonContainer").Visible = false
+    do
+        gunnerTab:Separator({
+            Text = "True Aim Crosshair"
+        })
     
-        mobileFrame.Visible = crosshairEnabled
-        mobileGui.Enabled = true
+        local currentUi = nil
+        local crosshairEnabled = true
     
-        crosshair.Size = UDim2.new(0,20,0,20)
-        crosshair.BackgroundTransparency = .5
-        crosshair.BackgroundColor3 = Color3.new(1,1,1)
-        crosshair.BorderSizePixel = 2
-        crosshair.BorderColor3 = Color3.new(0,0,0)
-        crosshair.ImageColor3 = Color3.new(1, 0, 0)
-        crosshair.ImageTransparency = 0
-        crosshair.ZIndex = 5
-    end
-
-    hooks:Add( LocalPlayer.PlayerGui.ChildAdded:Connect(function(v)
-        if v.Name == "GunAim" then
-            uiAdded(v)
+        local function uiAdded(gunAim: ScreenGui)
+            local mobileFrame = gunAim:WaitForChild("MobileFrame") :: Frame
+            local mobileGui = mobileFrame:WaitForChild("mobilegui") :: ScreenGui
+            local crosshair = mobileGui:WaitForChild("crosshair") :: ImageLabel
+    
+            mobileFrame:WaitForChild("ButtonContainer").Visible = false
+        
+            mobileFrame.Visible = crosshairEnabled
+            mobileGui.Enabled = true
+        
+            crosshair.Size = UDim2.new(0,20,0,20)
+            crosshair.BackgroundTransparency = .5
+            crosshair.BackgroundColor3 = Color3.new(1,1,1)
+            crosshair.BorderSizePixel = 2
+            crosshair.BorderColor3 = Color3.new(0,0,0)
+            crosshair.ImageColor3 = Color3.new(1, 0, 0)
+            crosshair.ImageTransparency = 0
+            crosshair.ZIndex = 5
         end
-    end) )
-
-    hooks:Add( function()
-        if currentUi then
-            currentUi.MobileFrame.Visible = false
-        end
-    end )
-
-    if LocalPlayer.PlayerGui:FindFirstChild("GunAim") then
-        uiAdded(LocalPlayer.PlayerGui:FindFirstChild("GunAim"))
-    end
-
-    gunnerTab:Checkbox({
-        Label = "Enabled",
-        Value = true,
-        saveFlag = "crosshair",
-        Callback = function(self, Value)
-            if currentUi then
-                currentUi.MobileFrame.Visible = Value
+    
+        hooks:Add( LocalPlayer.PlayerGui.ChildAdded:Connect(function(v)
+            if v.Name == "GunAim" then
+                uiAdded(v)
             end
-        end,
-    })
+        end) )
+    
+        hooks:Add( function()
+            if currentUi then
+                currentUi.MobileFrame.Visible = false
+            end
+        end )
+    
+        if LocalPlayer.PlayerGui:FindFirstChild("GunAim") then
+            uiAdded(LocalPlayer.PlayerGui:FindFirstChild("GunAim"))
+        end
+    
+        gunnerTab:Checkbox({
+            Label = "Enabled",
+            Value = true,
+            saveFlag = "crosshair",
+            Callback = function(self, Value)
+                if currentUi then
+                    currentUi.MobileFrame.Visible = Value
+                end
+            end,
+        })
+    end
 
     --zoom
-    gunnerTab:Separator({
-        Text = "Zoom"
-    })
-
-    local camera = workspace.CurrentCamera
-
-    local target;
-    local enabled = false;
-    local debounce = false;
-    local lastNonZoomVal = camera.FieldOfView;
-    local zoomAmount = 1;
-
-    local function zoom(normalFov: number)
-        lastNonZoomVal = normalFov
-        local targetFov = normalFov / zoomAmount
-        debounce = true
-        camera.FieldOfView = targetFov
-    end
-
-    hooks:Add(
-        camera:GetPropertyChangedSignal("FieldOfView"):Connect(function()
-            if enabled and not debounce then
-                zoom(camera.FieldOfView)
-            else
-                debounce = false
-            end
-        end)
-    )
-
-    local function enableZoom()
-        enabled = true
-        zoom(camera.FieldOfView)
-    end
-
-    local function disableZoom()
-        enabled = false
-        camera.FieldOfView = lastNonZoomVal
-    end
-
+    do
+        gunnerTab:Separator({
+            Text = "Zoom"
+        })
     
-    local checkBox = gunnerTab:Checkbox({
-        Label = "Enabled",
-        Value = false,
-        saveFlag = "zoomEnabled",
-        Callback = function(self, Value)
-            if Value then enableZoom() else disableZoom() end
-        end,
-    })
-
-    local keybind = gunnerTab:Keybind({
-        Label = "Keybind",
-        Value = Enum.KeyCode.V,
-        saveFlag = "gunnerzoomkeybind",
-        Callback = function()
-            checkBox:Toggle()
-        end,
-    })
-
-    gunnerTab:Slider({
-        Label = "Amount",
-        Format = "%.d/%s", 
-        Value = zoomAmount,
-        MinValue = 1,
-        MaxValue = 10,
-        saveFlag = "zoomValue",
+        local camera = workspace.CurrentCamera
     
-        Callback = function(self, Value)
-            zoomAmount = Value
-            if enabled then
-                zoom(lastNonZoomVal)
-            end
-        end,
-    })
+        local target;
+        local enabled = false;
+        local debounce = false;
+        local lastNonZoomVal = camera.FieldOfView;
+        local zoomAmount = 1;
+    
+        local function zoom(normalFov: number)
+            lastNonZoomVal = normalFov
+            local targetFov = normalFov / zoomAmount
+            debounce = true
+            camera.FieldOfView = targetFov
+        end
+    
+        hooks:Add(
+            camera:GetPropertyChangedSignal("FieldOfView"):Connect(function()
+                if enabled and not debounce then
+                    zoom(camera.FieldOfView)
+                else
+                    debounce = false
+                end
+            end)
+        )
+    
+        local function enableZoom()
+            enabled = true
+            zoom(camera.FieldOfView)
+        end
+    
+        local function disableZoom()
+            enabled = false
+            camera.FieldOfView = lastNonZoomVal
+        end
+    
+        
+        local checkBox = gunnerTab:Checkbox({
+            Label = "Enabled",
+            Value = false,
+            saveFlag = "zoomEnabled",
+            Callback = function(self, Value)
+                if Value then enableZoom() else disableZoom() end
+            end,
+        })
+    
+        local keybind = gunnerTab:Keybind({
+            Label = "Keybind",
+            Value = Enum.KeyCode.V,
+            saveFlag = "gunnerzoomkeybind",
+            Callback = function()
+                checkBox:Toggle()
+            end,
+        })
+    
+        gunnerTab:Slider({
+            Label = "Amount",
+            Format = "%.d/%s", 
+            Value = zoomAmount,
+            MinValue = 1,
+            MaxValue = 10,
+            saveFlag = "zoomValue",
+        
+            Callback = function(self, Value)
+                zoomAmount = Value
+                if enabled then
+                    zoom(lastNonZoomVal)
+                end
+            end,
+        })
+    end
 
+    -- Turret Modifications
+    if hookfunction and getrenv then
+        do
+            local modifications = {}
+            
+            --[[
+            accelMult = 10;
+            forwardSpeedMult = 10;
+            backwardSpeedMult = 10;
+            rpmConstant = 1;
+            turnAccelBoost = 5;
+            ]]
+            
+            local modificationsEnabled = true
+    
+            do
+                local mt = {}
+
+                mt.__newindex = function(self, i, v)
+                    self.__base[i] = v
+                end
+                mt.__index = function(self, i)
+                    if modificationsEnabled then
+                        if modifications[i] ~= nil then
+                            return modifications[i]
+                        end
+                    end
+                    return self.__base[i]
+                end
+
+                local disabled = false
+
+                local old; old = hookfunction(getrenv().require, function(self: ModuleScript)
+                    if not disabled and not checkcaller() and typeof(self) == "Instance" and self:IsA("ModuleScript") and self.Name == "TurretInfo" then
+                        local x = old(self)
+                        return setmetatable({__base = x}, mt)
+                    end
+                    return old(self)
+                end)
+
+                hooks:Add(function()
+                    disabled = true
+                    modificationsEnabled = false
+                end)
+            end
+    
+            local dropdown = gunnerTab:CollapsingHeader({
+                Title = "Modifications",
+                Open = false
+            })
+
+            dropdown:Checkbox({
+                Label = "All Disabled",
+                Value = not modificationsEnabled,
+                saveFlag = "modsEnabledReal_Turret",
+                Callback = function(_, v)
+                    modificationsEnabled = not v
+                end,
+            })
+
+            --rotation
+            do
+                local rotTable = {
+                    horizontal = {nil, nil, 100},
+                    vertical = {-99999, 99999, 100},
+                }
+
+                dropdown:Separator({
+                    Text = "Rotation (Remove Angle Limits)"
+                })
+                
+                dropdown:Checkbox({
+                    Label = "Enabled",
+                    Value = true,
+                    saveFlag = "rotEnabledReal",
+                    Callback = function(_, v)
+                        if v then
+                            modifications.anglelimits = rotTable
+                        else
+                            modifications.anglelimits = nil
+                        end
+                    end,
+                })
+
+                dropdown:Slider({
+                    Label = "Rotation Speed",
+                    Format = "%.d/%s", 
+                    Value = 50,
+                    MinValue = 0,
+                    MaxValue = 300,
+                    saveFlag = "raotionSpeedSaksoMakso",
+                
+                    Callback = function(self, Value)
+                        for _, v in rotTable do
+                            v[3] = Value
+                        end
+                    end,
+                })
+            end
+
+            --stabilizer
+            do
+                local Stabiliser = {
+                    StabRatio = {1, 1};
+                };
+
+                dropdown:Separator({
+                    Text = "Perfect Stabilizer"
+                })
+                
+                dropdown:Checkbox({
+                    Label = "Enabled",
+                    Value = true,
+                    saveFlag = "stabEnabled",
+                    Callback = function(_, v)
+                        if v then
+                            modifications.Stabiliser = Stabiliser
+                        else
+                            modifications.Stabiliser = nil
+                        end
+                    end,
+                })
+            end
+    
+            --mouse aim
+            do
+                dropdown:Separator({
+                    Text = "Mouse Aim"
+                })
+                
+                dropdown:Checkbox({
+                    Label = "Enabled",
+                    Value = true,
+                    saveFlag = "mouseAimMakcijk",
+                    Callback = function(_, v)
+                        if v then
+                            modifications.MouseAim = true
+                        else
+                            modifications.MouseAim = nil
+                        end
+                    end,
+                })
+            end
+
+            --perfect range finder
+            do
+                local mds = {
+                    unit = 1;
+                    maxAccurateRange = 99999999;
+                    speed = 0.1;
+                }
+
+                dropdown:Separator({
+                    Text = "Perfect Range Finder"
+                })
+                
+                dropdown:Checkbox({
+                    Label = "Enabled",
+                    Value = true,
+                    saveFlag = "RANGEFINERMONKEY",
+                    Callback = function(_, v)
+                        if v then
+                            modifications.rangeFinderAccuracy = mds
+                        else
+                            modifications.rangeFinderAccuracy = nil
+                        end
+                    end,
+                })
+
+                dropdown:Slider({
+                    Label = "Find Time",
+                    Format = "%.d/%s", 
+                    Value = 1,
+                    MinValue = 0,
+                    MaxValue = 10,
+                    saveFlag = "rangeFindTimeNig",
+                
+                    Callback = function(self, Value)
+                        mds.speed = Value
+                    end,
+                })
+            end
+        end
+    end
 end
 
 --Mod detection

@@ -22,5 +22,8 @@
         "gethui",
         "http",
         "http_request",
+        "hookfunction",
+        "getrenv",
+        "MTC_SAKSO"
     ]
 }
