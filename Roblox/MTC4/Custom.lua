@@ -14,7 +14,23 @@ if MTC_SAKSO then
 else
     getgenv().MTC_SAKSO = {}
     if hookmetamethod then
+        --disable adonis
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
+        --disable goofy anticheat
+        local old; old = hookmetamethod(game, "__namecall", function(self: RemoteEvent, arg1, ...)
+            if not checkcaller() and typeof(self) == "Instance" and (self.ClassName == "RemoteEvent" or self.ClassName == "UnreliableRemoteEvent" ) then
+                local method = getnamecallmethod()
+                if method == "FireServer" or method == "fireServer" then
+                    if self.Name == "IWantToBeBanned" then
+                        return
+                    end
+                    if typeof(arg1) == "string" and arg1 == "gone" then
+                        return
+                    end
+                end
+            end
+            return old(self, arg1, ...)
+        end)
     end
 end
 
@@ -422,7 +438,7 @@ do
 	--seating
 	do
 		local dropdown = VehicleTab:CollapsingHeader({
-			Title = "Seats",
+			Title = "Seat Changer",
 			Open = false
 		})
 
@@ -447,11 +463,16 @@ do
 		end
 	
 		local function pickSeat(name: string)
+            local char = LocalPlayer.Character
+            if not char then return end
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not hum then return end
+
 			local closestVehicle = getClosestVehicle()
 			if closestVehicle then
-				for _, v: Instance in closestVehicle:GetDescendants() do
+				for _, v: VehicleSeat in closestVehicle:GetDescendants() do
 					if v:IsA("VehicleSeat") and v.Name == name then
-						v.SeatEvt:FireServer()
+						v:Sit(hum)
                         return
 					end 
 				end
@@ -1120,6 +1141,20 @@ do
     end
 end
 
+--weapons
+--(90% ban stuff)
+do
+    if hookmetamethod then
+        local weaponTab = Window:CreateTab({
+            Name = "Weapons",
+            Visible = false 
+        })
+
+
+        
+    end
+end
+
 --Mod detection
 do
     local modRanks = {
@@ -1134,7 +1169,7 @@ do
     local function playerDetected(v: Player)
         local rank = v:GetRoleInGroup(13466988)
         if table.find(modRanks, rank) then
-            ImGui:Notify("Moderator Detector", "A fatass moderator is in the server!!v!!11! 💀☠️🙏, Name: " .. v.Name .. " Rank: " .. rank , 10)
+            ImGui:Notify("Moderator Detector", "A fatass moderator is in the server!!v!!11! 💀☠️🙏, Name: " .. v.Name .. " Rank: " .. rank , 99999999)
         end
     end
 
