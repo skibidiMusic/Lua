@@ -3,5 +3,9 @@ for _, v in getgc(true) do
 		print(v)
 		v.AmmoInGun = 500
 		v.Ammo = 500
+		v.RainbowMode = true
+		v.ShootRate = 5000
+		v.ExplosiveAmmo = true
+		v.ExplosionRadius = 500
 	end
 end

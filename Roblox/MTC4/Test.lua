@@ -1,33 +1,10 @@
-local function ToString(v:any, depth: number?)
-    local dataType = typeof(v)
-    local str;
-
-    if dataType == "Instance" then
-        dataType = v.ClassName
-        str = v:GetFullName()
-    else
-        if dataType == "table" then
-            depth = depth or 0
-            local depthShit = string.rep("\t", depth)
-            str = "{\n"
-            for i, c in v do
-                str = str .. string.format(depthShit .. "\t[%s]: %s,\n", tostring(i), ToString(c, depth + 1))
-            end
-            str = str .. depthShit .. "}"
-        elseif dataType == "string" then
-            str = string.format("%q", v)
-        else
-            str = tostring(v)
-        end
-    end
-
-    return string.format("(%s) %s", dataType, str)
-end
 
 --anticheat overhaul
 --disable adonis
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
 --disable anti-cheat
+
+--[[
 local old; old = hookmetamethod(game, "__namecall", function(self: RemoteEvent, ...)
     if not checkcaller() and typeof(self) == "Instance" and (self.ClassName == "RemoteEvent" or self.ClassName == "UnreliableRemoteEvent" or self.ClassName == "RemoteFunction") then
         local method = getnamecallmethod()
@@ -45,6 +22,7 @@ local old; old = hookmetamethod(game, "__namecall", function(self: RemoteEvent, 
     end
     return old(self, ...)
 end)
+]]
 
 --dex
 loadstring(game:HttpGet("https://gitlab.com/sens3/assets/-/raw/main/OptimizedDexForSolara.lua?ref_type=heads"))()

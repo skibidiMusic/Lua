@@ -14,22 +14,24 @@ if MTC_SAKSO then
 else
     getgenv().MTC_SAKSO = {}
     if hookmetamethod then
-        --disable adonis
+        --adonis
         loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
-        --disable goofy anticheat
-        local old; old = hookmetamethod(game, "__namecall", function(self: RemoteEvent, arg1, ...)
-            if not checkcaller() and typeof(self) == "Instance" and (self.ClassName == "RemoteEvent" or self.ClassName == "UnreliableRemoteEvent" ) then
-                local method = getnamecallmethod()
-                if method == "FireServer" or method == "fireServer" then
-                    if self.Name == "IWantToBeBanned" then
-                        return
-                    end
-                    if typeof(arg1) == "string" and arg1 == "gone" then
-                        return
-                    end
+
+        --game anticheat bypass
+        local IsA = Instance.new("Part").IsA
+        local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+            if typeof(self) == "Instance" and IsA(self, "RemoteEvent") or IsA(self, "UnreliableRemoteEvent") then
+                if self.Name == "IWantToBeBanned" then
+                    print("ban remote bypassed")
+                    return
+                end
+                local args = {...}
+                if rawequal(args[1], "gone") then
+                    print("goner bypassed")
+                    return
                 end
             end
-            return old(self, arg1, ...)
+            return old(self, ...)
         end)
     end
 end
@@ -43,10 +45,10 @@ end
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
-local CollectionService = game:GetService("CollectionService")
+--local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
+--local TweenService = game:GetService("TweenService")
 
 local LocalPlayer = Players.LocalPlayer
 
@@ -1150,6 +1152,7 @@ do
             Visible = false 
         })
 
+        
 
         
     end
