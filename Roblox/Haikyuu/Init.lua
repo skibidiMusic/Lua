@@ -177,71 +177,75 @@ end
 
 -- Character Tweaks
 do
-    local thread;
-    local connections = Janitor.new() ;
-
-    local DLY_SLIDER = .33
-
-    local function charAdded(char: Model)
-        connections:Add(char:GetAttributeChangedSignal("Jumping"):Connect(function()
-            if char:GetAttribute("Jumping") then
-                --if not __ENABLED then return end
-                local hum = char:FindFirstChildOfClass("Humanoid")
-                if not hum then return end
-                thread = task.spawn(function()
-                    hum.AutoRotate = true
-                    task.wait(DLY_SLIDER)
-                    hum.AutoRotate = false
-                end)
-            else
-                if thread then
-                    task.cancel(thread)
-                    thread = nil
-                end
-            end
-        end), nil, "jumpCon")
-    end
-
-    local function setEnabled(v)
-        if v then
-            connections:Add(Players.LocalPlayer.CharacterAdded:Connect(charAdded))
-            if Players.LocalPlayer.Character then
-                charAdded(Players.LocalPlayer.Character)
-            end
-        else   
-            connections:Cleanup()
-        end
-    end
-
-    hooks:Add(function()
-        setEnabled(false)
-    end)
-
     local CharacterTab = Window:CreateTab({
         Name = "Character",
         Visible = false 
     })
 
-    CharacterTab:Checkbox({
-        Label = "Rotate In Air",
-        Value = true,
-        saveFlag = "CharacterRotateToggle",
-        Callback = setEnabled,
-    })
-
-    CharacterTab:Slider({
-        Label = "Rotate Off Delay",
-        Format = "%.2f/%s", 
-        Value = DLY_SLIDER,
-        MinValue = 0,
-        MaxValue = 4,
-        saveFlag = "RotateOffDelaySlider",
-        Callback = function(self, Value)
-            DLY_SLIDER = Value
-        end,
-    })
-
-    CharacterTab:Separator({ })
+    do
+        local thread;
+        local connections = Janitor.new() ;
+    
+        local DLY_SLIDER = .33
+    
+        local function charAdded(char: Model)
+            connections:Add(char:GetAttributeChangedSignal("Jumping"):Connect(function()
+                if char:GetAttribute("Jumping") then
+                    --if not __ENABLED then return end
+                    local hum = char:FindFirstChildOfClass("Humanoid")
+                    if not hum then return end
+                    thread = task.spawn(function()
+                        hum.AutoRotate = true
+                        task.wait(DLY_SLIDER)
+                        hum.AutoRotate = false
+                    end)
+                else
+                    if thread then
+                        task.cancel(thread)
+                        thread = nil
+                    end
+                end
+            end), nil, "jumpCon")
+        end
+    
+        local function setEnabled(v)
+            if v then
+                connections:Add(Players.LocalPlayer.CharacterAdded:Connect(charAdded))
+                if Players.LocalPlayer.Character then
+                    charAdded(Players.LocalPlayer.Character)
+                end
+            else   
+                connections:Cleanup()
+            end
+        end
+    
+        hooks:Add(function()
+            setEnabled(false)
+        end)
+    
+        CharacterTab:Checkbox({
+            Label = "Rotate In Air",
+            Value = true,
+            saveFlag = "CharacterRotateToggle",
+            Callback = function(_, v)
+                setEnabled(v)
+            end,
+        })
+    
+        CharacterTab:Slider({
+            Label = "Rotate Off Delay",
+            Format = "%.2f/%s", 
+            Value = DLY_SLIDER,
+            MinValue = 0,
+            MaxValue = 4,
+            saveFlag = "RotateOffDelaySlider",
+            Callback = function(self, Value)
+                DLY_SLIDER = Value
+            end,
+        })
+    
+        CharacterTab:Separator({ })
+    end
     
     -- Shiftlock in Air
     do
@@ -273,7 +277,9 @@ do
                     Label = "Auto Shiftlock Air",
                     Value = true,
                     saveFlag = "AirShiftlockToggle",
-                    Callback = setEnabled,
+                    Callback = function(_, v)
+                        setEnabled(v)
+                    end,
                 })
     
                 CharacterTab:Separator({})
