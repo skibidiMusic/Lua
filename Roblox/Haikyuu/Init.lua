@@ -17,6 +17,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 
 
 -- Direction Ray
@@ -198,7 +199,7 @@ do
                     thread = nil
                 end
             end
-        end))
+        end), nil, "jumpCon")
     end
 
     local function setEnabled(v)
@@ -240,10 +241,50 @@ do
         end,
     })
 
+    CharacterTab:Separator({ })
+    
+    -- Shiftlock in Air
+    do
+                local connections = Janitor.new()
+    
+                local function charAdded(char: Model)
+                    connections:Add(char:GetAttributeChangedSignal("Jumping"):Connect(function()
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.LeftShift, false, Players.LocalPlayer)
+                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.LeftShift, false, Players.LocalPlayer)
+                    end), nil, "jumpCon")
+                end
+            
+                local function setEnabled(v)
+                    if v then
+                        connections:Add(Players.LocalPlayer.CharacterAdded:Connect(charAdded))
+                        if Players.LocalPlayer.Character then
+                            charAdded(Players.LocalPlayer.Character)
+                        end
+                    else   
+                        connections:Cleanup()
+                    end
+                end
+            
+                hooks:Add(function()
+                    setEnabled(false)
+                end)
+    
+                CharacterTab:Checkbox({
+                    Label = "Auto Shiftlock Air",
+                    Value = true,
+                    saveFlag = "AirShiftlockToggle",
+                    Callback = setEnabled,
+                })
+    
+                CharacterTab:Separator({})
+    end
+    
+
     
     CharacterTab:Separator({
         Text = "Attributes"
     })
+
 
     -- Attribute Modifiers
     local function attributeModifier(name: string, attributeName: string, baseVal: number, min: number, max: number)
@@ -370,7 +411,6 @@ do
 
         InternalTab:Separator({})
     end
-
 
 
     -- No Cooldowns
@@ -514,6 +554,7 @@ do
         end
         InternalTab:Separator({})
     end
+    
 end
 
 HaikyuuRaper:UiTab()
