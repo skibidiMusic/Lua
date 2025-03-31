@@ -17,7 +17,7 @@ function BaseLoader.new(name: string)
     self.name = name
 
     if genv[name] then
-        genv[name].unload()
+        genv[name]:Unload()
     end
 
     genv[name] = self
