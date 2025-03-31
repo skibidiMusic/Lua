@@ -3,36 +3,26 @@
 
 -->> SRC
 --https://github.com/depthso/Roblox-ImGUI/wiki/Elements
-local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
-local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Misc/Janitor.lua'))()
 
-if HaikyuuRaper then
-    if HaikyuuRaper.unload then
-        HaikyuuRaper.unload()
-    end
-else
-    getgenv().HaikyuuRaper = {}
-end
+local BaseScript = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Main/Base.lua'))()
+local HaikyuuRaper = BaseScript.new("HaikyuuRaper")
 
-local Window = ImGui:CreateWindow({Title = "HaikyuuRaper", Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false,})
-Window:Center()
+local Janitor = HaikyuuRaper.Janitor
 
-local hooks = Janitor.new()
-HaikyuuRaper.unload = function()
-    hooks:Cleanup()
-	Window:Destroy()
-	HaikyuuRaper.unload = nil
-end
+local Window = HaikyuuRaper.window
+local hooks = HaikyuuRaper.hooks
 
 --##
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 
 
 -- Direction Ray
 do
-    local RAY_LENGTH = 25
-    local ANGLE = 30
+    local RAY_LENGTH = 120
+    local ANGLE = 10
     local AIR_CHECK = true
 
     -- Table to store player colors and rays
@@ -186,24 +176,39 @@ end
 
 -- Character Tweaks
 do
-    local connection;
+    local thread;
+    local connections = Janitor.new() ;
+
+    local DLY_SLIDER = .33
+
+    local function charAdded(char: Model)
+        connections:Add(char:GetAttributeChangedSignal("Jumping"):Connect(function()
+            if char:GetAttribute("Jumping") then
+                --if not __ENABLED then return end
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if not hum then return end
+                thread = task.spawn(function()
+                    hum.AutoRotate = true
+                    task.wait(DLY_SLIDER)
+                    hum.AutoRotate = false
+                end)
+            else
+                if thread then
+                    task.cancel(thread)
+                    thread = nil
+                end
+            end
+        end))
+    end
+
     local function setEnabled(v)
         if v then
-            if not connection then
-                connection = RunService.RenderStepped:Connect(function()
-                    local player = Players.LocalPlayer
-                    if player.Character then
-                        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-                        if humanoid then
-                            humanoid.AutoRotate = true
-                        end
-                    end
-                end)
+            connections:Add(Players.LocalPlayer.CharacterAdded:Connect(charAdded))
+            if Players.LocalPlayer.Character then
+                charAdded(Players.LocalPlayer.Character)
             end
-        else
-            if connection then
-                connection:Disconnect(); connection = nil
-            end
+        else   
+            connections:Cleanup()
         end
     end
 
@@ -221,6 +226,18 @@ do
         Value = true,
         saveFlag = "CharacterRotateToggle",
         Callback = setEnabled,
+    })
+
+    CharacterTab:Slider({
+        Label = "Rotate Off Delay",
+        Format = "%.2f/%s", 
+        Value = DLY_SLIDER,
+        MinValue = 0,
+        MaxValue = 4,
+        saveFlag = "RotateOffDelaySlider",
+        Callback = function(self, Value)
+            DLY_SLIDER = Value
+        end,
     })
 
     
@@ -289,11 +306,11 @@ do
         end)
     end
 
-    attributeModifier("Dive Speed Mult.", "GameDiveSpeedMultiplier", 1, 0, 5)
+    attributeModifier("Dive Speed Mult.", "GameDiveSpeedMultiplier", 1.5, 0, 5)
     --GameJumpPowerMultiplier
-    attributeModifier("Jump Power Mult.", "GameJumpPowerMultiplier", 1, 0, 5)
+    attributeModifier("Jump Power Mult.", "GameJumpPowerMultiplier", 1.15, 0, 5)
     --GameSpeedMultiplier
-    attributeModifier("Speed Mult.", "GameSpeedMultiplier", 1, 0, 5)
+    attributeModifier("Speed Mult.", "GameSpeedMultiplier", 0.85, 0, 5)
 end
 
 -- Internals
@@ -331,20 +348,21 @@ do
         InternalTab:Slider({
             Label = "Serve Power",
             Format = "%.d/%s", 
-            Value = ANGLE,
+            Value = 100,
             MinValue = 0,
             MaxValue = 100,
             saveFlag = "ServeFixedPowerSlider",
         
             Callback = function(self, Value)
                 value = Value / 100
+                print(value)
             end,
         })
     
         InternalTab:Checkbox({
             Label = "Serve Power Enabled",
             Value = true,
-            saveFlag = "RayEnabledToggle",
+            saveFlag = "ServePowerToggle",
             Callback = function(_, v)
                 setEnabled(v)
             end,
@@ -353,62 +371,151 @@ do
         InternalTab:Separator({})
     end
 
+
+
+    -- No Cooldowns
+    if getloadedmodules and hookfunction and checkcaller and newcclosure then
+        for _, v in getloadedmodules() do
+            if v.Name == "GameController" then
+                    local t = require(v)
+                    local val = t.IsBusy
+
+                    local ENABLED = false
+
+                    -- ui
+                    InternalTab:Checkbox({
+                        Label = "No Cooldowns",
+                        Value = ENABLED,
+                        saveFlag = "NoCooldownsToggle",
+                        Callback = function(_, v)
+                            ENABLED = v
+                        end,
+                    })
+
+                    hooks:Add(function()
+                        ENABLED = false
+                    end)
+                    
+                    if ENABLED then
+                        val:set(false)  
+                    end
+
+                    local old; old = hookfunction(val.set, newcclosure(function(self, ...)
+                        if ENABLED and not checkcaller() and rawequal(self, val) and not Players.LocalPlayer:GetAttribute("IsServing") then
+                            return old(self, false)
+                        end     
+                        return old(self, ...)
+                    end))
+            end
+        end
+        InternalTab:Separator({})
+    end
+
     -- Hitbox Expander
+    if hookmetamethod then
+        local ENABLED = false
+        local MULTIPLIER = 1
+
+        local old ; old = hookmetamethod(game, "__namecall", function(self, ...)
+            local args = {...}
+            if ENABLED and not checkcaller() and rawequal(self, workspace) and getnamecallmethod() == "GetPartsInPart" then
+                    local hitboxPart = args[1]
+                    local overlapParams = args[2] :: OverlapParams
+    
+                    if rawequal(args[3], nil) and (typeof(hitboxPart) == "Instance" and hitboxPart.IsA(hitboxPart, "BasePart") and typeof(overlapParams) == "OverlapParams") then
+                            local testPart = overlapParams.FilterDescendantsInstances[1]
+                            if testPart and testPart.HasTag(testPart, "Ball") then
+                                    
+                                    local oldSize = hitboxPart.Size
+                                    hitboxPart.Size = oldSize * MULTIPLIER
+                                    local result = old(self, ...)
+                                    hitboxPart.Size = oldSize
+                                    return result
+    
+                            end
+                    end
+            end
+    
+            return old(self, unpack(args))
+        end)
+
+        InternalTab:Slider({
+            Label = "Hitbox Multiplier",
+            Format = "%.2f/%s", 
+            Value = MULTIPLIER,
+            MinValue = 0,
+            MaxValue = 10,
+            saveFlag = "HitboxMultiplier",
+        
+            Callback = function(self, Value)
+                MULTIPLIER = Value
+            end,
+        })
+    
+        InternalTab:Checkbox({
+            Label = "Hitbox Expander Enabled",
+            Value = true,
+            saveFlag = "HitboxToggle",
+            Callback = function(_, v)
+                ENABLED = v
+            end,
+        })
+
+        hooks:Add(function()
+            ENABLED = false
+        end)
+        InternalTab:Separator({})
+    end
+
+    -- Op Charge
+    if getloadedmodules and hookfunction and checkcaller and newcclosure then
+        for _, v in getloadedmodules() do
+            if v.Name == "GameController" then
+                    local t = require(v)
+                    local val = t.Power
+
+                    local SLIDER = 1
+                    local ENABLED = false
+
+                    -- ui
+                    InternalTab:Checkbox({
+                        Label = "Custom Charge",
+                        Value = ENABLED,
+                        saveFlag = "CustomChargeToggle",
+                        Callback = function(_, v)
+                            ENABLED = v
+                        end,
+                    })
+
+                    InternalTab:Slider({
+                        Label = "Charge Val",
+                        Format = "%.2f/%s", 
+                        Value = SLIDER,
+                        MinValue = 0,
+                        MaxValue = 10,
+                        saveFlag = "ChargeValSlider",
+                    
+                        Callback = function(self, Value)
+                            SLIDER = Value
+                        end,
+                    })
+
+                    hooks:Add(function()
+                        ENABLED = false
+                    end)
+
+                    local old; old = hookfunction(val.getCharge, newcclosure(function(self, ...)
+                        if ENABLED and not checkcaller() and rawequal(self, val) then
+                            return SLIDER
+                        end     
+                        return old(self, ...)
+                    end))
+            end
+        end
+        InternalTab:Separator({})
+    end
 end
 
-
---ui tab
-local KeybindsTab = Window:CreateTab({
-	Name = "Ui",
-	Visible = false 
-})
-
---keybinds
-do
-	KeybindsTab:Separator({
-		"lol 🙏😭"
-	})
-	
-	do
-		local toggleUiKeybind = KeybindsTab:Keybind({
-			Label = "Toggle UI",
-			Value = Enum.KeyCode.RightControl,
-			saveFlag = "ToggleUiKeybind",
-			Callback = function()
-				Window:SetVisible(not Window.Visible)
-			end,
-		})
-		
-		local wasClosedBefore = false
-		Window.CloseCallback = function()
-			if toggleUiKeybind.Value then
-				if wasClosedBefore then
-					--ImGui:Notify("Press " .. `{toggleUiKeybind.Value}` .. " to re-open the gui." , 1)
-					return
-				end
-				wasClosedBefore = true
-				ImGui:Notify("Gui", "Press " .. `{toggleUiKeybind.Value.Name}` .. " to re-open the gui." , 4)
-			end
-		end
-	end
-end
-
-Window:CreateConfigSaveHandler("HaikkyuuSaksooo3131")
-
--- unloading gui
-local closeTab = Window:CreateTab({
-	Name = "Unload",
-	Visible = false
-})
-
-closeTab:Separator({
-
-})
-
-closeTab:Button({
-    Text = "Unload the cheat",
-    Callback = function(self)
-        MTC_SAKSO.unload()
-		ImGui:Notify("Sakso", "Fenasin basa belasin kankitom" , 3)
-    end,
-})
+HaikyuuRaper:UiTab()
+HaikyuuRaper:ConfigManager()
+HaikyuuRaper:UnloadTab()
