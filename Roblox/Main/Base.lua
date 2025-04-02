@@ -6,9 +6,11 @@ BaseLoader.__index = BaseLoader
 
 local ImGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/UiLib/ImGui.lua'))()
 local Janitor = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Misc/Janitor.lua'))()
+local Signal = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Misc/Signal.lua'))()
 
 BaseLoader.ImGui = ImGui
 BaseLoader.Janitor = Janitor
+BaseLoader.Signal = Signal
 
 local genv = getgenv()
 
