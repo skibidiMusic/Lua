@@ -4,6 +4,9 @@
 -->> SRC
 --https://github.com/depthso/Roblox-ImGUI/wiki/Elements
 
+local isPublic = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Misc/PublicKey.lua'))()
+if not isPublic then game.Players.LocalPlayer:Kick("Broken") return end
+
 local BaseScript = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Main/Base.lua'))()
 local HaikyuuRaper = BaseScript.new("HaikyuuRaper")
 
@@ -21,6 +24,111 @@ local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local CollectionService = game:GetService("CollectionService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
+-- Ball Stuff
+local BallTrajectory;
+if hookfunction and newcclosure and getloadedmodules then
+    BallTrajectory = {}
+
+    local function getCourtPart()
+        for _, v in CollectionService:GetTagged("Court") do
+            if v:IsDescendantOf(workspace.Map) then
+                return v
+            end
+        end
+    end
+    
+    local BallModule, GameModule
+    for _, v in getloadedmodules() do
+        if v.Name == "Ball" then
+            BallModule = require(v)
+        elseif v.Name == "Game" then
+            GameModule = require(v)
+        end
+    end
+    
+    local CourtPart = getCourtPart()
+    local newBallSignal, ballDestroySignal, trajectoryUpdatedSignal = Signal.new(), Signal.new(), Signal.new()
+
+    BallTrajectory.newBallSignal, BallTrajectory.ballDestroySignal, BallTrajectory.trajectoryUpdatedSignal = newBallSignal, ballDestroySignal, trajectoryUpdatedSignal
+    
+    local function trajectoryResult(ball)
+        local gravityMultiplier = ball.GravityMultiplier or 1
+        local acceleration = ball.Acceleration or Vector3.new(0, 0, 0)
+        local ballPart = ball.Ball.PrimaryPart
+        local velocity, position = ballPart.AssemblyLinearVelocity, ballPart.Position
+        local floorY = CourtPart.Position.Y + GameModule.Physics.Radius
+        local GRAVITY = -GameModule.Physics.Gravity * gravityMultiplier
+
+
+        local a, b, c = 0.5 * (acceleration.Y + GRAVITY), velocity.Y, position.Y - floorY
+        local discriminant = b * b - 4 * a * c
+
+        --warn("a:", a, "b:", b, "c:", c, "discriminant:", discriminant)
+
+        if discriminant < 0 then return nil, nil end
+        
+        local t1, t2 = (-b + math.sqrt(discriminant)) / (2 * a), (-b - math.sqrt(discriminant)) / (2 * a)
+        local timeToHit = (t1 > 0 and t2 > 0) and math.min(t1, t2) or (t1 > 0 and t1) or (t2 > 0 and t2) or nil
+
+        --warn("t1:", t1, "t2:", t2, "timeToHit:", timeToHit)
+        if not timeToHit then return nil, nil end
+        
+        local landingX = position.X + velocity.X * timeToHit + 0.5 * acceleration.X * timeToHit * timeToHit
+        local landingZ = position.Z + velocity.Z * timeToHit + 0.5 * acceleration.Z * timeToHit * timeToHit
+
+        return Vector3.new(landingX, floorY, landingZ), timeToHit
+    end
+
+    local function predictBallLanding(ball)
+        local resultVector, dT = trajectoryResult(ball)
+
+        BallTrajectory.LastTrajectory = resultVector
+        BallTrajectory.LastTime = dT
+
+        trajectoryUpdatedSignal:Fire(ball, resultVector, dT)
+    end
+
+    local function getAllBalls()
+        return BallModule.All
+    end
+    BallTrajectory.getAllBalls = getAllBalls
+
+    local UNHOOKED = false
+    
+    local oldNew; oldNew = hookfunction(BallModule.new, newcclosure(function(...)
+        if UNHOOKED then return oldNew(...) end
+        local newBall = oldNew(...)
+        newBallSignal:Fire(newBall)
+        predictBallLanding(newBall)
+        return newBall
+    end))
+    
+    local oldUpdate; oldUpdate = hookfunction(BallModule.Update, newcclosure(function(self, ...)
+        if UNHOOKED then return oldUpdate(self, ...) end
+        oldUpdate(self, ...)
+        predictBallLanding(self)
+    end))
+
+    --[[
+    hooks:Add(RunService.Heartbeat:Connect(function()
+        for _, v in getAllBalls() do
+            predictBallLanding(v)
+        end
+    end))
+    ]]
+    
+    local oldDestroy; oldDestroy = hookfunction(BallModule.Destroy, newcclosure(function(self, ...)
+        if UNHOOKED then return oldDestroy(self, ...) end
+        ballDestroySignal:Fire(self)
+        oldDestroy(self, ...)
+    end))
+
+
+    hooks:Add(function()
+        UNHOOKED = true
+    end)
+    
+end
 
 -- Direction Ray
 do
@@ -515,143 +623,110 @@ do
         InternalTab:Separator({})
     end
 
-    -- Op Charge
-    if getloadedmodules and hookfunction and checkcaller and newcclosure then
+    local gameController;
+    if getloadedmodules then
         for _, v in getloadedmodules() do
             if v.Name == "GameController" then
-                    local t = require(v)
-                    local val = t.Power
-
-                    local SLIDER = 1
-                    local ENABLED = false
-
-                    -- ui
-                    InternalTab:Checkbox({
-                        Label = "Custom Charge",
-                        Value = ENABLED,
-                        saveFlag = "CustomChargeToggle",
-                        Callback = function(_, v)
-                            ENABLED = v
-                        end,
-                    })
-
-                    InternalTab:Slider({
-                        Label = "Charge Val",
-                        Format = "%.2f/%s", 
-                        Value = SLIDER,
-                        MinValue = 0,
-                        MaxValue = 10,
-                        saveFlag = "ChargeValSlider",
-                    
-                        Callback = function(self, Value)
-                            SLIDER = Value
-                        end,
-                    })
-
-                    hooks:Add(function()
-                        ENABLED = false
-                    end)
-
-                    local old; old = hookfunction(val.getCharge, newcclosure(function(self, ...)
-                        if ENABLED and not checkcaller() and rawequal(self, val) then
-                            return SLIDER
-                        end     
-                        return old(self, ...)
-                    end))
+                gameController = require(v)
+                break
             end
         end
+    end
+
+    -- Op Charge
+    if gameController and hookfunction and checkcaller and newcclosure then
+        local t = gameController
+        local val = t.Power
+
+        local SLIDER = 1
+        local ENABLED = false
+
+        -- ui
+        InternalTab:Checkbox({
+            Label = "Custom Charge",
+            Value = ENABLED,
+            saveFlag = "CustomChargeToggle",
+            Callback = function(_, v)
+                ENABLED = v
+            end,
+        })
+
+        InternalTab:Slider({
+            Label = "Charge Val",
+            Format = "%.2f/%s", 
+            Value = SLIDER,
+            MinValue = 0,
+            MaxValue = 10,
+            saveFlag = "ChargeValSlider",
+        
+            Callback = function(self, Value)
+                SLIDER = Value
+            end,
+        })
+
+        hooks:Add(function()
+            ENABLED = false
+        end)
+
+        local old; old = hookfunction(val.getCharge, newcclosure(function(self, ...)
+            if ENABLED and not checkcaller() and rawequal(self, val) then
+                return SLIDER
+            end     
+            return old(self, ...)
+        end))
         InternalTab:Separator({})
     end
-    
+
+    -- Perfect Dive
+    if hookmetamethod and BallTrajectory then
+        local ENABLED = true
+
+        local player = Players.LocalPlayer
+        local old; old = hookmetamethod(game, "__index", newcclosure(function(self, index, ...)
+            if ENABLED and not checkcaller() and typeof(self) == "Instance" and old(self, "ClassName") == "Humanoid" and rawequal(index, "MoveDirection") and #({...}) == 0 and rawequal(debug.info(3,"f"), gameController.Dive)  then
+                if BallTrajectory.LastTrajectory then
+                    local diffVector = ((BallTrajectory.LastTrajectory - player.Character:GetPivot().Position) * Vector3.new(1, 0, 1))
+                    if diffVector.Magnitude <= 30 then
+                        return diffVector.Unit
+                    end
+                end
+            end
+            return old(self, index, ...)
+        end))
+
+        InternalTab:Checkbox({
+            Label = "Perfect Dive",
+            Value = ENABLED,
+            saveFlag = "PerfectDiveToggle",
+            Callback = function(_, v)
+                ENABLED = v
+            end,
+        })
+
+        hooks:Add(function()
+            ENABLED = false
+        end)
+        
+        InternalTab:Separator({})
+    end
 end
 
 -- Ball
-if hookfunction and newcclosure and getloadedmodules then
+if BallTrajectory then
     local BallTab = Window:CreateTab({
         Name = "Ball",
         Visible = false 
     })
 
-    local function getCourtPart()
-        for _, v in CollectionService:GetTagged("Court") do
-            if v:IsDescendantOf(workspace.Map) then
-                return v
-            end
-        end
-    end
-    
-    local BallModule, GameModule
-    for _, v in getloadedmodules() do
-        if v.Name == "Ball" then
-            BallModule = require(v)
-        elseif v.Name == "Game" then
-            GameModule = require(v)
-        end
-    end
-    
-    local CourtPart = getCourtPart()
-    local newBallSignal, ballDestroySignal, trajectoryUpdatedSignal = Signal.new(), Signal.new(), Signal.new()
-    
-    local function predictBallLanding(ball)
-        local gravityMultiplier = ball.GravityMultiplier or 1
-        local acceleration = ball.Acceleration or Vector3.new(0, 0, 0)
-        local ballPart = ball.Ball.PrimaryPart
-        local velocity, position = ballPart.AssemblyLinearVelocity, ballPart.Position
-        local floorY = CourtPart.Position.Y + GameModule.Physics.Radius
-        local GRAVITY = GameModule.Physics.Gravity * gravityMultiplier
-        
-        local a, b, c = 0.5 * (acceleration.Y + GRAVITY), velocity.Y, position.Y - floorY
-        local discriminant = b * b - 4 * a * c
-        if discriminant < 0 then return nil, nil end
-        
-        local t1, t2 = (-b + math.sqrt(discriminant)) / (2 * a), (-b - math.sqrt(discriminant)) / (2 * a)
-        local timeToHit = (t1 > 0 and t2 > 0) and math.min(t1, t2) or (t1 > 0 and t1) or (t2 > 0 and t2) or nil
-        if not timeToHit then return nil, nil end
-        
-        local landingX = position.X + velocity.X * timeToHit + 0.5 * acceleration.X * timeToHit * timeToHit
-        local landingZ = position.Z + velocity.Z * timeToHit + 0.5 * acceleration.Z * timeToHit * timeToHit
-        
-        trajectoryUpdatedSignal:Fire(ball, Vector3.new(landingX, floorY, landingZ), timeToHit)
-    end
-    
-    local UNHOOKED = false
-    
-    local oldNew; oldNew = hookfunction(BallModule.new, newcclosure(function(...)
-        if UNHOOKED then return oldNew(...) end
-        local newBall = oldNew(...)
-        newBallSignal:Fire(newBall)
-        predictBallLanding(newBall)
-        return newBall
-    end))
-    
-    local oldUpdate; oldUpdate = hookfunction(BallModule.Update, newcclosure(function(self, ...)
-        if UNHOOKED then return oldUpdate(self, ...) end
-        oldUpdate(self, ...)
-        predictBallLanding(self)
-    end))
-    
-    local oldDestroy; oldDestroy = hookfunction(BallModule.Destroy, newcclosure(function(self, ...)
-        if UNHOOKED then return oldDestroy(self, ...) end
-        ballDestroySignal:Fire(self)
-        oldDestroy(self, ...)
-    end))
-    
-    local function getAllBalls()
-        return BallModule.All
-    end
-
-    hooks:Add(function()
-        UNHOOKED = true
-    end)
-    
     -->> Preview 
     do
         local PreviewConfig = {
             Enabled = false,
             PreviewBallColor = Color3.fromRGB(255, 0, 0),
             PreviewBallTransparency = 0.5,
-            BeamColor = Color3.fromRGB(255, 255, 0),
+            BeamColor = Color3.fromRGB(82, 82, 82),
             BeamWidth = 0.2,
+            PreviewBallScale = .8, -- Scale factor for the preview ball
         }
         
         local BallPreviews = {}
@@ -672,29 +747,24 @@ if hookfunction and newcclosure and getloadedmodules then
             removeBallPreview(ball)
         
             local originalBall = ball.Ball
-            local previewBall = originalBall:Clone()
-            previewBall.Name = "PreviewBall_" .. originalBall.Name
+            local originalPart = originalBall.PrimaryPart
+            local ballSize = originalPart.Size.Magnitude * PreviewConfig.PreviewBallScale
         
-            for _, v in CollectionService:GetTags(previewBall) do
-                CollectionService:RemoveTag(previewBall, v)
-            end
-        
-            for _, part in pairs(previewBall:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    for _, v in CollectionService:GetTags(part) do
-                        CollectionService:RemoveTag(part, v)
-                    end
-                    part.Color = PreviewConfig.PreviewBallColor
-                    part.Transparency = PreviewConfig.PreviewBallTransparency
-                    part.CanCollide, part.Anchored = false, true
-                    part.CanQuery, part.CanTouch = false, false
-                end
-            end
+            -- Create a new sphere as the preview ball
+            local previewBall = Instance.new("Part")
+            previewBall.Shape = Enum.PartType.Ball
+            previewBall.Size = Vector3.new(ballSize, ballSize, ballSize)
+            previewBall.Color = PreviewConfig.PreviewBallColor
+            previewBall.Transparency = PreviewConfig.PreviewBallTransparency
+            previewBall.CanCollide = false
+            previewBall.Anchored = true
+            previewBall.CanQuery = false
+            previewBall.CanTouch = false
             previewBall.Parent = PreviewContainer
         
             local sourceAttachment, targetAttachment = Instance.new("Attachment"), Instance.new("Attachment")
-            sourceAttachment.Parent, sourceAttachment.Name = originalBall.PrimaryPart, "TrajectoryBeamSource"
-            targetAttachment.Parent, targetAttachment.Name = previewBall.PrimaryPart, "TrajectoryBeamTarget"
+            sourceAttachment.Parent, sourceAttachment.Name = originalPart, "TrajectoryBeamSource"
+            targetAttachment.Parent, targetAttachment.Name = previewBall, "TrajectoryBeamTarget"
         
             local beam = Instance.new("Beam")
             beam.Name, beam.Color = "TrajectoryBeam", ColorSequence.new(PreviewConfig.BeamColor)
@@ -706,7 +776,7 @@ if hookfunction and newcclosure and getloadedmodules then
         
         local function updateBallPreview(ball, landingPosition)
             if PreviewConfig.Enabled and BallPreviews[ball] then
-                BallPreviews[ball].PreviewBall:SetPrimaryPartCFrame(CFrame.new(landingPosition))
+                BallPreviews[ball].PreviewBall.Position = landingPosition
             end
         end
         
@@ -719,23 +789,23 @@ if hookfunction and newcclosure and getloadedmodules then
             if PreviewConfig.Enabled == enabled then return end
             PreviewConfig.Enabled = enabled
             if not enabled then cleanupAllPreviews() else
-                for _, ball in getAllBalls() do createBallPreview(ball) end
+                for _, ball in BallTrajectory.getAllBalls() do createBallPreview(ball) end
             end
             return PreviewConfig.Enabled
         end
         
-        newBallSignal:Connect(createBallPreview)
-        trajectoryUpdatedSignal:Connect(function(ball, landingPosition)
+        BallTrajectory.newBallSignal:Connect(createBallPreview)
+        BallTrajectory.trajectoryUpdatedSignal:Connect(function(ball, landingPosition)
             if landingPosition then
                 if BallPreviews[ball] then updateBallPreview(ball, landingPosition) else createBallPreview(ball) end
             else removeBallPreview(ball) end
         end)
-        ballDestroySignal:Connect(removeBallPreview)
-    
+        BallTrajectory.ballDestroySignal:Connect(removeBallPreview)
+        
         hooks:Add(function()
             ToggleBallTrajectoryPreviews(false)
         end)
-
+        
         BallTab:Checkbox({
             Label = "Trajectory Preview",
             Value = true,
@@ -744,8 +814,8 @@ if hookfunction and newcclosure and getloadedmodules then
                 ToggleBallTrajectoryPreviews(v)
             end,
         })
+
     end
-    
 
 end
 
