@@ -528,6 +528,36 @@ do
         InternalTab:Separator({})
     end
 
+    -- Ts Hinoto
+    if hookmetamethod then
+        local ENABLED = true
+        local old;
+        old = hookmetamethod(game, "__namecall", function(self, ...)
+            local args = {...}
+            if ENABLED and not checkcaller() then
+                if getnamecallmethod() == "InvokeServer" and typeof(self) == "Instance" and self.ClassName == "RemoteFunction" and self.Name == "Interact" then
+                    local t = args[1]
+                    if typeof(t) == "table" and rawget(t, "SpecialCharge") ~= nil then
+                        rawset(t, "SpecialCharge", 2)
+                    end
+                end
+            end
+            return old(self, table.unpack(args))
+        end)
+
+        InternalTab:Checkbox({
+            Label = "Hinata Max",
+            Value = ENABLED,
+            saveFlag = "HinataMaxToggle",
+            Callback = function(_, v)
+                ENABLED = v
+            end,
+        })
+
+        hooks:Add(function()
+            ENABLED = false
+        end)
+    end
 
     -- No Cooldowns
     if getloadedmodules and hookfunction and checkcaller and newcclosure then
