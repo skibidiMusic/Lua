@@ -14,17 +14,49 @@ local ohTable1 = {
 
 game:GetService("ReplicatedStorage").Packages._Index["sleitnick_knit@1.7.0"].knit.Services.BallService.RF.Interact:InvokeServer(ohTable1)
 
+
+local function rotateTowardsXZ(lookVector, tiltVector, maxAngleDegrees)
+	local lookXZ = Vector3.new(lookVector.X, 0, lookVector.Z)
+	local tiltXZ = Vector3.new(tiltVector.X, 0, tiltVector.Z)
+
+	if lookXZ.Magnitude == 0 or tiltXZ.Magnitude == 0 then
+		return lookVector
+	end
+
+	lookXZ = lookXZ.Unit
+	tiltXZ = tiltXZ.Unit
+
+	local dot = lookXZ:Dot(tiltXZ)
+	local angle = math.acos(math.clamp(dot, -1, 1))
+
+	if math.deg(angle) <= maxAngleDegrees then
+		return Vector3.new(tiltVector.X, lookVector.Y, tiltVector.Z).Unit
+	end
+
+	local cross = lookXZ:Cross(tiltXZ).Y
+	local direction = if cross >= 0 then 1 else -1
+
+	local angleToRotate = math.rad(maxAngleDegrees) * direction
+
+	local rotatedXZ = (CFrame.Angles(0, angleToRotate, 0) * lookXZ)
+
+	return Vector3.new(rotatedXZ.X, lookVector.Y, rotatedXZ.Z).Unit
+end
+
+local ENABLED = true
+local MAX_ANGLE = 45
+
 local old;
-old = hookmetamethod(game, "__namecall", function(self, ...)
+old = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
     local args = {...}
     if  not checkcaller() then
         if getnamecallmethod() == "InvokeServer" and typeof(self) == "Instance" and self.ClassName == "RemoteFunction" and self.Name == "Interact" then
             local t = args[1]
             if typeof(t) == "table" and rawget(t, "Action") == "Spike" and rawget(t, "LookVector") ~= nil and rawget(t, "TiltDirection") ~= nil then
-                CFrame.lookAt(Vector3.zero, Vector3.new() * Vector3.new(1, 0, 1)) * CFrame.Angles()
-                rawset(t, "SpecialCharge", 15)
+                local lookVector = rotateTowardsXZ(rawget(t, "LookVector"), rawget(t, "TiltDirection"), MAX_ANGLE)
+                rawset(t, "LookVector", lookVector)
             end
         end
     end
     return old(self, table.unpack(args))
-end)
+end))

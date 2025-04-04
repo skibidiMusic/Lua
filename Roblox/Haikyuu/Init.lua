@@ -557,10 +557,103 @@ do
         hooks:Add(function()
             ENABLED = false
         end)
+
+        InternalTab:Separator({})
+    end
+
+    -- Sanu Tilt
+    if hookmetamethod and newcclosure then
+        local ENABLED = true
+        local MAX_ANGLE = 10
+
+        local function rotateTowardsXZ(lookVector, tiltVector, maxAngleDegrees)
+            local lookXZ = Vector2.new(lookVector.X, lookVector.Z)
+            local tiltXZ = Vector2.new(tiltVector.X, tiltVector.Z)
+            
+            if lookXZ.Magnitude == 0 or tiltXZ.Magnitude == 0 then
+                return lookVector
+            end
+            
+            lookXZ = lookXZ.Unit
+            tiltXZ = tiltXZ.Unit
+            
+            local dot = lookXZ.Dot(lookXZ, tiltXZ)
+            
+            if dot < -0.9 then
+                return lookVector
+            end
+            
+            local angle = math.acos(math.clamp(dot, -1, 1))
+            local cross = lookXZ.X * tiltXZ.Y - lookXZ.Y * tiltXZ.X
+            local direction = math.sign(cross)
+            
+            local maxAngle = math.rad(maxAngleDegrees)
+            local rotationAngle = math.min(angle, maxAngle)
+            
+            local cos = math.cos(rotationAngle)
+            local sin = math.sin(rotationAngle) * direction
+            
+            local rotated = Vector2.new(
+                lookXZ.X * cos - lookXZ.Y * sin,
+                lookXZ.X * sin + lookXZ.Y * cos
+            )
+            
+            return Vector3.new(rotated.X, lookVector.Y, rotated.Y).Unit
+        end
+        
+
+        local old;
+        old = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+            local args = {...}
+            if  ENABLED and not checkcaller() then
+                if getnamecallmethod() == "InvokeServer" and typeof(self) == "Instance" and self.ClassName == "RemoteFunction" and self.Name == "Interact" then
+                    local t = args[1]
+                    if typeof(t) == "table" and rawget(t, "Action") == "Spike" then
+                        local lookVector, tiltDirection = rawget(t, "LookVector"), rawget(t, "TiltDirection")
+                        if lookVector and tiltDirection then
+                            local rotatedVector = rotateTowardsXZ(lookVector, tiltDirection, MAX_ANGLE)
+                            rawset(t, "LookVector", rotatedVector)
+                            --rawset(t, "TiltDirection", tiltDirection)
+                        end
+
+                    end
+                end
+            end
+            return old(self, table.unpack(args))
+        end))
+
+        hooks:Add(function()
+            ENABLED = false
+        end)
+
+        -- ui
+        InternalTab:Slider({
+            Label = "Max Angle",
+            Format = "%.d/%s", 
+            Value = MAX_ANGLE,
+            MinValue = 0,
+            MaxValue = 90,
+            saveFlag = "SanuTiltMaxAngle",
+        
+            Callback = function(self, Value)
+                MAX_ANGLE = Value
+            end,
+        })
+    
+        InternalTab:Checkbox({
+            Label = "Sanu Tilt",
+            Value = ENABLED,
+            saveFlag = "SanuTiltToggle",
+            Callback = function(_, v)
+                ENABLED = v
+            end,
+        })
+
+        InternalTab:Separator({})
     end
 
     -- No Cooldowns
-    if getloadedmodules and hookfunction and checkcaller and newcclosure then
+    if getloadedmodules and hookfunction and newcclosure then
         for _, v in getloadedmodules() do
             if v.Name == "GameController" then
                     local t = require(v)
@@ -591,6 +684,18 @@ do
                             return old(self, false)
                         end     
                         return old(self, ...)
+                    end))
+
+                    local spikeClock = os.clock()
+                    local oldMove; oldMove = hookfunction(t.DoMove, newcclosure(function(_, name, ...)
+                        if ENABLED and not checkcaller() and rawequal(name, "Spike") then
+                            if os.clock() - spikeClock < 0.25 + Players.LocalPlayer:GetNetworkPing() then
+                                return
+                            else
+                                spikeClock = os.clock()
+                            end
+                        end
+                        return oldMove(_, name, ...)
                     end))
             end
         end
