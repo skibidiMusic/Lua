@@ -399,25 +399,28 @@ do
     -- Walkspeed
     do
         local WALKSPEED_VALUE = 26
+        local ENABLED = true
 
         local connections = Janitor.new()
 
         local defaultWalkspeed = nil
         local currentHum = nil
+        local function WalkSpeedChange()
+            if currentHum then
+                currentHum.Walkspeed = WALKSPEED_VALUE
+            end
+        end  
 
         local function charAdded(char)
             currentHum = char:WaitForChild("Humanoid", 2)
             if not currentHum then return end
-
-            local function WalkSpeedChange()
-                currentHum.Walkspeed = WALKSPEED_VALUE
-            end    
 
             connections:Add(currentHum:GetPropertyChangedSignal("WalkSpeed"):Connect(WalkSpeedChange), nil, "WalkSpeedChange")
             WalkSpeedChange()
         end
         
         local function setEnabled(v)
+            ENABLED = v
             if v then
                 connections:Add(Players.LocalPlayer.CharacterAdded:Connect(charAdded))
                 if Players.LocalPlayer.Character then
@@ -437,7 +440,7 @@ do
 
         CharacterTab:Checkbox({
             Label = "Walkspeed Enabled",
-            Value = true,
+            Value = ENABLED,
             saveFlag = "WalkspeedEnabled",
             Callback = function(_, v)
                 setEnabled(v)
@@ -453,6 +456,9 @@ do
             saveFlag = "WalkspeedValueSlider",
             Callback = function(self, Value)
                 WALKSPEED_VALUE = math.round(Value)
+                if ENABLED then
+                    WalkSpeedChange()
+                end
             end,
         })
     end
