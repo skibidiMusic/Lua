@@ -292,6 +292,7 @@ do
         Visible = false 
     })
 
+    -- Rotate Air
     do
         local thread;
         local connections = Janitor.new() ;
@@ -395,7 +396,66 @@ do
                 CharacterTab:Separator({})
     end
     
+    -- Walkspeed
+    do
+        local WALKSPEED_VALUE = 26
 
+        local connections = Janitor.new()
+
+        local defaultWalkspeed = nil
+        local currentHum = nil
+
+        local function charAdded(char)
+            currentHum = char:WaitForChild("Humanoid", 2)
+            if not currentHum then return end
+
+            local function WalkSpeedChange()
+                currentHum.Walkspeed = WALKSPEED_VALUE
+            end    
+
+            connections:Add(currentHum:GetPropertyChangedSignal("WalkSpeed"):Connect(WalkSpeedChange), nil, "WalkSpeedChange")
+            WalkSpeedChange()
+        end
+        
+        local function setEnabled(v)
+            if v then
+                connections:Add(Players.LocalPlayer.CharacterAdded:Connect(charAdded))
+                if Players.LocalPlayer.Character then
+                    charAdded(Players.LocalPlayer.Character)
+                end
+            else
+                if currentHum then
+                    currentHum.Walkspeed = defaultWalkspeed
+                end
+                connections:Cleanup()
+            end
+        end
+
+        hooks:Add(function()
+            setEnabled(false)
+        end)
+
+        CharacterTab:Checkbox({
+            Label = "Walkspeed Enabled",
+            Value = true,
+            saveFlag = "WalkspeedEnabled",
+            Callback = function(_, v)
+                setEnabled(v)
+            end,
+        })
+
+        CharacterTab:Slider({
+            Label = "Walkspeed Value",
+            Format = "%.d/%s", 
+            Value = WALKSPEED_VALUE,
+            MinValue = 0,
+            MaxValue = 40,
+            saveFlag = "WalkspeedValueSlider",
+            Callback = function(self, Value)
+                WALKSPEED_VALUE = math.round(Value)
+            end,
+        })
+    end
     
     CharacterTab:Separator({
         Text = "Attributes"
@@ -468,6 +528,63 @@ do
     attributeModifier("Jump Power Mult.", "GameJumpPowerMultiplier", 1.15, 0, 5)
     --GameSpeedMultiplier
     attributeModifier("Speed Mult.", "GameSpeedMultiplier", 0.85, 0, 5)
+end
+
+-- Camera
+local currentCam = workspace.CurrentCamera
+if currentCam then
+    local CameraTab = Window:CreateTab({
+        Name = "Camera",
+        Visible = false 
+    })
+
+    -- Fov
+    do
+        local DEFAULT_FOV = currentCam.FieldOfView
+        local FOV_VALUE = 90
+        local connections = Janitor.new()
+
+        local function fovUpdated()
+            currentCam.FieldOfView = FOV_VALUE
+        end
+
+        local function setEnabled(v)
+            if v then
+                fovUpdated()
+                connections:Add(currentCam:GetPropertyChangedSignal("FieldOfView"):Connect(fovUpdated))
+            else
+                connections:Cleanup()
+                currentCam.FieldOfView = DEFAULT_FOV
+            end
+        end
+
+        hooks:Add(function()
+            setEnabled(false)
+        end)
+
+        CameraTab:Checkbox({
+            Label = "FOV Enabled",
+            Value = true,
+            saveFlag = "FovEnabled",
+            Callback = function(_, v)
+                setEnabled(v)
+            end,
+        })
+
+        CameraTab:Slider({
+            Label = "FOV Value",
+            Format = "%.d/%s", 
+            Value = FOV_VALUE,
+            MinValue = 1,
+            MaxValue = 120,
+            saveFlag = "FovValueSlider",
+            Callback = function(self, Value)
+                FOV_VALUE = math.round(Value)
+            end,
+        })
+
+        CameraTab:Separator({})
+    end
 end
 
 -- Internals
