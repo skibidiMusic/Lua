@@ -24,6 +24,19 @@ local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local CollectionService = game:GetService("CollectionService")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 
+local LocalPlayer = Players.LocalPlayer
+
+-- Game Stuff
+local function getCourtPart()
+    for _, v in CollectionService:GetTagged("Court") do
+        if v:IsDescendantOf(workspace.Map) then
+            return v
+        end
+    end
+end
+
+local CourtPart = getCourtPart()
+
 -- Ball Stuff
 local BallTrajectory;
 if hookfunction and newcclosure and getloadedmodules then
@@ -46,7 +59,6 @@ if hookfunction and newcclosure and getloadedmodules then
         end
     end
     
-    local CourtPart = getCourtPart()
     local newBallSignal, ballDestroySignal, trajectoryUpdatedSignal = Signal.new(), Signal.new(), Signal.new()
 
     BallTrajectory.newBallSignal, BallTrajectory.ballDestroySignal, BallTrajectory.trajectoryUpdatedSignal = newBallSignal, ballDestroySignal, trajectoryUpdatedSignal
@@ -138,10 +150,21 @@ do
 
     -- Table to store player colors and rays
     local playerData = {}
+    local BrightColors = {
+        Color3.fromRGB(255, 99, 71),    -- Tomato Red
+        Color3.fromRGB(255, 165, 0),    -- Orange
+        Color3.fromRGB(255, 255, 0),    -- Yellow
+        Color3.fromRGB(0, 255, 0),      -- Lime
+        Color3.fromRGB(0, 255, 255),    -- Cyan
+        Color3.fromRGB(30, 144, 255),   -- Dodger Blue
+        Color3.fromRGB(138, 43, 226),   -- Blue Violet
+        Color3.fromRGB(255, 20, 147),   -- Deep Pink
+        Color3.fromRGB(255, 105, 180),  -- Hot Pink
+    }
     -- Function to get a random color for a players
     local function getPlayerColor(player)
         if not playerData[player] then
-            playerData[player] = {Color = BrickColor.random().Color, Ray = nil}
+            playerData[player] = {Color = BrightColors[math.random(#BrightColors)], Ray = nil}
         end
         return playerData[player].Color
     end
@@ -178,7 +201,7 @@ do
 
             rayPart.Size = Vector3.new(0.2, 0.2, RAY_LENGTH)
             rayPart.CFrame = CFrame.lookAt(rootPart.Position, rootPart.Position + direction) * CFrame.new(0, 0, -RAY_LENGTH * 0.5)
-            rayPart.Transparency = 0.5 -- Make it visible
+            rayPart.Transparency = 0.6 -- Make it visible
         else
             -- Hide the ray when not in the air
             if playerData[player].Ray then
@@ -225,6 +248,8 @@ do
     end)
 
     hooks:Add(Players.PlayerAdded:Connect(loadPlayer))
+    hooks:Add(Players.PlayerRemoving:Connect(unloadPlayer))
+
     for _, v in Players:GetPlayers() do
         loadPlayer(v)
     end
@@ -321,9 +346,9 @@ do
     
         local function setEnabled(v)
             if v then
-                connections:Add(Players.LocalPlayer.CharacterAdded:Connect(charAdded))
-                if Players.LocalPlayer.Character then
-                    charAdded(Players.LocalPlayer.Character)
+                connections:Add(LocalPlayer.CharacterAdded:Connect(charAdded))
+                if LocalPlayer.Character then
+                    charAdded(LocalPlayer.Character)
                 end
             else   
                 connections:Cleanup()
@@ -364,16 +389,16 @@ do
     
                 local function charAdded(char: Model)
                     connections:Add(char:GetAttributeChangedSignal("Jumping"):Connect(function()
-                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.LeftShift, false, Players.LocalPlayer)
-                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.LeftShift, false, Players.LocalPlayer)
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.LeftShift, false, LocalPlayer)
+                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.LeftShift, false, LocalPlayer)
                     end), nil, "jumpCon")
                 end
             
                 local function setEnabled(v)
                     if v then
-                        connections:Add(Players.LocalPlayer.CharacterAdded:Connect(charAdded))
-                        if Players.LocalPlayer.Character then
-                            charAdded(Players.LocalPlayer.Character)
+                        connections:Add(LocalPlayer.CharacterAdded:Connect(charAdded))
+                        if LocalPlayer.Character then
+                            charAdded(LocalPlayer.Character)
                         end
                     else   
                         connections:Cleanup()
@@ -422,9 +447,9 @@ do
         local function setEnabled(v)
             ENABLED = v
             if v then
-                connections:Add(Players.LocalPlayer.CharacterAdded:Connect(charAdded))
-                if Players.LocalPlayer.Character then
-                    charAdded(Players.LocalPlayer.Character)
+                connections:Add(LocalPlayer.CharacterAdded:Connect(charAdded))
+                if LocalPlayer.Character then
+                    charAdded(LocalPlayer.Character)
                 end
             else
                 if currentHum then
@@ -474,15 +499,15 @@ do
 
         local currentValue = baseVal
         local db = false
-        local gameValue = Players.LocalPlayer:GetAttribute(attributeName)
-        hooks:Add(Players.LocalPlayer:GetAttributeChangedSignal(name):Connect(function()
+        local gameValue = LocalPlayer:GetAttribute(attributeName)
+        hooks:Add(LocalPlayer:GetAttributeChangedSignal(name):Connect(function()
             if db then db = false return end
 
-            gameValue = Players.LocalPlayer:GetAttribute(name)
+            gameValue = LocalPlayer:GetAttribute(name)
             defaultText.Text = `default: {gameValue}`
 
             db = true
-            Players.LocalPlayer:SetAttribute(name, currentValue)
+            LocalPlayer:SetAttribute(name, currentValue)
         end))
 
 
@@ -503,7 +528,7 @@ do
             Callback = function(self, Value)
                 currentValue = Value
                 db = true
-                Players.LocalPlayer:SetAttribute(attributeName, Value)
+                LocalPlayer:SetAttribute(attributeName, Value)
             end,
         })
 
@@ -525,7 +550,7 @@ do
 
         hooks:Add(function()
             db = true
-            Players.LocalPlayer:SetAttribute(attributeName, gameValue)
+            LocalPlayer:SetAttribute(attributeName, gameValue)
         end)
     end
 
@@ -803,7 +828,7 @@ do
                     end
 
                     local old; old = hookfunction(val.set, newcclosure(function(self, ...)
-                        if ENABLED and not checkcaller() and rawequal(self, val) and not Players.LocalPlayer:GetAttribute("IsServing") then
+                        if ENABLED and not checkcaller() and rawequal(self, val) and not LocalPlayer:GetAttribute("IsServing") then
                             return old(self, false)
                         end     
                         return old(self, ...)
@@ -812,7 +837,7 @@ do
                     local spikeClock = os.clock()
                     local oldMove; oldMove = hookfunction(t.DoMove, newcclosure(function(_, name, ...)
                         if ENABLED and not checkcaller() and rawequal(name, "Spike") then
-                            if os.clock() - spikeClock < 0.25 + Players.LocalPlayer:GetNetworkPing() then
+                            if os.clock() - spikeClock < 0.25 + LocalPlayer:GetNetworkPing() then
                                 return
                             else
                                 spikeClock = os.clock()
@@ -939,7 +964,7 @@ do
     if hookmetamethod and BallTrajectory then
         local ENABLED = true
 
-        local player = Players.LocalPlayer
+        local player = LocalPlayer
         local old; old = hookmetamethod(game, "__index", newcclosure(function(self, index, ...)
             if ENABLED and not checkcaller() and typeof(self) == "Instance" and old(self, "ClassName") == "Humanoid" and rawequal(index, "MoveDirection") and #({...}) == 0 and rawequal(debug.info(3,"f"), gameController.Dive)  then
                 if BallTrajectory.LastTrajectory then
@@ -969,113 +994,272 @@ do
     end
 end
 
--- Ball
-if BallTrajectory then
-    local BallTab = Window:CreateTab({
-        Name = "Ball",
+-- Debug
+do
+    local DebugTab = Window:CreateTab({
+        Name = "Debug",
         Visible = false 
     })
 
-    -->> Preview 
-    do
-        local PreviewConfig = {
-            Enabled = false,
-            PreviewBallColor = Color3.fromRGB(255, 0, 0),
-            PreviewBallTransparency = 0.5,
-            BeamColor = Color3.fromRGB(82, 82, 82),
-            BeamWidth = 0.2,
-            PreviewBallScale = .8, -- Scale factor for the preview ball
-        }
-        
-        local BallPreviews = {}
-        local PreviewContainer = Instance.new("Folder")
-        PreviewContainer.Name = "BallLandingPreviews"
-        PreviewContainer.Parent = workspace
-        
-        local function removeBallPreview(ball)
-            if not BallPreviews[ball] then return end
-            for _, obj in pairs(BallPreviews[ball]) do
-                if obj and obj.Parent then obj:Destroy() end
-            end
-            BallPreviews[ball] = nil
-        end
-        
-        local function createBallPreview(ball)
-            if not PreviewConfig.Enabled then return end
-            removeBallPreview(ball)
-        
-            local originalBall = ball.Ball
-            local originalPart = originalBall.PrimaryPart
-            local ballSize = originalPart.Size.Magnitude * PreviewConfig.PreviewBallScale
-        
-            -- Create a new sphere as the preview ball
-            local previewBall = Instance.new("Part")
-            previewBall.Shape = Enum.PartType.Ball
-            previewBall.Size = Vector3.new(ballSize, ballSize, ballSize)
-            previewBall.Color = PreviewConfig.PreviewBallColor
-            previewBall.Transparency = PreviewConfig.PreviewBallTransparency
-            previewBall.CanCollide = false
-            previewBall.Anchored = true
-            previewBall.CanQuery = false
-            previewBall.CanTouch = false
-            previewBall.Parent = PreviewContainer
-        
-            local sourceAttachment, targetAttachment = Instance.new("Attachment"), Instance.new("Attachment")
-            sourceAttachment.Parent, sourceAttachment.Name = originalPart, "TrajectoryBeamSource"
-            targetAttachment.Parent, targetAttachment.Name = previewBall, "TrajectoryBeamTarget"
-        
-            local beam = Instance.new("Beam")
-            beam.Name, beam.Color = "TrajectoryBeam", ColorSequence.new(PreviewConfig.BeamColor)
-            beam.Width0, beam.Width1, beam.FaceCamera = PreviewConfig.BeamWidth, PreviewConfig.BeamWidth, true
-            beam.Attachment0, beam.Attachment1, beam.Parent = sourceAttachment, targetAttachment, previewBall
-        
-            BallPreviews[ball] = { PreviewBall = previewBall, Beam = beam, SourceAttachment = sourceAttachment, TargetAttachment = targetAttachment }
-        end
-        
-        local function updateBallPreview(ball, landingPosition)
-            if PreviewConfig.Enabled and BallPreviews[ball] then
-                BallPreviews[ball].PreviewBall.Position = landingPosition
-            end
-        end
-        
-        local function cleanupAllPreviews()
-            for ball in pairs(BallPreviews) do removeBallPreview(ball) end
-            BallPreviews = {}
-        end
-        
-        function ToggleBallTrajectoryPreviews(enabled)
-            if PreviewConfig.Enabled == enabled then return end
-            PreviewConfig.Enabled = enabled
-            if not enabled then cleanupAllPreviews() else
-                for _, ball in BallTrajectory.getAllBalls() do createBallPreview(ball) end
-            end
-            return PreviewConfig.Enabled
-        end
-        
-        BallTrajectory.newBallSignal:Connect(createBallPreview)
-        BallTrajectory.trajectoryUpdatedSignal:Connect(function(ball, landingPosition)
-            if landingPosition then
-                if BallPreviews[ball] then updateBallPreview(ball, landingPosition) else createBallPreview(ball) end
-            else removeBallPreview(ball) end
-        end)
-        BallTrajectory.ballDestroySignal:Connect(removeBallPreview)
-        
-        hooks:Add(function()
-            ToggleBallTrajectoryPreviews(false)
-        end)
-        
-        BallTab:Checkbox({
-            Label = "Trajectory Preview",
-            Value = true,
-            saveFlag = "TrajectoryPreviewToggle",
-            Callback = function(_, v)
-                ToggleBallTrajectoryPreviews(v)
-            end,
-        })
+    local PreviewContainer = Instance.new("Folder")
+    PreviewContainer.Name = "DebugFolder"
+    PreviewContainer.Parent = workspace
 
+    -- Ball Trajectory
+    if BallTrajectory then
+        -->> Preview 
+        do
+            local PreviewConfig = {
+                Enabled = false,
+                PreviewBallColor = Color3.fromRGB(255, 0, 0),
+                PreviewBallTransparency = 0.5,
+                BeamColor = Color3.fromRGB(82, 82, 82),
+                BeamWidth = 0.2,
+                PreviewBallScale = .8, -- Scale factor for the preview ball
+            }
+            
+            local BallPreviews = {}
+            
+            local function removeBallPreview(ball)
+                if not BallPreviews[ball] then return end
+                for _, obj in pairs(BallPreviews[ball]) do
+                    if obj and obj.Parent then obj:Destroy() end
+                end
+                BallPreviews[ball] = nil
+            end
+            
+            local function createBallPreview(ball)
+                if not PreviewConfig.Enabled then return end
+                removeBallPreview(ball)
+            
+                local originalBall = ball.Ball
+                local originalPart = originalBall.PrimaryPart
+                local ballSize = originalPart.Size.Magnitude * PreviewConfig.PreviewBallScale
+            
+                -- Create a new sphere as the preview ball
+                local previewBall = Instance.new("Part")
+                previewBall.Shape = Enum.PartType.Ball
+                previewBall.Size = Vector3.new(ballSize, ballSize, ballSize)
+                previewBall.Color = PreviewConfig.PreviewBallColor
+                previewBall.Transparency = PreviewConfig.PreviewBallTransparency
+                previewBall.CanCollide = false
+                previewBall.Anchored = true
+                previewBall.CanQuery = false
+                previewBall.CanTouch = false
+                previewBall.Parent = PreviewContainer
+            
+                local sourceAttachment, targetAttachment = Instance.new("Attachment"), Instance.new("Attachment")
+                sourceAttachment.Parent, sourceAttachment.Name = originalPart, "TrajectoryBeamSource"
+                targetAttachment.Parent, targetAttachment.Name = previewBall, "TrajectoryBeamTarget"
+            
+                local beam = Instance.new("Beam")
+                beam.Name, beam.Color = "TrajectoryBeam", ColorSequence.new(PreviewConfig.BeamColor)
+                beam.Width0, beam.Width1, beam.FaceCamera = PreviewConfig.BeamWidth, PreviewConfig.BeamWidth, true
+                beam.Attachment0, beam.Attachment1, beam.Parent = sourceAttachment, targetAttachment, previewBall
+            
+                BallPreviews[ball] = { PreviewBall = previewBall, Beam = beam, SourceAttachment = sourceAttachment, TargetAttachment = targetAttachment }
+            end
+            
+            local function updateBallPreview(ball, landingPosition)
+                if PreviewConfig.Enabled and BallPreviews[ball] then
+                    BallPreviews[ball].PreviewBall.Position = landingPosition
+                end
+            end
+            
+            local function cleanupAllPreviews()
+                for ball in pairs(BallPreviews) do removeBallPreview(ball) end
+                BallPreviews = {}
+            end
+            
+            function ToggleBallTrajectoryPreviews(enabled)
+                if PreviewConfig.Enabled == enabled then return end
+                PreviewConfig.Enabled = enabled
+                if not enabled then cleanupAllPreviews() else
+                    for _, ball in BallTrajectory.getAllBalls() do createBallPreview(ball) end
+                end
+                return PreviewConfig.Enabled
+            end
+            
+            BallTrajectory.newBallSignal:Connect(createBallPreview)
+            BallTrajectory.trajectoryUpdatedSignal:Connect(function(ball, landingPosition)
+                if landingPosition then
+                    if BallPreviews[ball] then updateBallPreview(ball, landingPosition) else createBallPreview(ball) end
+                else removeBallPreview(ball) end
+            end)
+            BallTrajectory.ballDestroySignal:Connect(removeBallPreview)
+            
+            hooks:Add(function()
+                ToggleBallTrajectoryPreviews(false)
+            end)
+            
+            DebugTab:Checkbox({
+                Label = "Ball Trajectory",
+                Value = true,
+                saveFlag = "TrajectoryPreviewToggle",
+                Callback = function(_, v)
+                    ToggleBallTrajectoryPreviews(v)
+                end,
+            })
+    
+        end
+    
     end
 
+    -- Safe Zone
+    do
+        DebugTab:Separator({})
+
+        local toggleEnabled = false
+        local enemyCylinders = {}
+        local courtHighlight = nil
+        local enemyHighlightModel = nil
+        
+        local janitor = Janitor.new()
+        
+        local function createHighlightModel()
+            enemyHighlightModel = Instance.new("Model")
+            enemyHighlightModel.Name = "EnemyHighlights"
+            enemyHighlightModel.Parent = PreviewContainer
+        
+            janitor:Add(enemyHighlightModel)
+        end
+        
+        local function updateCourtHighlight()
+            if not courtHighlight then return end
+        
+            if not LocalPlayer.Team or not LocalPlayer.Team:GetAttribute("Index") then
+                courtHighlight.Parent = nil
+                return
+            else
+                courtHighlight.Parent = PreviewContainer
+            end
+        
+            local courtPos = CourtPart.Position
+            local halfZ = CourtPart.Size.Z / 2
+            local newPos = courtPos
+        
+            if LocalPlayer.Team and LocalPlayer.Team:GetAttribute("Index") == 1 then
+                newPos = Vector3.new(courtPos.X, courtPos.Y + 0.1, courtPos.Z + (halfZ / 2))
+            elseif LocalPlayer.Team and LocalPlayer.Team:GetAttribute("Index") == 2 then
+                newPos = Vector3.new(courtPos.X, courtPos.Y + 0.1, courtPos.Z - (halfZ / 2))
+            end
+        
+            courtHighlight.Size = Vector3.new(CourtPart.Size.X, CourtPart.Size.Y, halfZ)
+            courtHighlight.CFrame = CFrame.new(newPos) * CourtPart.CFrame.Rotation
+        end
+        
+        local function createCourtHighlight()
+            local highlightPart = Instance.new("Part")
+            highlightPart.Name = "CourtHighlightPart"
+            highlightPart.Anchored = true
+            highlightPart.CanCollide = false
+            highlightPart.Color = Color3.fromRGB(165, 255, 165)
+            highlightPart.Material = Enum.Material.ForceField
+            highlightPart.Transparency = 0.5
+            highlightPart.Parent = PreviewContainer
+        
+            courtHighlight = highlightPart
+            updateCourtHighlight()
+        
+            janitor:Add(highlightPart)
+        end
+        
+        local function createEnemyCylinder(player)
+            if player == LocalPlayer then return end
+            if not player.Team or (LocalPlayer.Team and player.Team and player.Team == LocalPlayer.Team) then return end
+        
+            local multiplier = player:GetAttribute("GameDiveSpeedMultiplier") or 1
+            local radius = 10 * multiplier
+        
+            local cylinder = Instance.new("Part")
+            cylinder.Shape = Enum.PartType.Cylinder
+            cylinder.Name = player.Name .. "_HighlightCylinder"
+            cylinder.Anchored = true
+            cylinder.CanCollide = false
+            cylinder.Color = Color3.new(1, 0, 0)
+            cylinder.Material = Enum.Material.Neon
+            cylinder.Transparency = 0.75
+            cylinder.Size = Vector3.new(0.2, radius * 2, radius * 2)
+            cylinder.Parent = enemyHighlightModel
+        
+            enemyCylinders[player] = cylinder
+            janitor:Add(cylinder, nil, player)
+        
+            return cylinder
+        end
+        
+        local function updateEnemyCylinder(player)
+            if not enemyCylinders[player] then
+                createEnemyCylinder(player)
+            end
+        
+            local cyl = enemyCylinders[player]
+            if cyl and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                cyl.Parent = enemyHighlightModel
+                local hrp = player.Character.HumanoidRootPart
+                cyl.CFrame = CFrame.new(hrp.Position.X, CourtPart.Position.Y + CourtPart.Size.Y + 0.2, hrp.Position.Z) * CFrame.Angles(0, 0, math.rad(90))
+
+            else
+                if cyl then
+                    cyl.Parent = nil
+                end
+            end
+        end
+        
+        local function removeEnemyCylinder(player)
+            local cyl = enemyCylinders[player]
+            if cyl then
+                janitor:Remove(player)
+                enemyCylinders[player] = nil
+            end
+        end
+        
+        local function setup()
+            createHighlightModel()
+            createCourtHighlight()
+        
+            janitor:Add(RunService.Heartbeat:Connect(function()
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer then
+                        if LocalPlayer.Team and player.Team and player.Team ~= LocalPlayer.Team then
+                            updateEnemyCylinder(player)
+                        else
+                            removeEnemyCylinder(player)
+                        end
+                    end
+                end
+            end))
+        
+            janitor:Add(Players.PlayerRemoving:Connect(removeEnemyCylinder))
+            janitor:Add(LocalPlayer:GetPropertyChangedSignal("Team"):Connect(updateCourtHighlight))
+        end
+        
+        local function toggle(on)
+            if on then
+                setup()
+            else
+                janitor:Cleanup()
+                table.clear(enemyCylinders)
+                courtHighlight = nil
+                enemyHighlightModel = nil
+            end
+        end
+        
+        DebugTab:Checkbox({
+            Label = "Hit Zone",
+            Value = toggleEnabled,
+            saveFlag = "HitZoneToggle",
+            Callback = function(_, v)
+                toggle(v)
+            end,
+        })
+        
+        hooks:Add(function()
+            toggle(false)
+        end)
+    end        
 end
+
 
 HaikyuuRaper:UiTab()
 HaikyuuRaper:ConfigManager()

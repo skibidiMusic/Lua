@@ -79,3 +79,156 @@ old = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
 end))
 
 game.UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local Janitor = require(path.to.Janitor) -- Update this path to your actual Janitor module
+
+local localPlayer = Players.LocalPlayer
+local court = workspace:WaitForChild("Court")
+
+local toggleEnabled = false
+local enemyCylinders = {}
+local courtHighlight = nil
+local enemyHighlightModel = nil
+local janitor = Janitor.new()
+
+local function createHighlightModel()
+	enemyHighlightModel = Instance.new("Model")
+	enemyHighlightModel.Name = "EnemyHighlights"
+	enemyHighlightModel.Parent = workspace
+	janitor:Add(enemyHighlightModel)
+end
+
+local function createCourtHighlight()
+	local highlightPart = Instance.new("Part")
+	highlightPart.Name = "CourtHighlightPart"
+	highlightPart.Anchored = true
+	highlightPart.CanCollide = false
+	highlightPart.Transparency = 1
+	highlightPart.Parent = enemyHighlightModel
+
+	local courtPos = court.Position
+	local halfZ = court.Size.Z / 2
+	local newPos = courtPos
+
+	if localPlayer.Team and localPlayer.Team.Index == 1 then
+		newPos = Vector3.new(courtPos.X, courtPos.Y + 0.1, courtPos.Z + (halfZ / 2))
+	elseif localPlayer.Team and localPlayer.Team.Index == 2 then
+		newPos = Vector3.new(courtPos.X, courtPos.Y + 0.1, courtPos.Z - (halfZ / 2))
+	end
+
+	highlightPart.Size = Vector3.new(court.Size.X, court.Size.Y, halfZ)
+	highlightPart.CFrame = CFrame.new(newPos)
+
+	local hl = Instance.new("Highlight")
+	hl.Adornee = highlightPart
+	hl.FillColor = Color3.new(1, 1, 0)
+	hl.OutlineColor = Color3.new(1, 1, 1)
+	hl.FillTransparency = 0.5
+	hl.OutlineTransparency = 0.5
+	hl.DepthMode = Enum.HighlightDepthMode.Occluded
+	hl.Parent = highlightPart
+
+	courtHighlight = highlightPart
+	janitor:Add(highlightPart)
+end
+
+local function createEnemyCylinder(player)
+	if player == localPlayer then return nil end
+	if localPlayer.Team and player.Team and player.Team == localPlayer.Team then return nil end
+
+	local multiplier = player:GetAttribute("GameDiveSpeedMultiplier") or 1
+	local radius = 10 * multiplier
+
+	local cylinder = Instance.new("Part")
+	cylinder.Shape = Enum.PartType.Cylinder
+	cylinder.Name = player.Name .. "_HighlightCylinder"
+	cylinder.Anchored = true
+	cylinder.CanCollide = false
+	cylinder.Color = Color3.new(1, 0, 0)
+	cylinder.Transparency = 0.5
+	cylinder.Size = Vector3.new(radius * 2, 1, radius * 2)
+	cylinder.Parent = enemyHighlightModel
+
+	enemyCylinders[player] = cylinder
+	janitor:Add(cylinder)
+
+	return cylinder
+end
+
+local function updateEnemyCylinder(player)
+	if not enemyCylinders[player] then
+		createEnemyCylinder(player)
+	end
+
+	local cyl = enemyCylinders[player]
+	if cyl and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+		local hrp = player.Character.HumanoidRootPart
+		cyl.CFrame = CFrame.new(hrp.Position.X, court.Position.Y + court.Size.Y + 0.5, hrp.Position.Z) * CFrame.Angles(math.rad(90), 0, 0)
+	end
+end
+
+local function removeEnemyCylinder(player)
+	local cyl = enemyCylinders[player]
+	if cyl then
+		cyl:Destroy()
+		enemyCylinders[player] = nil
+	end
+end
+
+local function setup()
+	createHighlightModel()
+	createCourtHighlight()
+
+	janitor:Add(RunService.RenderStepped:Connect(function()
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player ~= localPlayer then
+				if localPlayer.Team and player.Team and player.Team ~= localPlayer.Team then
+					updateEnemyCylinder(player)
+				else
+					removeEnemyCylinder(player)
+				end
+			end
+		end
+	end), "Disconnect")
+
+	janitor:Add(Players.PlayerAdded:Connect(function(player)
+		local charConn
+		charConn = player.CharacterAdded:Connect(function()
+			task.wait(0.5)
+			if toggleEnabled and localPlayer.Team and player.Team and player.Team ~= localPlayer.Team then
+				updateEnemyCylinder(player)
+			end
+		end)
+		janitor:Add(charConn, "Disconnect")
+	end), "Disconnect")
+
+	janitor:Add(Players.PlayerRemoving:Connect(removeEnemyCylinder), "Disconnect")
+end
+
+local function toggle(on)
+	if on then
+		janitor:Cleanup()
+		enemyCylinders = {}
+		janitor = Janitor.new()
+		setup()
+	else
+		janitor:Cleanup()
+		enemyCylinders = {}
+		courtHighlight = nil
+		enemyHighlightModel = nil
+	end
+end
+
+UserInputService.InputBegan:Connect(function(input, gp)
+	if not gp and input.KeyCode == Enum.KeyCode.H then
+		toggleEnabled = not toggleEnabled
+		toggle(toggleEnabled)
+	end
+end)
+
+toggleEnabled = true
+toggle(true)
