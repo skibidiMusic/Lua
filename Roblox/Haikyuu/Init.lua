@@ -407,7 +407,7 @@ do
         local currentHum = nil
         local function WalkSpeedChange()
             if currentHum then
-                currentHum.Walkspeed = WALKSPEED_VALUE
+                currentHum.WalkSpeed = WALKSPEED_VALUE
             end
         end  
 
@@ -428,7 +428,7 @@ do
                 end
             else
                 if currentHum then
-                    currentHum.Walkspeed = defaultWalkspeed
+                    currentHum.WalkSpeed = defaultWalkspeed
                 end
                 connections:Cleanup()
             end
