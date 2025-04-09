@@ -445,12 +445,21 @@ do
             Text = "Hidden Shiftlock"
         })
 
-        CharacterTab:Checkbox({
+        local checkBox = CharacterTab:Checkbox({
             Label = "Enabled",
             Value = true,
             saveFlag = "AirShiftlockToggle",
             Callback = function(_, v)
                 setEnabled(v)
+            end,
+        })
+
+        local kb = CharacterTab:Keybind({
+            Label = "Keybind",
+            Value = Enum.KeyCode.R,
+            saveFlag = "AirShiftlockKeybind",
+            Callback = function()
+                checkBox:Toggle()
             end,
         })
       end
