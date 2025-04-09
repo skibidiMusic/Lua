@@ -18,18 +18,20 @@ local hooks = HaikyuuRaper.hooks
 
 --##
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+--local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local ReplicatedFirst = game:GetService("ReplicatedFirst")
+--local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local CollectionService = game:GetService("CollectionService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
+--local UserInputService = game:GetService("UserInputService")
+--local VirtualInputManager = game:GetService("VirtualInputManager")
+local UserGameSettings = UserSettings():GetService("UserGameSettings")
 
 local LocalPlayer = Players.LocalPlayer
 
 -- Game Stuff
 local function getCourtPart()
     for _, v in CollectionService:GetTagged("Court") do
-        if v:IsDescendantOf(workspace.Map) then
+        if v:IsDescendantOf(workspace:WaitForChild("Map")) then
             return v
         end
     end
@@ -260,6 +262,10 @@ do
         Visible = true 
     })
 
+    RayTab:Separator({
+        Text = "Main"
+    })
+
     RayTab:Checkbox({
         Label = "Enabled",
         Value = true,
@@ -358,9 +364,13 @@ do
         hooks:Add(function()
             setEnabled(false)
         end)
-    
+   
+        CharacterTab:Separator({
+            Text = "Air Rotate"
+        })
+
         CharacterTab:Checkbox({
-            Label = "Rotate In Air",
+            Label = "Enabled",
             Value = true,
             saveFlag = "CharacterRotateToggle",
             Callback = function(_, v)
@@ -369,7 +379,7 @@ do
         })
     
         CharacterTab:Slider({
-            Label = "Rotate Off Delay",
+            Label = "Max Time",
             Format = "%.2f/%s", 
             Value = DLY_SLIDER,
             MinValue = 0,
@@ -379,48 +389,72 @@ do
                 DLY_SLIDER = Value
             end,
         })
-    
-        CharacterTab:Separator({ })
     end
-    
-    -- Shiftlock in Air
+
+    -- GetIsMouseLocked
+    -- Hidden Shiftlock
     do
-                local connections = Janitor.new()
-    
-                local function charAdded(char: Model)
-                    connections:Add(char:GetAttributeChangedSignal("Jumping"):Connect(function()
-                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.LeftShift, false, LocalPlayer)
-                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.LeftShift, false, LocalPlayer)
-                    end), nil, "jumpCon")
+        local connections = Janitor.new()
+
+        local IN_AIR = false
+        local ENABLED = true
+
+        local default = Enum.RotationType.CameraRelative
+        --setreadonly(Enum.RotationType, false)
+
+        local old; old = hookmetamethod(game, "__newindex", newcclosure(function(self, index, val, ...)
+            if not checkcaller() and ENABLED and IN_AIR and rawequal(self, UserGameSettings) and rawequal(index, "RotationType") then
+                return old(self, index, Enum.RotationType.MovementRelative)
+            end
+            return old(self, index, val, ...)
+        end))
+
+        local function setActive(v)
+            IN_AIR = v
+        end
+
+        local function charAdded(char: Model)
+            setActive(true)
+            connections:Add(char:GetAttributeChangedSignal("Jumping"):Connect(function()
+                if char:GetAttribute("Jumping") then
+                    setActive(false)
+                else
+                    setActive(true)
                 end
-            
-                local function setEnabled(v)
-                    if v then
-                        connections:Add(LocalPlayer.CharacterAdded:Connect(charAdded))
-                        if LocalPlayer.Character then
-                            charAdded(LocalPlayer.Character)
-                        end
-                    else   
-                        connections:Cleanup()
-                    end
+            end), nil, "jumpCon")
+        end
+    
+        local function setEnabled(v)
+            ENABLED = v
+            if v then
+                connections:Add(LocalPlayer.CharacterAdded:Connect(charAdded))
+                if LocalPlayer.Character then
+                    charAdded(LocalPlayer.Character)
                 end
-            
-                hooks:Add(function()
-                    setEnabled(false)
-                end)
+            else   
+                setActive(false)
+                connections:Cleanup()
+            end
+        end
     
-                CharacterTab:Checkbox({
-                    Label = "Auto Shiftlock Air",
-                    Value = true,
-                    saveFlag = "AirShiftlockToggle",
-                    Callback = function(_, v)
-                        setEnabled(v)
-                    end,
-                })
-    
-                CharacterTab:Separator({})
-    end
-    
+        hooks:Add(function()
+            setEnabled(false)
+        end)
+
+        CharacterTab:Separator({
+            Text = "Hidden Shiftlock"
+        })
+
+        CharacterTab:Checkbox({
+            Label = "Enabled",
+            Value = true,
+            saveFlag = "AirShiftlockToggle",
+            Callback = function(_, v)
+                setEnabled(v)
+            end,
+        })
+      end
+
     -- Walkspeed
     do
         local WALKSPEED_VALUE = 26
@@ -463,8 +497,12 @@ do
             setEnabled(false)
         end)
 
+        CharacterTab:Separator({
+            Text = "Walkspeed"
+        })
+
         CharacterTab:Checkbox({
-            Label = "Walkspeed Enabled",
+            Label = "Enabled",
             Value = ENABLED,
             saveFlag = "WalkspeedEnabled",
             Callback = function(_, v)
@@ -473,7 +511,7 @@ do
         })
 
         CharacterTab:Slider({
-            Label = "Walkspeed Value",
+            Label = "Speed",
             Format = "%.d/%s", 
             Value = WALKSPEED_VALUE,
             MinValue = 0,
@@ -492,6 +530,9 @@ do
         Text = "Attributes"
     })
 
+    CharacterTab:Label({
+        Text = ``
+    })
 
     -- Attribute Modifiers
     local function attributeModifier(name: string, attributeName: string, baseVal: number, min: number, max: number)
@@ -510,15 +551,13 @@ do
             LocalPlayer:SetAttribute(name, currentValue)
         end))
 
-
-        local dropdown = CharacterTab:CollapsingHeader({
-            Title = name,
-            Open = true
+        CharacterTab:Separator({
+            Text = name,
         })
 
-        local row = dropdown:Row()
+        local row = CharacterTab:Row()
 
-        local slider = dropdown:Slider({
+        local slider = CharacterTab:Slider({
             Label = name,
             Format = "%.2f/%s", 
             Value = baseVal,
@@ -593,8 +632,12 @@ if currentCam then
             setEnabled(false)
         end)
 
+        CameraTab:Separator({
+            Text = "FOV"
+        })
+
         CameraTab:Checkbox({
-            Label = "FOV Enabled",
+            Label = "Enabled",
             Value = true,
             saveFlag = "FovEnabled",
             Callback = function(_, v)
@@ -613,8 +656,6 @@ if currentCam then
                 FOV_VALUE = math.round(Value)
             end,
         })
-
-        CameraTab:Separator({})
     end
 end
 
@@ -649,9 +690,13 @@ do
             return old(self, table.unpack(args))
         end)
 
+        InternalTab:Separator({
+            Text = "Serve"
+        })
+
         -- ui
         InternalTab:Slider({
-            Label = "Serve Power",
+            Label = "Power",
             Format = "%.d/%s", 
             Value = 100,
             MinValue = 0,
@@ -665,7 +710,7 @@ do
         })
     
         InternalTab:Checkbox({
-            Label = "Serve Power Enabled",
+            Label = "Enabled",
             Value = true,
             saveFlag = "ServePowerToggle",
             Callback = function(_, v)
@@ -673,40 +718,116 @@ do
             end,
         })
 
-        InternalTab:Separator({})
     end
 
     -- Ts Hinoto
     if hookmetamethod then
-        local ENABLED = true
-        local old;
-        old = hookmetamethod(game, "__namecall", function(self, ...)
-            local args = {...}
-            if ENABLED and not checkcaller() then
-                if getnamecallmethod() == "InvokeServer" and typeof(self) == "Instance" and self.ClassName == "RemoteFunction" and self.Name == "Interact" then
-                    local t = args[1]
-                    if typeof(t) == "table" and rawget(t, "SpecialCharge") ~= nil then
-                        rawset(t, "SpecialCharge", 2)
-                    end
-                end
-            end
-            return old(self, table.unpack(args))
-        end)
-
-        InternalTab:Checkbox({
-            Label = "Hinata Max",
-            Value = ENABLED,
-            saveFlag = "HinataMaxToggle",
-            Callback = function(_, v)
-                ENABLED = v
-            end,
+        InternalTab:Separator({
+            Text = "Timeskip Hinata"
         })
 
-        hooks:Add(function()
-            ENABLED = false
-        end)
+        local specialController;
+        for _, v in getloadedmodules() do
+            if v.Name ~= "SpecialController" then continue end
+            specialController = require(v)
+            break
+        end
 
-        InternalTab:Separator({})
+        do
+            local function valueHook(name, value)
+                InternalTab:Label({
+                    Text = `* {name}`
+                })
+
+                local MULTIPLIER = 1
+                local ENABLED = false
+
+                local old; old = hookfunction(value.get, newcclosure(function(self, ...)
+                    if not ENABLED or not rawequal(self, value) then return old(self, ...) end
+
+                    local result = old(self, ...)
+                    if typeof(result) ~= "number" then return result end
+
+                    return result * MULTIPLIER
+                end))
+
+
+                -- ui
+                InternalTab:Checkbox({
+                    Label = "Enabled",
+                    Value = ENABLED,
+                    saveFlag = `TsHinoto{name}Toggle`,
+                    Callback = function(_, v)
+                        ENABLED = v
+                    end,
+                })
+
+                InternalTab:Slider({
+                    Label = "Multiplier",
+                    Format = "%.d/%s", 
+                    Value = 1,
+                    MinValue = 0,
+                    MaxValue = 10,
+                    saveFlag = `TsHinoto{name}ValueSlider`,
+                
+                    Callback = function(self, Value)
+                        if name == "Fill Damping" then
+                            MULTIPLIER = 1 / Value
+                        else
+                            MULTIPLIER = Value
+                        end
+                    end,
+                })
+            
+                hooks:Add(function()
+                    ENABLED = false
+                end)
+            end
+                
+            -- Speed
+            local speedVal = specialController.ChargeSpringSpeed
+            valueHook("Fill Speed", speedVal)
+        
+            -- Damping
+            --local dampingVal = specialController.ChargeSpringSpeed
+            --valueHook("Fill Damping", dampingVal)
+        end
+
+
+        -- Always Max
+        do     
+            local ENABLED = true
+            local old;
+            old = hookmetamethod(game, "__namecall", function(self, ...)
+                local args = {...}
+                if ENABLED and not checkcaller() then
+                    if getnamecallmethod() == "InvokeServer" and typeof(self) == "Instance" and self.ClassName == "RemoteFunction" and self.Name == "Interact" then
+                        local t = args[1]
+                        if typeof(t) == "table" and rawget(t, "SpecialCharge") ~= nil then
+                            rawset(t, "SpecialCharge", 2)
+                        end
+                    end
+                end
+                return old(self, table.unpack(args))
+            end)
+
+            InternalTab:Label({
+                Text = `* Always Purple`
+            })
+
+            InternalTab:Checkbox({
+                Label = "Enabled",
+                Value = ENABLED,
+                saveFlag = "HinataMaxToggle",
+                Callback = function(_, v)
+                    ENABLED = v
+                end,
+            })
+
+            hooks:Add(function()
+                ENABLED = false
+            end)
+        end
     end
 
     -- Sanu Tilt
@@ -774,6 +895,10 @@ do
             ENABLED = false
         end)
 
+        InternalTab:Separator({
+            Text = "Sanu Tilt"
+        })
+
         -- ui
         InternalTab:Slider({
             Label = "Max Angle",
@@ -789,15 +914,13 @@ do
         })
     
         InternalTab:Checkbox({
-            Label = "Sanu Tilt",
+            Label = "Enabled",
             Value = ENABLED,
             saveFlag = "SanuTiltToggle",
             Callback = function(_, v)
                 ENABLED = v
             end,
         })
-
-        InternalTab:Separator({})
     end
 
     -- No Cooldowns
@@ -810,8 +933,12 @@ do
                     local ENABLED = false
 
                     -- ui
+                    InternalTab:Separator({
+                        Text = "No Cooldowns"
+                    })
+
                     InternalTab:Checkbox({
-                        Label = "No Cooldowns",
+                        Label = "Enabled",
                         Value = ENABLED,
                         saveFlag = "NoCooldownsToggle",
                         Callback = function(_, v)
@@ -847,7 +974,6 @@ do
                     end))
             end
         end
-        InternalTab:Separator({})
     end
 
     -- Hitbox Expander
@@ -878,8 +1004,12 @@ do
             return old(self, unpack(args))
         end)
 
+        InternalTab:Separator({
+            Text = "Hitbox Expander"
+        })
+
         InternalTab:Slider({
-            Label = "Hitbox Multiplier",
+            Label = "Size",
             Format = "%.2f/%s", 
             Value = MULTIPLIER,
             MinValue = 0,
@@ -892,7 +1022,7 @@ do
         })
     
         InternalTab:Checkbox({
-            Label = "Hitbox Expander Enabled",
+            Label = "Enabled",
             Value = true,
             saveFlag = "HitboxToggle",
             Callback = function(_, v)
@@ -903,7 +1033,6 @@ do
         hooks:Add(function()
             ENABLED = false
         end)
-        InternalTab:Separator({})
     end
 
     local gameController;
@@ -916,6 +1045,7 @@ do
         end
     end
 
+    --[[
     -- Op Charge
     if gameController and hookfunction and checkcaller and newcclosure then
         local t = gameController
@@ -957,8 +1087,10 @@ do
             end     
             return old(self, ...)
         end))
+        
         InternalTab:Separator({})
     end
+    ]]
 
     -- Perfect Dive
     if hookmetamethod and BallTrajectory then
@@ -977,8 +1109,12 @@ do
             return old(self, index, ...)
         end))
 
+        InternalTab:Separator({
+            Text = "Perfect Dive"
+        })
+
         InternalTab:Checkbox({
-            Label = "Perfect Dive",
+            Label = "Enabled",
             Value = ENABLED,
             saveFlag = "PerfectDiveToggle",
             Callback = function(_, v)
@@ -989,8 +1125,6 @@ do
         hooks:Add(function()
             ENABLED = false
         end)
-        
-        InternalTab:Separator({})
     end
 end
 
@@ -1091,9 +1225,13 @@ do
             hooks:Add(function()
                 ToggleBallTrajectoryPreviews(false)
             end)
+      
+            DebugTab:Separator({
+                Text = "Ball Trajectory"
+            })
             
             DebugTab:Checkbox({
-                Label = "Ball Trajectory",
+                Label = "Enabled",
                 Value = true,
                 saveFlag = "TrajectoryPreviewToggle",
                 Callback = function(_, v)
@@ -1107,8 +1245,6 @@ do
 
     -- Safe Zone
     do
-        DebugTab:Separator({})
-
         local toggleEnabled = false
         local enemyCylinders = {}
         local courtHighlight = nil
@@ -1244,9 +1380,13 @@ do
                 enemyHighlightModel = nil
             end
         end
+                
+        DebugTab:Separator({
+            Text = "Dive Range"
+        })
         
         DebugTab:Checkbox({
-            Label = "Hit Zone",
+            Label = "Enabled",
             Value = toggleEnabled,
             saveFlag = "HitZoneToggle",
             Callback = function(_, v)

@@ -232,3 +232,14 @@ end)
 
 toggleEnabled = true
 toggle(true)
+
+
+for _, v in getloadedmodules() do
+	if v.Name == "PlayerModule" then
+		local playerModule = require(v)
+		local cameras = playerModule.cameras
+
+		print(getrawmetatable(cameras), cameras)
+
+	end
+end
