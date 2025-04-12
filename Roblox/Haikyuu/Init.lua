@@ -886,14 +886,16 @@ do
             if  ENABLED and not checkcaller() then
                 if getnamecallmethod() == "InvokeServer" and typeof(self) == "Instance" and self.ClassName == "RemoteFunction" and self.Name == "Interact" then
                     local t = args[1]
-                    if typeof(t) == "table" and rawget(t, "Action") == "Spike" then
-                        local lookVector, tiltDirection = rawget(t, "LookVector"), rawget(t, "TiltDirection")
-                        if lookVector and tiltDirection then
-                            local rotatedVector = rotateTowardsXZ(lookVector, tiltDirection, MAX_ANGLE)
-                            rawset(t, "LookVector", rotatedVector)
-                            --rawset(t, "TiltDirection", tiltDirection)
+                    if typeof(t) == "table" then
+                        local action = rawget(t, "Action")
+                        if action == "Spike" or action == "Block" then
+                            local lookVector, tiltDirection = rawget(t, "LookVector"), rawget(t, "TiltDirection")
+                            if lookVector and tiltDirection then
+                                local rotatedVector = rotateTowardsXZ(lookVector, tiltDirection, MAX_ANGLE)
+                                rawset(t, "LookVector", rotatedVector)
+                                --rawset(t, "TiltDirection", tiltDirection)
+                            end
                         end
-
                     end
                 end
             end
@@ -972,7 +974,7 @@ do
 
                     local spikeClock = os.clock()
                     local oldMove; oldMove = hookfunction(t.DoMove, newcclosure(function(_, name, ...)
-                        if ENABLED and not checkcaller() and rawequal(name, "Spike") then
+                        if ENABLED and not checkcaller() and (rawequal(name, "Spike") or rawequal(name, "Block"))  then
                             if os.clock() - spikeClock < 0.25 + LocalPlayer:GetNetworkPing() then
                                 return
                             else
