@@ -730,7 +730,7 @@ do
     end
 
     -- Ts Hinoto
-    if hookmetamethod then
+    if hookmetamethod and hookfunction and newcclosure then
         InternalTab:Separator({
             Text = "Timeskip Hinata"
         })
@@ -757,7 +757,11 @@ do
                     local result = old(self, ...)
                     if typeof(result) ~= "number" then return result end
 
-                    return result * MULTIPLIER
+                    if result == 20 then
+                        return result * 0.75
+                    else
+                        return result * MULTIPLIER
+                    end
                 end))
 
 
@@ -780,11 +784,7 @@ do
                     saveFlag = `TsHinoto{name}ValueSlider`,
                 
                     Callback = function(self, Value)
-                        if name == "Fill Damping" then
-                            MULTIPLIER = 1 / Value
-                        else
-                            MULTIPLIER = Value
-                        end
+                        MULTIPLIER = Value
                     end,
                 })
             
