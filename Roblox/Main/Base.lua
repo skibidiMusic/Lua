@@ -24,7 +24,31 @@ function BaseLoader.new(name: string)
 
     genv[name] = self
     
-    local Window = ImGui:CreateWindow({Title = name, Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false,})
+    local Window = ImGui:CreateWindow({Title = name, Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false, 	--// Styles
+	Colors = {
+		Window = {
+			BackgroundColor3 = Color3.fromRGB(122, 78, 119),
+			BackgroundTransparency = 0.25,
+			ResizeGrip = {
+				TextColor3 = Color3.fromRGB(56, 56, 56)
+			},
+			
+			TitleBar = {
+				BackgroundColor3 = Color3.fromRGB(255, 184, 251),
+				[{
+					Recursive = true,
+					Name = "ToggleButton"
+				}] = {
+					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+				}
+			},
+			ToolBar = {
+				TabButton = {
+					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+				}
+			},
+		},
+	}})
     Window:Center()
     
     local hooks = Janitor.new()
