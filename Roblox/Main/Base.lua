@@ -27,28 +27,48 @@ function BaseLoader.new(name: string)
     local Window = ImGui:CreateWindow({Title = name, Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false, 	--// Styles
 	Colors = {
 		Window = {
-			BackgroundColor3 = Color3.fromRGB(122, 78, 119),
-			BackgroundTransparency = 0.25,
+			BackgroundColor3 = Color3.fromRGB(89, 57, 92),
+			BackgroundTransparency = 0.1,
 			ResizeGrip = {
-				TextColor3 = Color3.fromRGB(56, 56, 56)
+				TextColor3 = Color3.fromRGB(87, 26, 95)
 			},
 			
 			TitleBar = {
-				BackgroundColor3 = Color3.fromRGB(255, 184, 251),
+				BackgroundColor3 = Color3.fromRGB(49, 21, 51),
 				[{
 					Recursive = true,
 					Name = "ToggleButton"
 				}] = {
-					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+					BackgroundColor3 = Color3.fromRGB(134, 63, 134)
 				}
 			},
 			ToolBar = {
 				TabButton = {
-					BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+					BackgroundColor3 = Color3.fromRGB(170, 81, 155)
 				}
 			},
 		},
-	}})
+		CheckBox = {
+			Tickbox = {
+				BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+				Tick = {
+					ImageColor3 = Color3.fromRGB(226, 130, 255)
+				}
+			}
+		},
+		Slider = {
+			Grab = {
+				BackgroundColor3 = Color3.fromRGB(255, 152, 229)
+			},
+			BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+		},
+		CollapsingHeader = {
+			TitleBar = {
+				BackgroundColor3 = Color3.fromRGB(155, 42, 136)
+			}
+		}
+	}
+})
     Window:Center()
     
     local hooks = Janitor.new()
