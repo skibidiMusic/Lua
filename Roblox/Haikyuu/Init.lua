@@ -611,7 +611,6 @@ local currentCam = workspace.CurrentCamera
 if currentCam then
     local CameraTab = Window:CreateTab({
         Name = "Camera",
-
     })
 
     -- Fov
