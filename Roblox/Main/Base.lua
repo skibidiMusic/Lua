@@ -1,6 +1,7 @@
 -->> Loadstring
 --	local BaseScript = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Main/Base.lua'))()
 
+local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local InsertService = game:GetService("InsertService")
 local CoreGui = game:GetService("CoreGui")
@@ -234,8 +235,9 @@ function BaseLoader:ConfigManager()
 	self.autosave = autoSave
 
 	--// AutoSave when game closes
-	self.hooks:Add(CoreGui.ChildRemoved:Connect(function(child)
-		if child.Name == "RobloxGui" then
+	local localPlayer = Players.LocalPlayer
+	self.hooks:Add(Players.PlayerRemoving:Connect(function(child)
+		if child == localPlayer then
 			autoSave()
 		end
 	end))
