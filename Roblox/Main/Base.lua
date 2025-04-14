@@ -34,7 +34,7 @@ function BaseLoader.new(name: string)
 		Prefabs = InsertService:LoadLocalAsset(PrefabsId)
 	})
     
-    local Window = ImGui:TabsWindow({Title = "🔥😛 SelamiHub " .. name, Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = "false",})
+    local Window = ImGui:TabsWindow({Title = "🔥😛 SelamiHub " .. name, Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false,})
     Window:Center()
 
 	--
