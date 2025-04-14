@@ -231,9 +231,8 @@ function BaseLoader:ConfigManager()
 	end
 
 	--// AutoSave when leaving game / also at a interval, add the connection to the hooks
-	self.hooks:Add(function()
-		autoSave()
-	end)
+
+	self.autosave = autoSave
 
 	--// AutoSave when game closes
 	self.hooks:Add(CoreGui.ChildRemoved:Connect(function(child)
@@ -299,6 +298,9 @@ end
 function BaseLoader:Unload()
     if not self.loaded then return end
     self.loaded = false
+	if self.autosave then
+		self.autosave()
+	end
     self.hooks:Cleanup()
 	self.window:Close()
     self.window.WindowFrame:Destroy()
