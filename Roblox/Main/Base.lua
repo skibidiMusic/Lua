@@ -104,6 +104,7 @@ function BaseLoader:ConfigManager()
 		local save = saveFolder:getSave(name)
 		if save then
 			ImGui:LoadIni(save, false)
+			self:Notify("Config", `You loaded the config: ({name})`, 6)
 		else
 			self:Notify("Config", `There is no config with the name: ({name}), make sure you've saved it first.`, 6)
 		end
