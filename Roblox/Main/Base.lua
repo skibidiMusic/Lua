@@ -248,7 +248,7 @@ function BaseLoader:UiTab()
     })
 
 	UiTab:Separator({
-		"Keybind"
+		Text = "Keybind"
 	})
 	
 	do
@@ -277,7 +277,7 @@ function BaseLoader:UiTab()
 	end
 
 	UiTab:Separator({
-		"Theme 🎨"
+		Text = "Theme 🎨"
 	})
 
 	do
