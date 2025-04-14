@@ -41,7 +41,7 @@ function BaseLoader.new(name: string)
     Window:Center()
 
 	--
-	
+
     local hooks = Janitor.new()
 
     self.hooks = hooks
@@ -107,7 +107,7 @@ function BaseLoader:ConfigManager()
 		if save then
 			ImGui:LoadIni(save, false)
 		else
-			ImGui:Notify("Config", `There is no config with the name: ({name}), make sure you've saved it first.`, 6)
+			self:Notify("Config", `There is no config with the name: ({name}), make sure you've saved it first.`, 6)
 		end
 	end
 
@@ -227,7 +227,7 @@ function BaseLoader:ConfigManager()
 
 	if configHandlerSettings.AutoLoadEnabled then
 		loadConfig(configHandlerSettings.lastSaveName)
-		ImGui:Notify("Config", "Auto-loaded config: " .. configHandlerSettings.lastSaveName .. ".", 4)
+		self:Notify("Config", "Auto-loaded config: " .. configHandlerSettings.lastSaveName .. ".", 4)
 	end
 
 	local function autoSave()
@@ -277,7 +277,7 @@ function BaseLoader:UiTab()
 					return
 				end
 				wasClosedBefore = true
-				ImGui:Notify("Gui", "Press " .. `{toggleUiKeybind.Value.Name}` .. " to re-open the gui." , 4)
+				self:Notify("Gui", "Press " .. `{toggleUiKeybind.Value.Name}` .. " to re-open the gui." , 4)
 			end
 		end
 	end
@@ -298,7 +298,7 @@ function BaseLoader:UnloadTab()
         Text = "Unload the script",
         Callback = function()
             self:Unload()
-    		ImGui:Notify("Unload", "Unloaded (Everything disabled, re-execute to enable)" , 3)
+    		self:Notify("Unload", "Unloaded (Everything disabled, re-execute to enable)" , 3)
         end,
     })
 end
