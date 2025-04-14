@@ -8,7 +8,7 @@ local isPublic = loadstring(game:HttpGet('https://raw.githubusercontent.com/skib
 if not isPublic then game.Players.LocalPlayer:Kick("Broken") return end
 
 local BaseScript = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Main/Base.lua'))()
-local HaikyuuRaper = BaseScript.new("HaikyuuRaper")
+local HaikyuuRaper = BaseScript.new("Voleyball Legends")
 
 local Janitor = HaikyuuRaper.Janitor
 local Signal = HaikyuuRaper.Signal
@@ -673,7 +673,6 @@ end
 do
     local InternalTab = Window:CreateTab({
         Name = "Internals",
-
     })
 
     -- Serve Power
