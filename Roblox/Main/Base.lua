@@ -282,12 +282,29 @@ function BaseLoader:UiTab()
 
 	do
 		ImGui:DefineTheme("Pink", {
+			TitleAlign = Enum.TextXAlignment.Center,
+			TextDisabled = Color3.fromRGB(120, 100, 120),
 			Text = Color3.fromRGB(200, 180, 200),
+			
+			FrameBg = Color3.fromRGB(25, 20, 25),
+			FrameBgTransparency = 0.4,
+			FrameBgActive = Color3.fromRGB(120, 100, 120),
+			FrameBgTransparencyActive = 0.4,
+			
+			CheckMark = Color3.fromRGB(150, 100, 150),
+			SliderGrab = Color3.fromRGB(150, 100, 150),
+			ButtonsBg = Color3.fromRGB(150, 100, 150),
+			CollapsingHeaderBg = Color3.fromRGB(150, 100, 150),
+			CollapsingHeaderText = Color3.fromRGB(200, 180, 200),
+			RadioButtonHoveredBg = Color3.fromRGB(150, 100, 150),
+			
 			WindowBg = Color3.fromRGB(35, 30, 35),
 			TitleBarBg = Color3.fromRGB(35, 30, 35),
 			TitleBarBgActive = Color3.fromRGB(50, 45, 50),
+			
 			Border = Color3.fromRGB(50, 45, 50),
 			ResizeGrab = Color3.fromRGB(50, 45, 50),
+			RegionBgTransparency = 1,
 		})
 
 		local allThemes = {}
@@ -302,6 +319,7 @@ function BaseLoader:UiTab()
 			Label = "Theme",
 			IniFlag = "ThemeSelector",
 			Items = allThemes,
+			Value = "Pink",
 			Callback = function(_, Value)
 				for _, v in ImGui.Windows do
 					v:SetTheme(Value)
