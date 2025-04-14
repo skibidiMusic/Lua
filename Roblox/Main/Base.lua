@@ -57,7 +57,7 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 	local notification = ImGui:Window({
 		Title = title,
 		TabsBar = false,
-		AutoSize = "Y",
+		AutoSize = "X",
 		NoCollapse = true,
 		--NoResize = true,
 		NoClose = false,
@@ -67,7 +67,7 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 	})
 
 	local windowUi = notification.WindowFrame
-	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Linear),  {Size = UDim2.fromOffset(500, 50)})
+	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Circular),  {Size = UDim2.fromOffset(500, 50)})
 	tween:Play()
 
 	tween.Completed:Connect(function(playbackState)
@@ -300,7 +300,9 @@ function BaseLoader:Unload()
     if not self.loaded then return end
     self.loaded = false
     self.hooks:Cleanup()
-    self.window:Destroy()
+	self.window:CloseTab()
+    self.window.WindowFrame:Destroy()
+	self.window:Destroy()
 end
 
 return BaseLoader
