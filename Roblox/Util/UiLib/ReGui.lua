@@ -7726,4 +7726,43 @@ ReGui:DefineElement("PopupModal", {
 	end,
 })
 
+function ReGui:Notify(title: string, message: string, length: number?)
+	length = 0.5 + (length or 5)
+
+	local notification = ReGui:CreateWindow({
+		Title = title,
+		TabsBar = false,
+		AutoSize = "Y",
+		NoCollapse = true,
+		NoResize = true,
+		NoClose = false,
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1 - 0.05, 0, 1 - 0.05, 0),
+		Size = UDim2.fromOffset(0, 0), --// Roblox property 
+	})
+
+	local Content = notification:CreateTab({
+		Visible = true
+	})
+
+	local windowUi = notification.Window
+	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Linear),  {Size = UDim2.fromOffset(500, 50)})
+	tween:Play()
+
+	tween.Completed:Connect(function(playbackState)
+		Content:Label({
+			Text = message,
+			TextWrapped = true,
+			RichText = true,
+		})
+	end)
+
+	task.delay(length, function() 
+		notification:Close()
+		notification:Destroy()
+	end)
+
+	return notification
+end
+
 return ReGui
