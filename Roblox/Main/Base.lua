@@ -112,7 +112,7 @@ function BaseLoader:ConfigManager()
 	end 
 
 	-->> UI
-	local tab = self.winow:CreateTab({
+	local tab = self.window:CreateTab({
 		Name = "Configs",
 		Visible = false 
 	})
