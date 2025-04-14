@@ -281,39 +281,198 @@ function BaseLoader:UiTab()
 	})
 
 	do
-		ImGui:DefineTheme("Pink", {
+		ImGui:DefineTheme("🌸Pink", {
 			TitleAlign = Enum.TextXAlignment.Center,
-			TextDisabled = Color3.fromRGB(120, 100, 120),
-			Text = Color3.fromRGB(200, 180, 200),
+			TextDisabled = Color3.fromRGB(150, 120, 150),
+			Text = Color3.fromRGB(255, 200, 255),
 			
-			FrameBg = Color3.fromRGB(25, 20, 25),
+			FrameBg = Color3.fromRGB(35, 25, 35),
 			FrameBgTransparency = 0.4,
-			FrameBgActive = Color3.fromRGB(120, 100, 120),
+			FrameBgActive = Color3.fromRGB(180, 120, 180),
 			FrameBgTransparencyActive = 0.4,
 			
-			CheckMark = Color3.fromRGB(150, 100, 150),
-			SliderGrab = Color3.fromRGB(150, 100, 150),
-			ButtonsBg = Color3.fromRGB(150, 100, 150),
-			CollapsingHeaderBg = Color3.fromRGB(150, 100, 150),
-			CollapsingHeaderText = Color3.fromRGB(200, 180, 200),
-			RadioButtonHoveredBg = Color3.fromRGB(150, 100, 150),
+			CheckMark = Color3.fromRGB(255, 130, 255),
+			SliderGrab = Color3.fromRGB(255, 130, 255),
+			ButtonsBg = Color3.fromRGB(255, 130, 255),
+			CollapsingHeaderBg = Color3.fromRGB(255, 130, 255),
+			CollapsingHeaderText = Color3.fromRGB(255, 200, 255),
+			RadioButtonHoveredBg = Color3.fromRGB(255, 130, 255),
 			
-			WindowBg = Color3.fromRGB(35, 30, 35),
-			TitleBarBg = Color3.fromRGB(35, 30, 35),
-			TitleBarBgActive = Color3.fromRGB(50, 45, 50),
+			WindowBg = Color3.fromRGB(45, 35, 45),
+			TitleBarBg = Color3.fromRGB(45, 35, 45),
+			TitleBarBgActive = Color3.fromRGB(70, 55, 70),
 			
-			Border = Color3.fromRGB(50, 45, 50),
-			ResizeGrab = Color3.fromRGB(50, 45, 50),
+			Border = Color3.fromRGB(70, 55, 70),
+			ResizeGrab = Color3.fromRGB(70, 55, 70),
 			RegionBgTransparency = 1,
-
+		
 			TabText = Color3.fromRGB(24, 24, 24),
-			TabBg =  Color3.fromRGB(201, 141, 201),
+			TabBg = Color3.fromRGB(255, 150, 255),
 			TabTextActive = Color3.fromRGB(255, 255, 255),
-			TabBgActive = Color3.fromRGB(41, 22, 41),
+			TabBgActive = Color3.fromRGB(70, 30, 70),
+		})
+
+		-- Green Theme
+		ImGui:DefineTheme("🍀Green", {
+		    TitleAlign = Enum.TextXAlignment.Center,
+		    TextDisabled = Color3.fromRGB(100, 120, 100),
+		    Text = Color3.fromRGB(180, 200, 180),
+		
+		    FrameBg = Color3.fromRGB(20, 25, 20),
+		    FrameBgTransparency = 0.4,
+		    FrameBgActive = Color3.fromRGB(100, 120, 100),
+		    FrameBgTransparencyActive = 0.4,
+		
+		    CheckMark = Color3.fromRGB(100, 150, 100),
+		    SliderGrab = Color3.fromRGB(100, 150, 100),
+		    ButtonsBg = Color3.fromRGB(100, 150, 100),
+		    CollapsingHeaderBg = Color3.fromRGB(100, 150, 100),
+		    CollapsingHeaderText = Color3.fromRGB(180, 200, 180),
+		    RadioButtonHoveredBg = Color3.fromRGB(100, 150, 100),
+		
+		    WindowBg = Color3.fromRGB(30, 35, 30),
+		    TitleBarBg = Color3.fromRGB(30, 35, 30),
+		    TitleBarBgActive = Color3.fromRGB(45, 50, 45),
+		
+		    Border = Color3.fromRGB(45, 50, 45),
+		    ResizeGrab = Color3.fromRGB(45, 50, 45),
+		    RegionBgTransparency = 1,
+		
+		    TabText = Color3.fromRGB(24, 24, 24),
+		    TabBg = Color3.fromRGB(141, 201, 141),
+		    TabTextActive = Color3.fromRGB(255, 255, 255),
+		    TabBgActive = Color3.fromRGB(22, 41, 22),
+		})
+
+		-- Red Theme
+		ImGui:DefineTheme("🍒Red", {
+		    TitleAlign = Enum.TextXAlignment.Center,
+		    TextDisabled = Color3.fromRGB(120, 100, 100),
+		    Text = Color3.fromRGB(200, 180, 180),
+		
+		    FrameBg = Color3.fromRGB(25, 20, 20),
+		    FrameBgTransparency = 0.4,
+		    FrameBgActive = Color3.fromRGB(120, 100, 100),
+		    FrameBgTransparencyActive = 0.4,
+		
+		    CheckMark = Color3.fromRGB(150, 100, 100),
+		    SliderGrab = Color3.fromRGB(150, 100, 100),
+		    ButtonsBg = Color3.fromRGB(150, 100, 100),
+		    CollapsingHeaderBg = Color3.fromRGB(150, 100, 100),
+		    CollapsingHeaderText = Color3.fromRGB(200, 180, 180),
+		    RadioButtonHoveredBg = Color3.fromRGB(150, 100, 100),
+		
+		    WindowBg = Color3.fromRGB(35, 30, 30),
+		    TitleBarBg = Color3.fromRGB(35, 30, 30),
+		    TitleBarBgActive = Color3.fromRGB(50, 45, 45),
+		
+		    Border = Color3.fromRGB(50, 45, 45),
+		    ResizeGrab = Color3.fromRGB(50, 45, 45),
+		    RegionBgTransparency = 1,
+		
+		    TabText = Color3.fromRGB(24, 24, 24),
+		    TabBg = Color3.fromRGB(201, 141, 141),
+		    TabTextActive = Color3.fromRGB(255, 255, 255),
+		    TabBgActive = Color3.fromRGB(41, 22, 22),
+		})
+
+		-- Yellow Theme
+		ImGui:DefineTheme("🍋Yellow", {
+		    TitleAlign = Enum.TextXAlignment.Center,
+		    TextDisabled = Color3.fromRGB(120, 120, 100),
+		    Text = Color3.fromRGB(200, 200, 180),
+		
+		    FrameBg = Color3.fromRGB(25, 25, 20),
+		    FrameBgTransparency = 0.4,
+		    FrameBgActive = Color3.fromRGB(120, 120, 100),
+		    FrameBgTransparencyActive = 0.4,
+		
+		    CheckMark = Color3.fromRGB(150, 150, 100),
+		    SliderGrab = Color3.fromRGB(150, 150, 100),
+		    ButtonsBg = Color3.fromRGB(150, 150, 100),
+		    CollapsingHeaderBg = Color3.fromRGB(150, 150, 100),
+		    CollapsingHeaderText = Color3.fromRGB(200, 200, 180),
+		    RadioButtonHoveredBg = Color3.fromRGB(150, 150, 100),
+		
+		    WindowBg = Color3.fromRGB(35, 35, 30),
+		    TitleBarBg = Color3.fromRGB(35, 35, 30),
+		    TitleBarBgActive = Color3.fromRGB(50, 50, 45),
+		
+		    Border = Color3.fromRGB(50, 50, 45),
+		    ResizeGrab = Color3.fromRGB(50, 50, 45),
+		    RegionBgTransparency = 1,
+		
+		    TabText = Color3.fromRGB(24, 24, 24),
+		    TabBg = Color3.fromRGB(201, 201, 141),
+		    TabTextActive = Color3.fromRGB(255, 255, 255),
+		    TabBgActive = Color3.fromRGB(41, 41, 22),
+		})
+
+		-- Blue Theme
+		ImGui:DefineTheme("🌊Blue", {
+		    TitleAlign = Enum.TextXAlignment.Center,
+		    TextDisabled = Color3.fromRGB(100, 100, 120),
+		    Text = Color3.fromRGB(180, 180, 200),
+		
+		    FrameBg = Color3.fromRGB(20, 20, 25),
+		    FrameBgTransparency = 0.4,
+		    FrameBgActive = Color3.fromRGB(100, 100, 120),
+		    FrameBgTransparencyActive = 0.4,
+		
+		    CheckMark = Color3.fromRGB(100, 100, 150),
+		    SliderGrab = Color3.fromRGB(100, 100, 150),
+		    ButtonsBg = Color3.fromRGB(100, 100, 150),
+		    CollapsingHeaderBg = Color3.fromRGB(100, 100, 150),
+		    CollapsingHeaderText = Color3.fromRGB(180, 180, 200),
+		    RadioButtonHoveredBg = Color3.fromRGB(100, 100, 150),
+		
+		    WindowBg = Color3.fromRGB(30, 30, 35),
+		    TitleBarBg = Color3.fromRGB(30, 30, 35),
+		    TitleBarBgActive = Color3.fromRGB(45, 45, 50),
+		
+		    Border = Color3.fromRGB(45, 45, 50),
+		    ResizeGrab = Color3.fromRGB(45, 45, 50),
+		    RegionBgTransparency = 1,
+		
+		    TabText = Color3.fromRGB(24, 24, 24),
+		    TabBg = Color3.fromRGB(141, 141, 201),
+		    TabTextActive = Color3.fromRGB(255, 255, 255),
+		    TabBgActive = Color3.fromRGB(22, 22, 41),
+		})
+
+		-- Purple Theme
+		ImGui:DefineTheme("🍇Purple", {
+		    TitleAlign = Enum.TextXAlignment.Center,
+		    TextDisabled = Color3.fromRGB(120, 100, 130),
+		    Text = Color3.fromRGB(200, 180, 210),
+		
+		    FrameBg = Color3.fromRGB(25, 20, 30),
+		    FrameBgTransparency = 0.4,
+		    FrameBgActive = Color3.fromRGB(120, 100, 130),
+		    FrameBgTransparencyActive = 0.4,
+		
+		    CheckMark = Color3.fromRGB(150, 100, 170),
+		    SliderGrab = Color3.fromRGB(150, 100, 170),
+		    ButtonsBg = Color3.fromRGB(150, 100, 170),
+		    CollapsingHeaderBg = Color3.fromRGB(150, 100, 170),
+		    CollapsingHeaderText = Color3.fromRGB(200, 180, 210),
+		    RadioButtonHoveredBg = Color3.fromRGB(150, 100, 170),
+		
+		    WindowBg = Color3.fromRGB(35, 30, 40),
+		    TitleBarBg = Color3.fromRGB(35, 30, 40),
+		    TitleBarBgActive = Color3.fromRGB(50, 45, 55),
+		
+		    Border = Color3.fromRGB(50, 45, 55),
+		    ResizeGrab = Color3.fromRGB(50, 45, 55),
+		    RegionBgTransparency = 1,
+		
+		    TabText = Color3.fromRGB(24, 24, 24),
+		    TabBg = Color3.fromRGB(171, 141, 201),
+		    TabTextActive = Color3.fromRGB(255, 255, 255),
+		    TabBgActive = Color3.fromRGB(35, 22, 41),
 		})
 
 		local allThemes = {}
-		warn(ImGui.ThemeConfigs)
 
 		for i, v in ImGui.ThemeConfigs do
 			table.insert(allThemes, i)
@@ -324,7 +483,7 @@ function BaseLoader:UiTab()
 			Label = "Theme",
 			IniFlag = "ThemeSelector",
 			Items = allThemes,
-			Value = "Pink",
+			Value = "🌸Pink",
 			Callback = function(_, Value)
 				for _, v in ImGui.Windows do
 					v:SetTheme(Value)
