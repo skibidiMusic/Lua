@@ -1,6 +1,10 @@
 -->> Loadstring
 --	local BaseScript = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Main/Base.lua'))()
 
+local TweenService = game:GetService("TweenService")
+local InsertService = game:GetService("InsertService")
+local CoreGui = game:GetService("CoreGui")
+
 local BaseLoader = {}
 BaseLoader.__index = BaseLoader
 
@@ -25,9 +29,6 @@ function BaseLoader.new(name: string)
     genv[name] = self
 
 	-- Window
-
-	local InsertService = game:GetService("InsertService")
-
 	--local ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/depthso/Dear-ReGui/refs/heads/main/ReGui.lua'))()
 	local PrefabsId = "rbxassetid://" .. ImGui.PrefabsId
 
@@ -48,6 +49,45 @@ function BaseLoader.new(name: string)
     self.loaded = true
 
     return setmetatable(self, BaseLoader)
+end
+
+function BaseLoader:Notify(title: string, message: string, length: number?)
+	length = 0.5 + (length or 5)
+
+	local notification = ImGui:CreateWindow({
+		Title = title,
+		TabsBar = false,
+		AutoSize = "Y",
+		NoCollapse = true,
+		NoResize = true,
+		NoClose = false,
+		AnchorPoint = Vector2.new(1, 1),
+		Position = UDim2.new(1 - 0.05, 0, 1 - 0.05, 0),
+		Size = UDim2.fromOffset(0, 0), --// Roblox property 
+	})
+
+	local Content = notification:CreateTab({
+		Visible = true
+	})
+
+	local windowUi = notification.Window
+	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Linear),  {Size = UDim2.fromOffset(500, 50)})
+	tween:Play()
+
+	tween.Completed:Connect(function(playbackState)
+		Content:Label({
+			Text = message,
+			TextWrapped = true,
+			RichText = true,
+		})
+	end)
+
+	task.delay(length, function() 
+		notification:Close()
+		notification:Destroy()
+	end)
+
+	return notification
 end
 
 function BaseLoader:ConfigManager()
@@ -201,7 +241,7 @@ function BaseLoader:ConfigManager()
 	end)
 
 	--// AutoSave when game closes
-	self.hooks:Add(game:GetService("CoreGui").ChildRemoved:Connect(function(child)
+	self.hooks:Add(CoreGui.ChildRemoved:Connect(function(child)
 		if child.Name == "RobloxGui" then
 			autoSave()
 		end
