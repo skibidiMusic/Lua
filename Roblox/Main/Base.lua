@@ -300,7 +300,7 @@ function BaseLoader:Unload()
     if not self.loaded then return end
     self.loaded = false
     self.hooks:Cleanup()
-	self.window:CloseTab()
+	self.window:Close()
     self.window.WindowFrame:Destroy()
 	self.window:Destroy()
 end
