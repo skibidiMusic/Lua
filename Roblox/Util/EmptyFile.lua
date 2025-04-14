@@ -260,3 +260,18 @@ local ohTable1 = {
 }
 
 game:GetService("ReplicatedStorage").Packages._Index["sleitnick_knit@1.7.0"].knit.Services.BallService.RF.Interact:InvokeServer(ohTable1)
+
+for _, v in getscripts() do
+	if v.Name == "LocalText" then
+		 debug.getproto(getscriptclosure(v), 1)("Im gonna rape you", 5)
+		 break
+	end
+end
+
+for GarbageIndex, GarbageValue in pairs(getgc(true)) do
+    if typeof(GarbageValue) == "table" and typeof(rawget(GarbageValue, 1) ) == "table" and rawequal(rawget(rawget(GarbageValue, 1), "Delay"), 5)  then
+		for _, v in GarbageValue do
+			v.Text = "I love gay sex, I love sucking william off."
+		end
+	end
+end

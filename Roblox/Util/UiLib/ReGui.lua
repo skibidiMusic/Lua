@@ -13,11 +13,11 @@
 
 local ReGui = {
 	--// Package data
-	Version = "1.3.9",
+	Version = "1.4.1",
 	Author = "Depso",
 	License = "MIT",
 	Repository = "https://github.com/depthso/Dear-ReGui/",
-	
+
 	--// Configuration
 	Debug = false,
 	PrefabsId = 71968920594655,
@@ -25,11 +25,10 @@ local ReGui = {
 	ContainerName = "ReGui",
 	DoubleClickThreshold = 0.3,
 	TooltipOffset = 15,
-	IgnoredCanvasProperties = {
-		"Remove",
-		"Destroy"
+	IniToSave = {
+		"Value"
 	},
-	
+
 	--// Objects
 	Container = nil,
 	Prefabs = nil,
@@ -38,25 +37,23 @@ local ReGui = {
 	--// Classes
 	ThemeConfigs = {},
 	Elements = {},
+	Signaling = {},
 	Animation = {
 		DefaultTweenInfo = TweenInfo.new(0.08),
 	},
-	
+
 	--// Collections
 	_FlagCache = {},
 	_ErrorCache = {},
 	Windows = {},
 	ActiveTooltips = {},
-	AnimationConnections = {},
-	MouseEvents = {
-		DoubleClick = {},
-		Click = {}
-	}
+	IniSettings = {},
+	AnimationConnections = {}
 }
 
 ReGui.Icons = {
 	Dot = "rbxasset://textures/whiteCircle.png",
-	Arrow = "rbxassetid://4731371527",
+	Arrow = "rbxasset://textures/DeveloperFramework/button_arrow_right.png",
 	Close = "rbxasset://textures/AnimationEditor/icon_close.png",
 	Checkmark = "rbxasset://textures/AnimationEditor/icon_checkmark.png",
 	Cat = "rbxassetid://16211812161",
@@ -137,8 +134,9 @@ ReGui.Accent = {
 	--// ReGui acent colors
 	Light = Color3.fromRGB(50, 150, 250),
 	Dark = Color3.fromRGB(30, 66, 115),
+	ExtraDark = Color3.fromRGB(28, 39, 53),
 	White = Color3.fromRGB(240, 240, 240),
-	Gray = Color3.fromRGB(127, 126, 129),
+	Gray = Color3.fromRGB(172, 171, 175),
 	Black = Color3.fromRGB(15, 19, 24),
 	Yellow = Color3.fromRGB(230, 180, 0),
 	Orange = Color3.fromRGB(230, 150, 0),
@@ -172,7 +170,7 @@ ThemeConfigs.DarkTheme = {
 		FrameBgTransparency = 0.4,
 		FrameBgActive = ReGui.Accent.Light,
 		FrameBgTransparencyActive = 0.4,
-		FrameRounding = 2,
+		FrameRounding = UDim.new(0, 2),
 
 		--// Elements
 		SliderGrab = ReGui.Accent.Light,
@@ -180,7 +178,6 @@ ThemeConfigs.DarkTheme = {
 		CollapsingHeaderBg = ReGui.Accent.Light,
 		CollapsingHeaderText = ReGui.Accent.White,
 		CheckMark = ReGui.Accent.Light,
-		RadioButtonHoveredBg = ReGui.Accent.Light,
 		ResizeGrab = ReGui.Accent.Light,
 		HeaderBg = ReGui.Accent.Gray,
 		HeaderBgTransparency = 0.7,
@@ -193,6 +190,9 @@ ThemeConfigs.DarkTheme = {
 		ConsoleLineNumbers = ReGui.Accent.White,
 		LabelPaddingTop = UDim.new(0, 0),
 		LabelPaddingBottom = UDim.new(0, 0),
+		MenuBar = ReGui.Accent.ExtraDark,
+		MenuBarTransparency = 0.1,
+		PopupCanvas = ReGui.Accent.Black,
 
 		--// TabSelector
 		TabTextPaddingTop = UDim.new(0, 3),
@@ -203,7 +203,7 @@ ThemeConfigs.DarkTheme = {
 		TabBgActive = ReGui.Accent.Light,
 		TabsBarBg = Color3.fromRGB(36, 36, 36),
 		TabsBarBgTransparency = 1,
-		TabPadding = UDim.new(0, 8),
+		TabPagePadding = UDim.new(0, 8),
 
 		--// Window
 		ModalWindowDimBg = Color3.fromRGB(230, 230, 230),
@@ -213,8 +213,8 @@ ThemeConfigs.DarkTheme = {
 		WindowBgTransparency = 0.05,
 
 		Border = ReGui.Accent.Gray,
-		BorderTransparency = 0.7,
-		BorderTransparencyActive = 0.4,
+		BorderTransparency = 0.8,
+		BorderTransparencyActive = 0.5,
 
 		Title = ReGui.Accent.White,
 		TitleAlign = Enum.TextXAlignment.Left,
@@ -236,35 +236,33 @@ ThemeConfigs.LightTheme = {
 
 		FrameBg = ReGui.Accent.Gray,
 		FrameBgTransparency = 0.4,
-		FrameBgActive = ReGui.Accent.Gray,
-		FrameBgTransparencyActive = 0,
+		FrameBgActive = ReGui.Accent.Light,
+		FrameBgTransparencyActive = 0.6,
 
-		SliderGrab = ReGui.Accent.White,
-		ButtonsBg = ReGui.Accent.Gray,
-		CollapsingHeaderBg = ReGui.Accent.Gray,
+		SliderGrab = ReGui.Accent.Light,
+		ButtonsBg = ReGui.Accent.Light,
 		CollapsingHeaderText = ReGui.Accent.Black,
-		CheckMark = ReGui.Accent.Black,
-		RadioButtonHoveredBg = ReGui.Accent.Black,
 		Separator = ReGui.Accent.Black,
 		ConsoleLineNumbers = ReGui.Accent.Yellow,
+		MenuBar = Color3.fromRGB(219, 219, 219),
+		PopupCanvas = ReGui.Accent.White,
 
 		TabText = ReGui.Accent.Black,
-		TabBg = ReGui.Accent.White,
 		TabTextActive = ReGui.Accent.Black,
-		TabBgActive = ReGui.Accent.Gray,
 
 		WindowBg = ReGui.Accent.White,
 		Border = ReGui.Accent.Gray,
 		ResizeGrab = ReGui.Accent.Gray,
 
-		Title = ReGui.Accent.White,
+		Title = ReGui.Accent.Black,
 		TitleAlign = Enum.TextXAlignment.Center,
-		TitleBarBg = ReGui.Accent.Black,
+		TitleBarBg = ReGui.Accent.Gray,
 		TitleActive = ReGui.Accent.Black,
-		TitleBarBgActive = ReGui.Accent.Gray,
+		TitleBarBgActive = Color3.fromRGB(186, 186, 186),
+		TitleBarBgCollapsed = ReGui.Accent.Gray
 	}
 }
-ThemeConfigs.Classic = {
+ThemeConfigs.ImGui = {
 	BaseTheme = ThemeConfigs.DarkTheme,
 	Values = {
 		AnimationTweenInfo = TweenInfo.new(0),
@@ -274,22 +272,21 @@ ThemeConfigs.Classic = {
 		FrameBgTransparency = 0.4,
 		FrameBgActive = ReGui.Accent.ImGui.Light,
 		FrameBgTransparencyActive = 0.5,
-		FrameRounding = 0,
+		FrameRounding = UDim.new(0, 0),
 
 		ButtonsBg = ReGui.Accent.ImGui.Light,
 		CollapsingHeaderBg = ReGui.Accent.ImGui.Light,
 		CollapsingHeaderText = ReGui.Accent.White,
 		CheckMark = ReGui.Accent.ImGui.Light,
-		RadioButtonHoveredBg = ReGui.Accent.ImGui.Light,
 		ResizeGrab = ReGui.Accent.ImGui.Light,
-
-		TabTextPaddingTop = UDim.new(0, 0),
+		MenuBar = ReGui.Accent.ImGui.Gray,
+		MenuBarTransparency = 0,
+		PopupCanvas = ReGui.Accent.ImGui.Black,
+		
 		TabText = ReGui.Accent.Gray,
-		TabBg = ReGui.Accent.ImGui.Gray,
+		TabBg = ReGui.Accent.ImGui.Dark,
 		TabTextActive = ReGui.Accent.White,
-		TabBgActive = ReGui.Accent.ImGui.Gray,
-		TabsBarBg = ReGui.Accent.ImGui.Gray,
-		TabsBarBgTransparency = 0,
+		TabBgActive = ReGui.Accent.ImGui.Light,
 
 		WindowBg = ReGui.Accent.ImGui.Black,
 		WindowBgTransparency = 0.05,
@@ -306,14 +303,21 @@ ThemeConfigs.Classic = {
 }
 
 ReGui.ElementColors = {
+	["MenuBar"] = {
+		BackgroundColor3 = "MenuBar",
+		BackgroundTransparency = "MenuBarTransparency",
+	},
+	["FrameRounding"] = {
+		CornerRadius = "FrameRounding"
+	},
+	["PopupCanvas"] = {
+		BackgroundColor3 = "PopupCanvas"
+	},
 	["ModalWindowDim"] = {
 		BackgroundColor3 = "ModalWindowDimBg"
 	},
-	["Selectable"] = {
-		BackgroundColor3 = "ButtonsBg",
-		FontFace = "TextFont",
-		TextSize = "TextSize",
-	},
+	["Selectable"] = "Button",
+	["MenuButton"] = "Button",
 	["Separator"] = {
 		BackgroundColor3 = "Separator",
 		BackgroundTransparency = "SeparatorTransparency",
@@ -332,11 +336,7 @@ ReGui.ElementColors = {
 		FontFace = "TextFont",
 		TextSize = "TextSize",
 	},
-	["ConsoleText"] = {
-		TextColor3 = "Text",
-		FontFace = "TextFont",
-		TextSize = "TextSize",
-	},
+	["ConsoleText"] = "Label",
 	["LabelDisabled"] = {
 		TextColor3 = "TextDisabled",
 		FontFace = "TextFont",
@@ -373,7 +373,7 @@ ReGui.ElementColors = {
 		BackgroundColor3 = "TitleBarBg",
 		BackgroundTransparency = "TitleBarTransparency"
 	},
-	["TabSelectorTabsBar"] = {
+	["TabsBar"] = {
 		BackgroundColor3 = "TabsBarBg",
 		BackgroundTransparency = "TabsBarBgTransparency",
 	},
@@ -421,8 +421,8 @@ ReGui.ElementColors = {
 		BackgroundColor3 = "CheckMark",
 	},
 	["RadioButton"] = {
-		BackgroundColor3 = "RadioButtonHoveredBg",
-	},
+		BackgroundColor3 = "ButtonsBg",
+	}
 }
 
 ReGui.Styles = {
@@ -550,7 +550,6 @@ ReGui.ElementFlags = {
 		Properties = {"Center"},
 		Callback = function<FlagFunc>(Data, Object, Value)
 			local Position = Object.Position
-
 			ReGui:SetProperties(Object, {
 				Position = UDim2.new(
 					Value:find("X") and 0.5 or Position.X.Scale,
@@ -578,6 +577,7 @@ ReGui.ElementFlags = {
 			local WindowClass = Data.WindowClass
 			local NoAutoTheme = Class.NoAutoTheme
 			
+			--// Check if theming is enabled
 			if not WindowClass then return end
 			if NoAutoTheme then return end
 
@@ -592,39 +592,44 @@ ReGui.ElementFlags = {
 	{
 		Properties = {"Animation"},
 		Callback = function<StyleFunc>(Data, Object, Value)
+			--// Check if animations are disabled
 			local NoAnimation = Data.Class.NoAnimation
 			if NoAnimation then return end
+			
 			ReGui:SetAnimation(Object, Value)
 		end,
 	},
 	{
-		Properties = {"Icon", "IconSize", "IconRotation"},
+		Properties = {"Icon", "IconSize", "IconRotation", "IconPadding"},
 		Callback = function<StyleFunc>(Data, Object, Value)
 			--// Locate icon element
 			local Icon = Object:FindFirstChild("Icon", true)
 			if not Icon then 
 				return ReGui:Warn("No icon for", Object) 
 			end 
-
+			
+			--// Check class data for missing values
 			local Class = Data.Class
 			ReGui:CheckConfig(Class, {
 				Icon = "",
 				IconSize = UDim2.fromScale(1,1),
-				IconRotation = 0
+				IconRotation = 0,
+				IconPadding = UDim2.new(0, 2)
 			})
+			
+			--// Apply icon padding
+			local Padding = Icon.Parent:FindFirstChild("UIPadding")
+			ReGui:SetPadding(Padding, Class.IconPadding)
 
-			--// Unpack configuration
-			local Size = Class.IconSize
+			--// Check image asset url
 			local Image = Class.Icon
-			local Rotation = Class.IconRotation
-
 			Image = ReGui:CheckAssetUrl(Image)
 
 			ReGui:SetProperties(Icon, {
 				Visible = Icon ~= "",
 				Image = ReGui:CheckAssetUrl(Image),
-				Size = Size,
-				Rotation = Rotation
+				Size = Class.IconSize,
+				Rotation = Class.IconRotation
 			})
 		end,
 	},
@@ -748,14 +753,14 @@ ReGui.ElementFlags = {
 		},
 		Callback = function<StyleFunc>(Data, Object, Value)
 			Value = Value or 0
-			
+
 			--// Convert number value into a UDim
 			if typeof(Value) == "number" then
 				Value = UDim.new(0, Value)
 			end
-			
+
 			local Class = Data.Class
-			
+
 			local IsUiPadding = Class.UiPadding
 			if IsUiPadding then
 				ReGui:CheckConfig(Class, {
@@ -765,7 +770,7 @@ ReGui.ElementFlags = {
 					PaddingTop = Value,
 				})
 			end
-			
+
 			local UIPadding = ReGui:GetChildOfClass(Object, "UIPadding")
 			ReGui:SetProperties(UIPadding, {
 				PaddingBottom = Class.PaddingBottom,
@@ -830,6 +835,7 @@ local Services = setmetatable({}, {
 
 --// Core functions 
 --// Services
+local HttpService = game:GetService("HttpService")
 local Players: Players = Services.Players
 local CoreGui = Services.CoreGui
 local UserInputService = Services.UserInputService
@@ -840,9 +846,6 @@ local RunService = Services.RunService
 local LocalPlayer = Players.LocalPlayer
 ReGui.PlayerGui = LocalPlayer.PlayerGui
 ReGui.Mouse = LocalPlayer:GetMouse()
-
---// Lexer service
-
 
 --// Animation class
 local Animation = ReGui.Animation
@@ -878,7 +881,6 @@ function Animation:Tween(Data: AnimationTween): Tween?
 		if Completed then
 			Completed()
 		end
-
 		return
 	end
 
@@ -904,7 +906,7 @@ function Animation:Tween(Data: AnimationTween): Tween?
 		if not MasterTween then
 			MasterTween = Tween
 		end
-
+		
 		Tween:Play()
 	end
 
@@ -1073,7 +1075,50 @@ function Animation:HeaderCollapse(Data: HeaderCollapse): Tween
 	return Tween
 end
 
-function GetAndRemove(Key: string, Dict)
+--// Signal service
+type SignalClass = {
+	Connections: {
+		[number]: (...any) -> nil	
+	},
+	Fire: (SignalClass, ...any) -> nil,
+	GetConnections: (SignalClass) -> table,
+	Connect: (SignalClass, (...any) -> nil) -> table,
+	DisconnectConnections: (SignalClass) -> nil,
+}
+
+local Signaling = ReGui.Signaling
+
+local Signal: SignalClass = {}
+Signal.__index = Signal
+
+function Signal:Fire(...)
+	local Connections = self:GetConnections()
+	if #Connections <= 0 then return end
+	
+	for _, Connection in next, Connections do
+		Connection(...)
+	end
+end
+function Signal:GetConnections(): table
+	local Connections = self.Connections
+	return Connections
+end
+function Signal:Connect(Func: (...any) -> nil)
+	local Connections = self:GetConnections()
+	table.insert(Connections, Func)
+end
+function Signal:DisconnectConnections()
+	local Connections = self:GetConnections()
+	table.clear(Connections)
+end
+
+function Signaling:NewSignal(): SignalClass
+	return NewClass(Signal, {
+		Connections = {}
+	})
+end
+
+function GetAndRemove(Key: string, Dict: table)
 	local Value = Dict[Key]
 	if Value then
 		Dict[Key] = nil
@@ -1084,7 +1129,7 @@ end
 function MoveTableItem(Table: table, Item, NewPosition: number)
 	local Index = table.find(Table, Item)
 	if not Index then return end
-	
+
 	local Value = table.remove(Table, Index)
 	table.insert(Table, NewPosition, Value)
 end
@@ -1097,12 +1142,12 @@ end
 
 function Copy(Original: table, Insert: table?)
 	local Table = table.clone(Original)
-	
+
 	--// Merge Insert values
 	if Insert then
 		Merge(Table, Insert)
 	end
-	
+
 	return Table
 end
 
@@ -1135,36 +1180,31 @@ local function SortByQuery(Table: table, Query: string): table
 		local Value = IsArray and B or A
 		local Percentage = GetMatchPercentage(Value, Query)
 		local Position = 100 - Percentage
-		
+
 		table.insert(Sorted, Position, Value)
 	end
 
 	return Sorted
 end
 
-function NewClass(Base, Merge)
+function NewClass(Class, Merge)
 	Merge = Merge or {}
-	Base.__index = Base
-	return setmetatable(Merge, Base)
+	Class.__index = Class
+	return setmetatable(Merge, Class)
 end
 
-function ReGui:Warn(...)
+function ReGui:Warn(...: string?)
 	warn("[ReGui]::", ...)
 end
 
-function ReGui:IsDoubleClick(TickRange)
-	--// Unpack configuration
+function ReGui:IsDoubleClick(TickRange: number): boolean
 	local ClickThreshold = self.DoubleClickThreshold
-
-	if TickRange < ClickThreshold then
-		--// Double click
-		return true
-	end
+	return TickRange < ClickThreshold
 end
 
 function ReGui:Init(Overwrites)
 	Overwrites = Overwrites or {}
-	
+
 	--// Check if the library has already initalised
 	if self.Initialised then return end
 
@@ -1179,7 +1219,7 @@ function ReGui:Init(Overwrites)
 	--// Fetch folders
 	self:CheckConfig(self, {
 		ContainerParent = function()
-			return self:ResolveContainerParent()
+			return self:ResolveUIParent()
 		end,
 		Prefabs = function()
 			return self:LoadPrefabs()
@@ -1202,35 +1242,34 @@ function ReGui:Init(Overwrites)
 	local ActiveTooltips = self.ActiveTooltips
 	local Overlays = Container.Overlays
 	local LastClick = 0
-	
+
 	--// Create tooltips container
 	self.TooltipsContainer = ReGui.Elements:Overlay({
 		Parent = Overlays
 	})
-	
+
 	--// Key press
 	UserInputService.InputBegan:Connect(function(Input: InputObject)
 		if not self:IsMouseEvent(Input, true) then return end
-		
+
 		local ClickTick = tick()
-		local ClickRange = ClickTick-LastClick
-		
-		--// WindowActiveStates
-		self:UpdateWindowFocuses()
+		local ClickRange = ClickTick - LastClick
+		local IsDoubleClick = self:IsDoubleClick(ClickRange)
 		
 		--// DoubleClick
-		if self:IsDoubleClick(ClickRange) then
-			self:FireMouseEvents("DoubleClick")
-			LastClick = 0
-		else
-			LastClick = ClickTick
-		end
+		LastClick = IsDoubleClick and 0 or ClickTick
+
+		--// WindowActiveStates
+		self:UpdateWindowFocuses()
 	end)
-	
+
 	local function InputUpdate()
 		local Tooltips = self.TooltipsContainer
-		Tooltips.Visible = #ActiveTooltips >= 1
+		local Visible = #ActiveTooltips > 0
+		Tooltips.Visible = Visible
 		
+		if not Visible then return end
+
 		--// Set frame position to mosue location
 		local X, Y = ReGui:GetMouseLocation()
 		local Position = Overlays.AbsolutePosition
@@ -1240,7 +1279,7 @@ function ReGui:Init(Overwrites)
 			Y - Position.Y + TooltipOffset
 		)
 	end
-	
+
 	--// Bind events
 	RunService:BindToRenderStep("ReGui_InputUpdate", Enum.RenderPriority.Input.Value, InputUpdate)
 end
@@ -1257,7 +1296,7 @@ function ReGui:IsConsoleDevice(): boolean
 	return UserInputService.GamepadEnabled
 end
 
-function ReGui:GetScreenSize()
+function ReGui:GetScreenSize(): Vector2
 	return workspace.CurrentCamera.ViewportSize
 end
 
@@ -1276,13 +1315,16 @@ function ReGui:LoadPrefabs(): Folder?
 	return nil
 end
 
-function ReGui:ResolveContainerParent(): GuiObject?
+function ReGui:ResolveUIParent(): GuiObject?
 	local PlayerGui = self.PlayerGui
 	local Debug = self.Debug
 
 	local Steps = {
 		[1] = function()
-			return GetHiddenUI()
+			local Parent = GetHiddenUI()
+			if Parent.Parent == CoreGui then return end
+			
+			return Parent
 		end,
 		[2] = function()
 			return CoreGui
@@ -1295,9 +1337,10 @@ function ReGui:ResolveContainerParent(): GuiObject?
 	local Test = self:CreateInstance("ScreenGui")
 
 	--// Test each step for a successful parent
-	for Step, CreateFunc in next, Steps do
-		local Success, Parent = pcall(CreateFunc)
-		if not Success then continue end
+	for Step, Func in next, Steps do
+		--// Test fetching the parent
+		local Success, Parent = pcall(Func)
+		if not Success or not Parent then continue end
 
 		--// Test parenting
 		local CanParent = pcall(function()
@@ -1318,11 +1361,16 @@ function ReGui:ResolveContainerParent(): GuiObject?
 	return nil
 end
 
-function ReGui:CheckConfig(Source, Base, Call: boolean?)
+function ReGui:CheckConfig(Source: table, Base: table, Call: boolean?, IgnoreKeys: table?)
 	if not Source then return end 
 
 	for Key: string?, Value in next, Base do
 		if Source[Key] ~= nil then continue end
+		
+		--// Check the key should be ignored
+		if IgnoreKeys then
+			if table.find(IgnoreKeys, Key) then continue end
+		end
 
 		--// Call value function
 		if Call then
@@ -1341,7 +1389,6 @@ function ReGui:CheckAssetUrl(Url: (string|number)): string
 	if tonumber(Url) then
 		return `rbxassetid://{Url}`
 	end
-
 	return Url
 end
 
@@ -1369,18 +1416,18 @@ function ReGui:ConnectMouseEvent(Object: GuiObject, Config)
 	local Callback = Config.Callback
 	local DoubleClick = Config.DoubleClick
 	local OnlyMouseHovering = Config.OnlyMouseHovering
-	
+
 	local LastClick = 0
 	local HoverSignal = nil
-		
+
 	if OnlyMouseHovering then
 		HoverSignal = self:DetectHover(OnlyMouseHovering)
 	end
-	
+
 	Object.Activated:Connect(function(...)
 		local ClickTick = tick()
 		local ClickRange = ClickTick-LastClick
-		
+
 		--// OnlyMouseHovering
 		if HoverSignal and not HoverSignal.Hovering then return end
 
@@ -1390,39 +1437,11 @@ function ReGui:ConnectMouseEvent(Object: GuiObject, Config)
 				LastClick = ClickTick
 				return
 			end
-
 			LastClick = 0
 		end
 
 		Callback(...)
 	end)
-end
-
-export type ScreenMouseEvent = {
-	Callback: () -> nil
-}
-function ReGui:ConnectScreenMouseEvent(Object: GuiObject, Config: ScreenMouseEvent)
-	local MouseEvents = self.MouseEvents
-	local DoubleClick = Config.DoubleClick
-	local Events = DoubleClick and MouseEvents.DoubleClick or MouseEvents.Click
-	
-	Config.HoverSignal = self:DetectHover(Object)
-	table.insert(Events, Config)
-end
-
-function ReGui:FireMouseEvents(Type: string)
-	local MouseEvents = self.MouseEvents
-	local Events = MouseEvents[Type]
-	
-	for _, Event: MouseEvent in Events do
-		local Object = Event.Object
-		local Callback = Event.Callback
-		local HoverSignal = Event.HoverSignal
-		
-		if not HoverSignal.Hovering then continue end
-		
-		Callback()
-	end
 end
 
 function ReGui:GetAnimation(Animate: boolean?)
@@ -1437,11 +1456,9 @@ function ReGui:GetDictSize(Dict: table): number
 	return Count
 end
 
-function ReGui:RemoveAnimationSignals(Object: GuiObject)
-	local AllConnections = self.AnimationConnections
-
-	local Connections = AllConnections[Object]
-	if not Connections then return end 
+function ReGui:RemoveAnimations(Object: GuiObject)
+	local Data = self:GetAnimationData(Object)
+	local Connections = Data.Connections
 
 	--// Disconnect each connection 
 	for _, Connection in next, Connections do
@@ -1449,15 +1466,24 @@ function ReGui:RemoveAnimationSignals(Object: GuiObject)
 	end
 end
 
-function ReGui:AddAnimationSignal(Object: GuiObject, Connection: RBXScriptSignal)
-	local AllConnections = self.AnimationConnections
-
-	--// Create signals array for Object
-	local Connections = AllConnections[Object]
-	if not Connections then
+function ReGui:GetAnimationData(Object: GuiObject): table
+	local Connections = self.AnimationConnections
+	local Existing = Connections[Object]
+	
+	--// Check for existing
+	if Existing then return Existing end
+	
+	local Data = {
 		Connections = {}
-		AllConnections[Object] = Connections
-	end
+	}
+	
+	Connections[Object] = Data
+	return Data
+end
+
+function ReGui:AddAnimationSignal(Object: GuiObject, Connection: RBXScriptSignal)
+	local Data = self:GetAnimationData(Object)
+	local Connections = Data.Connections
 
 	table.insert(Connections, Connection)
 end
@@ -1466,41 +1492,46 @@ function ReGui:SetAnimationsEnabled(Enabled: boolean)
 	self.NoAnimations = not Enabled
 end
 
-function ReGui:SetAnimation(Object: GuiObject, Reference: string, Listener: GuiObject?)
+function ReGui:SetAnimation(Object: GuiObject, Reference: (string|table), Listener: GuiObject?)
 	Listener = Listener or Object
 
 	local Animations = self.Animations
-
+	
+	--// Get animation properties
 	local Data = Reference 
 	if typeof(Reference) ~= "table" then
 		Data = Animations[Reference]
 	end
-	
+
 	assert(Data, `No animation data for Class {Reference}!`)
 
 	--// Disconnect previous
-	self:RemoveAnimationSignals(Listener)
-
+	self:RemoveAnimations(Listener)
+	
+	--// Unpack data
 	local Init = Data.Init
 	local Connections = Data.Connections
 	local Tweeninfo = Data.Tweeninfo
 	local NoAnimation = Data.NoAnimation
+	
+	--// Get animation data
+	local StateData = self:GetAnimationData(Object)
+	local State = StateData.State
 
 	--// Connect signals
 	local InitFunc = nil
 	local AnimationEnabled = true
 	local CurrentSignal = nil
 	local Signals = {}
-	
+
 	--// Interface for the animation
 	local Module = {}
 	function Module:Reset(NoAnimation: boolean?)
-		if InitFunc then
-			InitFunc(NoAnimation)
-		end
+		if not InitFunc then return end
+		InitFunc(NoAnimation)
 	end
-	function Module:FireSignal(Enabled: boolean)
-		AnimationEnabled = Enabled
+	function Module:FireSignal(SignalName: string, NoAnimation: boolean?)
+		Signals[SignalName](NoAnimation)
 	end
 	function Module:Refresh(NoAnimation: boolean?)
 		if not CurrentSignal then return end
@@ -1509,20 +1540,21 @@ function ReGui:SetAnimation(Object: GuiObject, Reference: string, Listener: GuiO
 	function Module:SetEnabled(Enabled: boolean)
 		AnimationEnabled = Enabled
 	end
-	
+
 	for SignalName: string, Properties in next, Connections do
 		local function OnSignal(NoAnim: boolean?)
+			NoAnim = NoAnim == true --// Convert to boolean
 			CurrentSignal = SignalName
 			
 			--// Check if animations are enabled
 			local NoAnimations = self.NoAnimations
 			if NoAnimations then return end
-			
+
 			--// Check if the animation is enabled
 			if not AnimationEnabled then return end
 			
-			NoAnim = NoAnim == true --// Convert to boolean
-
+			StateData.State = SignalName
+			
 			Animation:Tween({
 				NoAnimation = NoAnim or NoAnimation,
 				Object = Object,
@@ -1537,7 +1569,7 @@ function ReGui:SetAnimation(Object: GuiObject, Reference: string, Listener: GuiO
 
 		--// Collect signal into array
 		self:AddAnimationSignal(Listener, Connection)
-		
+
 		Signals[SignalName] = OnSignal
 
 		--// Call init connection
@@ -1545,10 +1577,15 @@ function ReGui:SetAnimation(Object: GuiObject, Reference: string, Listener: GuiO
 			InitFunc = OnSignal
 		end
 	end
-	
-	--// Update the animation state to default
-	Module:Reset(true)
-	
+
+	if State then
+		--// Update the animation to the previous state, e.g MouseHover
+		Module:FireSignal(State)
+	else
+		--// Update the animation state to default
+		Module:Reset(true)
+	end
+
 	return Module
 end
 
@@ -1563,6 +1600,17 @@ function ReGui:GetChildOfClass(Object: GuiObject, ClassName: string): GuiObject
 	return Child
 end
 
+function ReGui:SetPadding(UiPadding: UIPadding, Padding: UDim)
+	if not UiPadding then return end
+	
+	self:SetProperties(UiPadding, {
+		PaddingBottom = Padding,
+		PaddingLeft = Padding,
+		PaddingRight = Padding,
+		PaddingTop = Padding
+	})
+end
+
 export type ConnectDrag = {
 	DragStart: () -> nil,
 	DragEnd: () -> nil,
@@ -1575,13 +1623,13 @@ function ReGui:ConnectDrag(Frame: GuiObject, Data)
 		DragMovement = EmptyFunction,
 		OnDragStateChange = EmptyFunction,
 	})
-	
+
 	--// Unpack Configuration
 	local DragStart = Data.DragStart
 	local DragEnd = Data.DragEnd
 	local DragMovement = Data.DragMovement
 	local OnDragStateChange = Data.OnDragStateChange
-	
+
 	--// Whitelist
 	local UserInputTypes = {
 		StartAndEnd = {
@@ -1593,9 +1641,9 @@ function ReGui:ConnectDrag(Frame: GuiObject, Data)
 			Enum.UserInputType.Touch
 		}
 	}
-	
+
 	local IsDragging = false
-	
+
 	local function InputTypeAllowed(Key, Type: string)
 		local InputType = Key.UserInputType
 		return table.find(UserInputTypes[Type], InputType)
@@ -1612,28 +1660,25 @@ function ReGui:ConnectDrag(Frame: GuiObject, Data)
 		OnDragStateChange(DraggingState)
 	end
 	local function MakeSignal(Data)
-		local DraggingDisabledCheck = Data.CheckDraggingDisabled
-		local DraggingRequired = Data.DraggingRequired
-		local UpdateState = Data.UpdateState
 		local IsDraggingState = Data.IsDragging
 		local InputType = Data.InputType
 		local Callback = Data.Callback
-		
+
 		return function(Key)
-			if IsDragging ~= DraggingRequired then return end
-			if DraggingDisabledCheck and self._DraggingDisabled then return end
+			if Data.DraggingRequired ~= IsDragging then return end
+			if Data.CheckDraggingDisabled and self._DraggingDisabled then return end
 			if not InputTypeAllowed(Key, InputType) then return end
-			
+
 			--// Update drag state
-			if UpdateState then
+			if Data.UpdateState then
 				SetIsDragging(IsDraggingState)
 			end
-			
+
 			local InputVector = KeyToVector(Key)
 			Callback(InputVector)
 		end
 	end
-	
+
 	--// Connect movement events
 	Frame.InputBegan:Connect(MakeSignal({
 		CheckDraggingDisabled = true,
@@ -1666,19 +1711,14 @@ type MakeDraggableFlags = {
 	StateChanged: ((MakeDraggableFlags) -> any)?
 }
 function ReGui:MakeDraggable(Config: MakeDraggableFlags)
-	self:CheckConfig(Config, {
-		Enabled = true
-	})
-
 	--// Unpack config
 	local Move = Config.Move
 	local Grab = Config.Grab
-	local Enabled = Config.Enabled
 	local OnDragStateChange = Config.OnDragStateChange
 
 	local PositionOrgin = nil
 	local InputOrgin = nil
-	
+
 	--// Interface
 	local Interface = {}
 	function Interface:SetEnabled(State: boolean)
@@ -1700,14 +1740,14 @@ function ReGui:MakeDraggable(Config: MakeDraggableFlags)
 	local function DragStart(InputVector)
 		if not Interface:CanDrag() then return end
 		local DragBegin = Config.DragBegin
-		
+
 		InputOrgin = InputVector
 		DragBegin(InputOrgin)
 	end
-	
+
 	local function DragMovement(InputVector)
 		if not Interface:CanDrag() then return end
-		
+
 		local Delta = InputVector - InputOrgin
 		local OnUpdate = Config.OnUpdate
 
@@ -1718,14 +1758,16 @@ function ReGui:MakeDraggable(Config: MakeDraggableFlags)
 	local function PositionBegan(Key)
 		PositionOrgin = Move.Position
 	end
-	local function UpdatePosition(Delta)
+	local function UpdatePosition(Delta: number)
 		local Position = UDim2.new(
 			PositionOrgin.X.Scale, 
 			PositionOrgin.X.Offset + Delta.X, 
 			PositionOrgin.Y.Scale, 
 			PositionOrgin.Y.Offset + Delta.Y
 		)
-
+		Config:SetPosition(Position)
+	end
+	local function SetPosition(self, Position: UDim2)
 		--// Tween frame element to the new size
 		Animation:Tween({
 			Object = Move,
@@ -1737,10 +1779,12 @@ function ReGui:MakeDraggable(Config: MakeDraggableFlags)
 
 	--// Check configuration
 	self:CheckConfig(Config, {
+		Enabled = true,
 		OnUpdate = UpdatePosition,
+		SetPosition = SetPosition,
 		DragBegin = PositionBegan
 	})
-	
+
 	--// Connect movement events
 	self:ConnectDrag(Grab, {
 		DragStart = DragStart,
@@ -1749,97 +1793,11 @@ function ReGui:MakeDraggable(Config: MakeDraggableFlags)
 	})
 
 	--// Set enabled state
+	local Enabled = Config.Enabled
 	Interface:SetEnabled(Enabled)
 
 	return Interface
 end
-
---type MakeDraggableFlags = {
---	Move: Instance,
---	Grab: Instance,
---	Enabled: boolean?,
---	OnUpdate: ((Vector2) -> ...any)?,
---	DragBegin: ((InputObject) -> ...any)?,
---	StateChanged: ((MakeDraggableFlags) -> any)?
---}
---function ReGui:MakeDraggable(Config: MakeDraggableFlags)
---	self:CheckConfig(Config, {
---		Enabled = true
---	})
-
---	--// Unpack config
---	local Move = Config.Move
---	local Grab = Config.Grab
---	local Enabled = Config.Enabled
-
---	local PositionOrgin = nil
---	local InputOrgin = nil
-
---	local DragDetector = ReGui:GetChildOfClass(Grab, "UIDragDetector")
-
---	--// Interface
---	local Interface = {}
---	function Interface:SetEnabled(State: boolean)
---		local StateChanged = Config.StateChanged
---		self.Enabled = State
---		DragDetector.Enabled = State
-
---		--// Invoke the state changed callback function
---		if StateChanged then 
---			StateChanged(self)
---		end
---	end
-
---	--// DragDetector event functions
---	local function DragStart(InputPosition)
---		local DragBegin = Config.DragBegin
---		InputOrgin = InputPosition
-
---		DragBegin(InputPosition)
---	end
---	local function DragMovement(InputPosition)
---		local Delta = InputPosition - InputOrgin
---		local OnUpdate = Config.OnUpdate
-
---		OnUpdate(Delta)
---	end
-
---	--// Movement functions
---	local function PositionBegan(InputPosition)
---		PositionOrgin = Move.Position
---	end
---	local function UpdatePosition(Delta)
---		local Position = UDim2.new(
---			PositionOrgin.X.Scale, 
---			PositionOrgin.X.Offset + Delta.X, 
---			PositionOrgin.Y.Scale, 
---			PositionOrgin.Y.Offset + Delta.Y
---		)
-
---		--// Tween frame element to the new size
---		Animation:Tween({
---			Object = Move,
---			EndProperties = {
---				Position = Position
---			}
---		})
---	end
-
---	--// Check configuration
---	self:CheckConfig(Config, {
---		OnUpdate = UpdatePosition,
---		DragBegin = PositionBegan
---	})
-
---	--// Connect movement events
---	DragDetector.DragStart:Connect(DragStart)
---	DragDetector.DragContinue:Connect(DragMovement)
-
---	--// Set enabled state
---	Interface:SetEnabled(Enabled)
-
---	return Interface
---end
 
 export type MakeResizableFlags = {
 	MinimumSize: Vector2,
@@ -1914,10 +1872,10 @@ end
 
 function ReGui:IsMouseEvent(Input: InputObject, IgnoreMovement: boolean)
 	local Name = Input.UserInputType.Name
-	
+
 	--// IgnoreMovement 
 	if IgnoreMovement and Name:find("Movement") then return end
-	
+
 	return Name:find("Touch") or Name:find("Mouse")
 end
 
@@ -1945,14 +1903,14 @@ function ReGui:DetectHover(Object: GuiObject, Config: DetectHover)
 	local function Update(Input, IsHovering: boolean?, IsMouseEvent: boolean?)
 		--// Check if the input is mouse or touch
 		if Input and MouseOnly then
-			if not ReGui:IsMouseEvent(Input) then return end
+			if not ReGui:IsMouseEvent(Input, true) then return end
 		end
 
 		--// Set new IsHovering state
 		if IsHovering ~= nil then
 			local Previous = Config.Hovering
 			Config.Hovering = IsHovering
-			
+
 			--// Invoke OnHoverChange
 			if IsHovering ~= Previous and OnHoverChange then
 				OnHoverChange(IsHovering)
@@ -2017,35 +1975,45 @@ function ReGui:StackWindows()
 	end
 end
 
+function ReGui:GetElementFlags(Object: GuiObject): table?
+	local Cache = self._FlagCache
+	return Cache[Object]
+end
+
 type UpdateColors = {
 	Object: GuiObject,
 	Tag: (string|table),
 	NoAnimation: boolean?,
 	Theme: string?,
-	TagsList: TagsList?
+	TagsList: TagsList?,
+	Tweeninfo: TweenInfo?
 }
 function ReGui:UpdateColors(Config: UpdateColors)
-	--// Unpack global configuration
-	local ElementColors = self.ElementColors
-	local Themes = self.ThemeConfigs
-	local Debug = self.Debug
-	local Cache = self._FlagCache
-	
 	--// Unpack config
 	local Object = Config.Object
 	local Tag = Config.Tag
 	local NoAnimation = Config.NoAnimation
 	local Elements = Config.TagsList
 	local Theme = Config.Theme
-
+	local Tweeninfo = Config.Tweeninfo
+	
+	--// Unpack global configuration
+	local ElementColors = self.ElementColors
+	local Themes = self.ThemeConfigs
+	local Debug = self.Debug
+	local Flags = self:GetElementFlags(Object)
+	
 	local Coloring = ElementColors[Tag]
-	local Flags = Cache[Object]
+	
+	--// Resolve string into color data
+	if typeof(Coloring) == "string" then
+		Coloring = ElementColors[Coloring]
+	end
 
 	if typeof(Tag) == "table" then
 		Coloring = Tag
 	elseif Elements then
-		--// Update the element's tag in the dict
-		Elements[Object] = Tag
+		Elements[Object] = Tag --// Update the element's tag in the dict
 	end
 
 	--// Check if coloring data exists
@@ -2060,7 +2028,7 @@ function ReGui:UpdateColors(Config: UpdateColors)
 		if Flags and Flags[Key] then 
 			continue 
 		end
-		
+
 		--// Color not found debug
 		if not Color then 
 			if Debug then
@@ -2074,6 +2042,7 @@ function ReGui:UpdateColors(Config: UpdateColors)
 
 	--// Tween new properties
 	Animation:Tween({
+		Tweeninfo = Tweeninfo,
 		Object = Object,
 		NoAnimation = NoAnimation,
 		EndProperties = Properties
@@ -2084,7 +2053,8 @@ export type MultiUpdateColorsConfig = {
 	Objects: ObjectsTable,
 	TagsList: TagsList?,
 	Theme: string?,
-	Animate: boolean?
+	Animate: boolean?,
+	Tweeninfo: TweenInfo?
 }
 function ReGui:MultiUpdateColors(Config: MultiUpdateColorsConfig)
 	local Objects = Config.Objects
@@ -2094,6 +2064,7 @@ function ReGui:MultiUpdateColors(Config: MultiUpdateColorsConfig)
 			TagsList = Config.TagsList,
 			Theme = Config.Theme,
 			NoAnimation = not Config.Animate,
+			Tweeninfo = Config.Tweeninfo,
 
 			Object = Object,
 			Tag = Tag,
@@ -2121,26 +2092,15 @@ function ReGui:MergeMetatables(Class, Object: GuiObject)
 	Metadata.__index = function(_, Key: string)
 		--// Fetch value from class
 		local Value = Class[Key]
-
 		if Value ~= nil then return Value end
 
 		--// Fetch value from Object
 		local Success, Value = pcall(function()
-			return Object[Key]
+			local Value = Object[Key]
+			return self:PatchSelf(Object, Value)  
 		end)
-
-		if Success then
-			--// Patch 'self'
-			if typeof(Value) == "function" then
-				return function(_, ...)
-					return Value(Object, ...)
-				end
-			end
-
-			return Value
-		end
-
-		return nil
+		
+		return Success and Value or nil
 	end
 
 	Metadata.__newindex = function(_, Key: string, Value)
@@ -2202,7 +2162,7 @@ function ReGui:ApplyFlags(Config: ApplyFlags)
 	local Object = Config.Object
 	local Class = Config.Class
 	local WindowClass = Config.WindowClass
-	
+
 	function Config:GetThemeKey(Tag: string)
 		if WindowClass then
 			return WindowClass:GetThemeKey(Tag)
@@ -2243,7 +2203,7 @@ function ReGui:ApplyFlags(Config: ApplyFlags)
 	end
 end
 
-function ReGui:SetProperties(Object: Instance, Properties)
+function ReGui:SetProperties(Object: Instance, Properties: table)
 	for Key: string, Value in next, Properties do
 		pcall(function()
 			Object[Key] = Value
@@ -2251,35 +2211,35 @@ function ReGui:SetProperties(Object: Instance, Properties)
 	end
 end
 
-function ReGui:InsertPrefab(Name: string, Properties): Instance
+function ReGui:InsertPrefab(Name: string, Properties): GuiObject
 	local Folder = self.Prefabs
 	local Prefabs = Folder.Prefabs
 
-	local Element = Prefabs:WaitForChild(Name)
-	local New = Element:Clone()
+	local Prefab = Prefabs:WaitForChild(Name)
+	local Object = Prefab:Clone()
 
 	--// Apply properties
 	if Properties then 
 		local UseProps = Properties.UsePropertiesList
 
 		if not UseProps then
-			self:SetProperties(New, Properties)
+			self:SetProperties(Object, Properties)
 		else
 			self:ApplyFlags({
-				Object = New,
+				Object = Object,
 				Class = Properties
 			})
 		end
 	end
 
-	return New
+	return Object
 end
 
 function ReGui:GetContentSize(Object: GuiObject, IngoreUIList: boolean?): Vector2
 	local UIListLayout = Object:FindFirstChildOfClass("UIListLayout")
 	local UIPadding = Object:FindFirstChildOfClass("UIPadding")
 	local UIStroke = Object:FindFirstChildOfClass("UIStroke")
-	
+
 	local ContentSize: Vector2
 
 	--// Fetch absolute size
@@ -2298,7 +2258,7 @@ function ReGui:GetContentSize(Object: GuiObject, IngoreUIList: boolean?): Vector
 
 		ContentSize += Vector2.new(Left+Right, Top+Bottom)
 	end
-	
+
 	if UIStroke then
 		local Thickness = UIStroke.Thickness
 		ContentSize += Vector2.new(Thickness/2, Thickness/2)
@@ -2312,7 +2272,7 @@ function ReGui:PatchSelf(Self, Func)
 	if typeof(Func) ~= "function" then 
 		return Func
 	end
-	
+
 	return function(_, ...)
 		return Func(Self, ...)
 	end
@@ -2326,13 +2286,21 @@ type MakeCanvas = {
 function ReGui:MakeCanvas(Config: MakeCanvas)
 	--// Unpack ReGui data
 	local ElementsClass = self.Elements
-	local IgnoredCanvasProps = self.IgnoredCanvasProperties
 	local Debug = self.Debug
+	local Signaling = self.Signaling
 
 	--// Unpack configuration
 	local Element = Config.Element
 	local WindowClass = Config.WindowClass
 	local Class = Config.Class
+	local OnChildChange = Config.OnChildChange
+	
+	local ChildChangeSignal = Signaling:NewSignal()
+	
+	--// Connect OnChildChange argument
+	if OnChildChange then
+		ChildChangeSignal:Connect(OnChildChange)
+	end
 
 	--// Debug report
 	if not WindowClass and Debug then
@@ -2342,19 +2310,19 @@ function ReGui:MakeCanvas(Config: MakeCanvas)
 
 	--// Create new canvas class
 	local Canvas = NewClass(ElementsClass, {
-		ParentCanvas = Element,
+		Class = Class,
+		RawObject = Element,
 		WindowClass = WindowClass or false,
+		OnChildChange = ChildChangeSignal,
 		Elements = {}
 	})
 
 	--// Create metatable merge
 	local Meta = {
 		__index = function(_, Key: string)
-			local CanvasIgnored = table.find(IgnoredCanvasProps, Key)
-			
 			--// Check Canvas class for value
 			local CanvasValue = Canvas[Key]
-			if not CanvasIgnored and CanvasValue ~= nil then 
+			if CanvasValue ~= nil then 
 				return self:PatchSelf(Canvas, CanvasValue)  
 			end
 
@@ -2383,34 +2351,117 @@ function ReGui:MakeCanvas(Config: MakeCanvas)
 	return setmetatable({}, Meta)
 end
 
+--// Ini service
+function ReGui:GetIniData(Class): table
+	local IniToSave = self.IniToSave
+	local Ini = {}
+	
+	for _, Name in next, IniToSave do
+		Ini[Name] = Class[Name]
+	end
+	
+	return Ini
+end
+
+function ReGui:DumpIni(JsonEncode: boolean?): table
+	local IniSettings = self.IniSettings
+	local Parsed = {}
+	
+	for Flag, Element in next, IniSettings do
+		Parsed[Flag] = self:GetIniData(Element)
+	end
+	
+	--// Parse into Json string
+	if JsonEncode then
+		return HttpService:JSONEncode(Parsed)
+	end
+	
+	return Parsed
+end
+
+function ReGui:LoadIniIntoElement(Element, Values: table)
+	local ValueFunctions = {
+		["Value"] = function(Value)
+			Element:SetValue(Value)
+		end,
+	}
+	
+	for Name, Value in next, Values do
+		--// Check if setting the value requires a function call
+		local SetValue = ValueFunctions[Name]
+		if SetValue then
+			SetValue(Value)
+			continue
+		end
+		
+		Element[Name] = Value
+	end
+end
+
+function ReGui:LoadIni(NewSettings: (table|string), JsonEncoded: boolean?)
+	local IniSettings = self.IniSettings
+	assert(NewSettings, "No Ini configuration was passed")
+	
+	--// Decode Json into a dict table
+	if JsonEncoded then
+		NewSettings = HttpService:JSONDecode(NewSettings)
+	end
+	
+	for Flag, Values in next, NewSettings do
+		local Element = IniSettings[Flag]
+		self:LoadIniIntoElement(Element, Values)
+	end
+end
+
+function ReGui:AddIniFlag(Flag: string, Element: table)
+	local IniSettings = self.IniSettings
+	IniSettings[Flag] = Element
+end
+
 type OnElementCreateData = {
 	Flags: table,
 	Object: GuiObject,
 	Canvas: table
 }
 function ReGui:OnElementCreate(Data: OnElementCreateData)
+	local FlagCache = self._FlagCache
+	
 	local Flags = Data.Flags
 	local Object = Data.Object
 	local Canvas = Data.Canvas
-	
+	local Class = Data.Class
+
 	local WindowClass = Canvas.WindowClass
-	
+
 	local NoAutoTag = Flags.NoAutoTag
 	local NoAutoFlags = Flags.NoAutoFlags
 	local ColorTag = Flags.ColorTag
+	local NoStyle = Flags.NoStyle
+	local IniFlag = Flags.IniFlag
 	
+	--// Cache element flags
+	FlagCache[Object] = Flags
+	
+	--// Registor element into IniSettings
+	if IniFlag then
+		self:AddIniFlag(IniFlag, Class)
+	end
+	
+	--// NoStyle
+	if NoStyle then return end
+
 	--// Registor element into WindowClass
 	if not NoAutoTag and WindowClass then
 		WindowClass:TagElements({
 			[Object] = ColorTag
 		})
 	end
-	
+
 	--// Apply style functions to the element
 	if WindowClass then
 		WindowClass:LoadStylesIntoElement(Data)
 	end
-	
+
 	if not NoAutoFlags then
 		--// Apply flags to the element
 		self:ApplyFlags({
@@ -2421,14 +2472,12 @@ function ReGui:OnElementCreate(Data: OnElementCreateData)
 	end
 end
 
-type WrapGeneration = {
-	Base: table,
-}
-function ReGui:WrapGeneration(Function, Data: WrapGeneration)
-	local Base = Data.Base
-	local Cache = self._FlagCache
+function ReGui:WrapGeneration(Function, Data: table)
 	local ErrorCache = self._ErrorCache
-
+	
+	local Base = Data.Base
+	local IgnoreDefaults = Data.IgnoreDefaults
+	
 	return function(Canvas, Flags, ...)
 		Flags = Flags or {}
 
@@ -2443,15 +2492,16 @@ function ReGui:WrapGeneration(Function, Data: WrapGeneration)
 			Flags = table.clone(Flags)
 		end
 		
-		local Parent = Canvas.ParentCanvas
+		local Parent = Canvas.RawObject
 		local Elements = Canvas.Elements
+		local OnChildChange = Canvas.OnChildChange
 
 		--// Check flags again as the element generation may have modified
 		self:CheckConfig(Flags, {
 			Parent = Parent,
 			Name = Flags.ColorTag
-		})
-		
+		}, nil, IgnoreDefaults)
+
 		--// Convert self from 'ReGui' to 'Elements'
 		if Canvas == self then
 			Canvas = self.Elements
@@ -2463,9 +2513,11 @@ function ReGui:WrapGeneration(Function, Data: WrapGeneration)
 
 		--// Check for errors
 		if Success == false then
-			if ErrorCache[Parent] then return end
-			ErrorCache[Parent] = Class
-			
+			if Parent then
+				if ErrorCache[Parent] then return end
+				ErrorCache[Parent] = Class
+			end
+
 			--// Create visual error message
 			if Canvas.Error then
 				Canvas:Error({
@@ -2482,24 +2534,26 @@ function ReGui:WrapGeneration(Function, Data: WrapGeneration)
 		if Element == nil then
 			Element = Class
 		end
-		
+
+		--// Invoke OnChildChange
+		if OnChildChange then
+			OnChildChange:Fire(Class)
+		end
+
 		--// Add element into the flag Cache
 		if Element then
 			if Elements then
 				table.insert(Elements, Element)
 			end
 			
-			--// Cache element flags
-			Cache[Element] = Flags
-			
-			--// Load element into theme
 			self:OnElementCreate({
 				Object = Element,
 				Flags = Flags,
+				Class = Class,
 				Canvas = Canvas
 			})
 		end
-		
+
 		return Class, Element
 	end
 end
@@ -2508,7 +2562,7 @@ function ReGui:DefineElement(Name: string, Data)
 	local Elements = self.Elements
 	local Themes = self.ThemeConfigs
 	local ElementColors = self.ElementColors
-	
+
 	local BaseTheme = Themes.DarkTheme
 
 	--// Element data
@@ -2521,8 +2575,7 @@ function ReGui:DefineElement(Name: string, Data)
 	--// Add missing keys to base config
 	self:CheckConfig(Base, {
 		ColorTag = Name,
-		ElementStyle = Name,
-		Visible = true,
+		ElementStyle = Name
 	})
 
 	--// Declare new coloring variables into theme
@@ -2536,9 +2589,7 @@ function ReGui:DefineElement(Name: string, Data)
 	end
 
 	--// Create element function wrap
-	local Generate = self:WrapGeneration(Create, {
-		Base = Base
-	})
+	local Generate = self:WrapGeneration(Create, Data)
 
 	--// Export creation function into ReGui dict
 	if Export then
@@ -2558,25 +2609,25 @@ end
 
 function ReGui:DefineTheme(Name: string, ThemeData: ThemeData)
 	local Themes = self.ThemeConfigs
-	
+
 	--// Check theme configuration for missing data
 	self:CheckConfig(ThemeData, {
 		BaseTheme = Themes.DarkTheme
 	})
-	
+
 	local BaseTheme = GetAndRemove("BaseTheme", ThemeData)
 	local Theme = {
 		BaseTheme = BaseTheme,
 		Values = ThemeData
 	}
-	
+
 	--// Push theme into the ThemeConfigs dict
 	Themes[Name] = Theme
-	
+
 	return Theme
 end
 
-function ReGui:GetMouseLocation()
+function ReGui:GetMouseLocation(): (number, number)
 	local Mouse = self.Mouse
 	return Mouse.X, Mouse.Y
 end
@@ -2588,7 +2639,7 @@ end
 function ReGui:UpdateWindowFocuses()
 	local Windows = self.Windows
 	local FocusesEnabled = self.WindowFocusesEnabled
-	
+
 	if not FocusesEnabled then return end
 
 	--// Update each window state
@@ -2615,22 +2666,22 @@ function ReGui:WindowCanFocus(WindowClass: table): boolean
 	return true
 end
 
-function ReGui:GetFocusedWindow()
+function ReGui:GetFocusedWindow(): table?
 	return self.FocusedWindow
 end
 
 function ReGui:BringWindowToFront(WindowClass: table)
 	local Windows = self.Windows
-	
+
 	--// Check if the NoBringToFrontOnFocus flag is enabled
 	local NoBringToFront = WindowClass.NoBringToFrontOnFocus
 	if NoBringToFront then return end
-	
+
 	--// Change position of window in the Windows array to 1
 	MoveTableItem(Windows, WindowClass, 1)
 end
 
-function ReGui:SetFocusedWindow(ActiveClass: table)
+function ReGui:SetFocusedWindow(ActiveClass: table?)
 	local Previous = self:GetFocusedWindow()
 	local Windows = self.Windows
 
@@ -2642,7 +2693,7 @@ function ReGui:SetFocusedWindow(ActiveClass: table)
 	if ActiveClass then
 		local CanSelect = self:WindowCanFocus(ActiveClass)
 		if not CanSelect then return end
-		
+
 		--// Bring Window to the front
 		self:BringWindowToFront(ActiveClass)
 	end
@@ -2655,9 +2706,9 @@ function ReGui:SetFocusedWindow(ActiveClass: table)
 
 		--// Ignore NoSelect windows with NoSelect flag
 		if not CanSelect then continue end
-		
+
 		ZIndex -= 1
-		
+
 		--// Set Window ZIndex
 		if ZIndex then
 			Window.ZIndex = ZIndex
@@ -2669,7 +2720,7 @@ function ReGui:SetFocusedWindow(ActiveClass: table)
 	end
 end
 
-function ReGui:SetItemTooltip(Parent: GuiObject, Render: () -> ...any)
+function ReGui:SetItemTooltip(Parent: GuiObject, Render: (Elements) -> ...any)
 	local Elements = self.Elements
 	local Tooltips = self.TooltipsContainer
 	local ActiveTooltips = self.ActiveTooltips
@@ -2693,7 +2744,7 @@ function ReGui:SetItemTooltip(Parent: GuiObject, Render: () -> ...any)
 				table.insert(ActiveTooltips, Canvas)
 				return 
 			end
-			
+
 			--// Remove from ActiveTooltips
 			local Index = table.find(ActiveTooltips, Canvas)
 			table.remove(ActiveTooltips, Index)
@@ -2708,46 +2759,110 @@ function ReGui:CheckFlags(Flags, Config)
 	for Name: string, Func in next, Flags do
 		local Value = Config[Name]
 		if not Value then continue end
-		
+
 		Func(Value)
 	end
 end
 
 function ReGui:GetThemeKey(Theme: (string|table), Key: string)
 	local Themes = self.ThemeConfigs
-
-	local BaseTheme = Themes.DarkTheme
-	Theme = Theme or BaseTheme
 	
 	--// Fetch theme data from the name
 	if typeof(Theme) == "string" then
 		Theme = Themes[Theme]
 	end
-	
+
+	local BaseTheme = Themes.DarkTheme
+	Theme = Theme or BaseTheme
+
 	local BaseTheme = Theme.BaseTheme
 	local Values = Theme.Values
-	
+
 	--// Test for a direct value
 	local Value = Values[Key]
 	if Value then return Value end
-	
+
 	--// Fetch value from the base theme
 	if BaseTheme then
 		return self:GetThemeKey(BaseTheme, Key)
 	end
 end
 
+function ReGui:SelectionGroup(Elements)
+	local Previous = nil
+	local Debounce = false
+	
+	local function ForEach(Func, Ignore)
+		for _, Element in next, Elements do
+			if typeof(Element) == "Instance" then continue end
+			if Element == Ignore then continue end
+			
+			Func(Element)
+		end
+	end
+	
+	local function Callback(self)
+		if Debounce then return end
+		Debounce = true
+		
+		local Value = Previous
+		Previous = self:GetValue()
+		
+		if not Value then
+			Value = Previous
+		end
+		
+		ForEach(function(Element)
+			Element:SetValue(Value)
+		end, self)
+		
+		Debounce = false
+	end
+	
+	ForEach(function(Element)
+		Element.Callback = Callback
+	end)
+end
+
 --// Container class
 local Elements = ReGui.Elements
 Elements.__index = Elements
 
-function Elements:GetParent()
-	return self.ParentCanvas
+function Elements:GetObject()
+	return self.RawObject
+end
+
+function Elements:Remove()
+	local OnChildChange = self.OnChildChange
+	local Object = self:GetObject()
+	local Class = self.Class
+
+	--// Check if the class has a remove function
+	local ClassRemove = Class.Remove
+	if ClassRemove then
+		return ClassRemove(Class)
+	end
+
+	--// Invoke OnChildChange
+	if OnChildChange then
+		OnChildChange:Fire(Class or self)
+	end
+
+	if Class then
+		table.clear(Class)
+	end
+
+	Object:Destroy()
+	table.clear(self)
+end
+
+function Elements:GetChildElements(): table
+	local Elements = self.Elements
+	return Elements
 end
 
 function Elements:ClearChildElements()
-	local Elements = self.Elements
-	
+	local Elements = self:GetChildElements()
 	for _, Object in next, Elements do
 		Object:Destroy()
 	end
@@ -2755,7 +2870,8 @@ end
 
 function Elements:TagElements(Objects: ObjectTable)
 	local WindowClass = self.WindowClass
-	
+	local Debug = ReGui.Debug
+
 	--// Missing WindowClass
 	if not WindowClass then 	
 		if Debug then
@@ -2769,11 +2885,11 @@ end
 
 function Elements:GetThemeKey(Key: string)
 	local WindowClass = self.WindowClass
-	
+
 	if WindowClass then 
 		return WindowClass:GetThemeKey(Key)
 	end
-	
+
 	return ReGui:GetThemeKey(nil, Key)
 end
 
@@ -2795,18 +2911,18 @@ end
 function Elements:SetElementFocused(Object: GuiObject, Data)
 	local WindowClass = self.WindowClass
 	local IsMobileDevice = ReGui.HasTouchScreen
-	
+
 	local Focused = Data.Focused
 	local Animation = Data.Animation
-	
+
 	--// Change global animation state
 	ReGui:SetAnimationsEnabled(not Focused)
-	
+
 	--// Reset animation state
 	if not Focused and Animation then
 		Animation:Refresh()
 	end
-	
+
 	--// Window modification
 	if not WindowClass then return end
 	if not IsMobileDevice then return end
@@ -2818,95 +2934,48 @@ end
 
 ReGui:DefineElement("Dropdown", {
 	Base = {
+		ColorTag = "PopupCanvas",
 		Disabled = false,
-		MaxSizeY = 150,
-		MinSizeX = 100,
-		OnClosed = EmptyFunction,
+		AutoClose = true,
 		OnSelected = EmptyFunction
 	},
-	Create = function(self, Config: Tooltip)
+	Create = function(Canvas, Config)
 		Config.Parent = ReGui.Container.Overlays
 
 		--// Unpack configuration
 		local Selected = Config.Selected
-		local Parent = Config.ParentObject
 		local Items = Config.Items
-		local MaxSizeY = Config.MaxSizeY
-		local MinSizeX = Config.MinSizeX
-		local OnClosed = Config.OnClosed
 		local OnSelected = Config.OnSelected
-
+		
 		--// Create overlay object
-		local Canvas, Object = self:OverlayScroll(Config)
-		local UIStroke = Object.UIStroke
-
-		--// Get content size of parent
-		local Padding = UIStroke.Thickness
-		local Position = Parent.AbsolutePosition
-		local Size = Parent.AbsoluteSize --ReGui:GetContentSize(Parent, true)
+		local Popup, Object = Canvas:PopupCanvas(Config)
+		local Class = ReGui:MergeMetatables(Config, Popup)
 		
 		local Entries = {}
-		
-		--// Position dropdown
-		local Relative = Object.Parent.AbsolutePosition
-		Object.Position = UDim2.fromOffset(
-			Position.X - Relative.X + Padding, 
-			Position.Y - Relative.Y + Size.Y
-		)
 
-		--// Connect hover watch
-		local Hover = ReGui:DetectHover(Object, {
-			MouseOnly = true,
-			OnInput = function(MouseHovering, Input)
-				if MouseHovering then return end
-				Config:Close()
-			end,
-		})
-		
 		local function SetValue(Value)
-			Config:Close()
 			OnSelected(Value) -- Invoke selected callback
 		end
-		
-		local function UpdateScale()
-			--// Configure size of the frame
-			-- Roblox does not support UISizeConstraint on a scrolling frame grr
-			local Absolute = Canvas:GetCanvasSize()
-			local YSize = math.clamp(Absolute.Y, Size.Y, MaxSizeY)
-			local XSize = math.clamp(Size.X-Padding, MinSizeX, math.huge)
 
-			Object.Size = UDim2.fromOffset(XSize, YSize)
-		end
-		
 		function Config:ClearEntries()
 			for _, Entry in Entries do
 				Entry:Remove()
 			end
 		end
-		
-		function Config:Close()
-			if self.Disabled then return end
-			self.Disabled = true
-			
-			Hover:Disconnect()
-			Object:Remove()
-			
-			OnClosed() -- Invoke closed callback
-		end
-		
+
 		function Config:SetItems(Items: table, Selected)
 			local IsArray = Items[1]
-			
+
 			--// Clear previous entries
 			self:ClearEntries()
-			
+
 			--// Append items
 			for A, B in Items do
 				local Value = IsArray and B or A
 				local IsSelected = A == Selected or B == Selected
 
 				--// Create selectable
-				local Entry = Canvas:Selectable({
+				local Entry = Popup:Selectable({
 					Text = tostring(Value),
 					Selected = IsSelected,
 					ZIndex = 6,
@@ -2914,12 +2983,9 @@ ReGui:DefineElement("Dropdown", {
 						return SetValue(Value)
 					end,
 				})
-				
+
 				table.insert(Entries, Entry)
 			end
-			
-			--// Update size of the dropdown frame
-			UpdateScale()
 		end
 
 		--// Update object
@@ -2927,53 +2993,50 @@ ReGui:DefineElement("Dropdown", {
 			Config:SetItems(Items, Selected)
 		end
 
-		return Config, Object
+		return Class, Object
 	end,
 })
 
 ReGui:DefineElement("OverlayScroll", {
-	Base = {},
+	Base = {
+		ElementClass = "OverlayScroll",
+		Spacing = UDim.new(0, 4),
+	},
 	Create = function(self, Config)
 		local WindowClass = self.WindowClass
+		
+		local ElementClass = Config.ElementClass
+		local Spacing = Config.Spacing
 
 		--// Create overlay object
-		local Object = ReGui:InsertPrefab("OverlayScroll", Config)
+		local Object = ReGui:InsertPrefab(ElementClass, Config)
+		local ContentFrame = Object:FindFirstChild("ContentFrame") or Object
+		local ListLayout = Object:FindFirstChild("UIListLayout", true)
 
-		local ContentFrame = Object.ContentFrame
+		ListLayout.Padding = Spacing
+		
+		local Class = ReGui:MergeMetatables(self, Config)
 
 		--// Content canvas
 		local Canvas = ReGui:MakeCanvas({
 			Element = ContentFrame,
 			WindowClass = WindowClass,
-			Class = self
+			Class = Class
 		})
 
 		function Config:GetCanvasSize()
 			return ContentFrame.AbsoluteCanvasSize
 		end
 
-		local Class = ReGui:MergeMetatables(Config, Canvas)
-		return Class, Object
+		return Canvas, Object
 	end,
 })
 
 ReGui:DefineElement("Overlay", {
-	Base = {},
-	Create = function(self, Config)
-		local WindowClass = self.WindowClass
-
-		--// Create overlay object
-		local Object = ReGui:InsertPrefab("Overlay", Config)
-
-		--// Content canvas
-		local Canvas = ReGui:MakeCanvas({
-			Element = Object,
-			WindowClass = WindowClass,
-			Class = self
-		})
-
-		return Canvas, Object
-	end,
+	Base = {
+		ElementClass = "Overlay"
+	},
+	Create = Elements.OverlayScroll,
 })
 
 export type Image = {
@@ -3035,9 +3098,9 @@ ReGui:DefineElement("Button", {
 	Create = function(self, Config: Button): TextButton
 		--// Create button object
 		local Object = ReGui:InsertPrefab("Button", Config)
-		
+
 		local DoubleClick = Config.DoubleClick
-		
+
 		--// MouseEvents
 		ReGui:ConnectMouseEvent(Object, {
 			DoubleClick = DoubleClick,
@@ -3065,37 +3128,46 @@ ReGui:DefineElement("Selectable", {
 		Disabled = false,
 		Size = UDim2.fromScale(1, 0),
 		AutomaticSize = Enum.AutomaticSize.Y,
+		TextXAlignment = Enum.TextXAlignment.Left,
 		AnimationTags = {
 			Selected = "Buttons",
 			Unselected = "TransparentButtons"
 		},
 	},
-	Create = function(self, Config: Selectable): TextButton
+	Create = function(self, Config: Selectable): (table, TextButton)
+		local AfterClick = self.Class.AfterClick
+		
 		local Selected = Config.Selected
 		local Disabled = Config.Disabled
-		
+
 		--// Create button object
 		local Object = ReGui:InsertPrefab("Button", Config)
 		local Class = ReGui:MergeMetatables(Config, Object)
-		
+
 		Object.Activated:Connect(function(...)
+			--// Invoke callback
 			local Func = Config.Callback
-			return Func(Object, ...)
+			Func(Object, ...)
+			
+			--// The canvas after click event
+			if AfterClick then
+				AfterClick(Object, ...)
+			end
 		end)
-		
+
 		function Config:SetSelected(Selected: boolean?)
 			local Animations = self.AnimationTags
 			local Animation = Selected and Animations.Selected or Animations.Unselected
-			
+
 			self.Selected = Selected
 			ReGui:SetAnimation(Object, Animation)
 		end
-		
+
 		function Config:SetDisabled(Disabled: boolean?)
 			self.Disabled = Disabled
 			Object.Interactable = not Disabled
 		end
-		
+
 		--// Update object state
 		Config:SetSelected(Selected)
 		Config:SetDisabled(Disabled)
@@ -3161,7 +3233,7 @@ ReGui:DefineElement("Keybind", {
 		KeyBlacklist = {},
 		UiPadding = UDim.new(),
 		AutomaticSize = Enum.AutomaticSize.None,
-		Size = UDim2.new(0.4, 0, 0, 19)
+		Size = UDim2.new(0.3, 0, 0, 19)
 	},
 	Create = function(Canvas, Config: Keybind)
 		local Value = Config.Value
@@ -3176,19 +3248,19 @@ ReGui:DefineElement("Keybind", {
 		local Label = Canvas:Label({
 			Parent = Object, 
 			Text = LabelText,
-			Position = UDim2.new(1, 5, 0.5),
+			Position = UDim2.new(1, 4, 0.5),
 			AnchorPoint = Vector2.new(0, 0.5)
 		})
-		
+
 		local function Callback(Func, ...)
 			return Func(Object, ...)
 		end
-		
+
 		local function KeyIsBlacklisted(KeyId: KeyId)
 			local Blacklisted = table.find(KeyBlacklist, KeyId)
 			return Blacklisted
 		end
-		
+
 		function Config:SetDisabled(Disabled: boolean)
 			self.Disabled = Disabled
 			Object.Interactable = not Disabled
@@ -3205,10 +3277,10 @@ ReGui:DefineElement("Keybind", {
 			if KeyId == DeleteKey then
 				KeyId = nil
 			end
-			
+
 			self.Value = KeyId
 			Object.Text = KeyId and KeyId.Name or "Not set"
-			
+
 			--// Invoke OnKeybindSet callback
 			Callback(OnKeybindSet, KeyId)
 		end
@@ -3218,35 +3290,35 @@ ReGui:DefineElement("Keybind", {
 			Object.Text = "..."
 			Object.Interactable = false
 		end
-		
+
 		local function GetKeyId(Input: InputObject)
 			local KeyCode = Input.KeyCode
 			local InputType = Input.UserInputType
-			
+
 			--// Convert mouse input
 			if InputType ~= Enum.UserInputType.Keyboard then
 				return InputType
 			end
-			
+
 			return KeyCode
 		end
-		
+
 		local function CheckNewKey(Input: InputObject)
 			local OnBlacklistedKeybindSet = Config.OnBlacklistedKeybindSet
 			local Previous = Config.Value
-			
+
 			local KeyId = GetKeyId(Input)
-			
+
 			--// Check if window is focused
 			if not UserInputService.WindowFocused then return end 
-			
+
 			--// Check if keycode is blacklisted
 			if KeyIsBlacklisted(KeyId) then
 				--// Invoke OnKeybindSet callback
 				Callback(OnBlacklistedKeybindSet, KeyId)
 				return
 			end
-			
+
 			Object.Interactable = true
 			Config._WaitingForNewKey = false
 
@@ -3267,7 +3339,7 @@ ReGui:DefineElement("Keybind", {
 			local Func = Config.Callback
 
 			local KeyId = GetKeyId(Input)
-			
+
 			--// OnKeybindSet
 			if Config._WaitingForNewKey then
 				CheckNewKey(Input)
@@ -3282,7 +3354,7 @@ ReGui:DefineElement("Keybind", {
 			if not Value then return end
 			if KeyId == DeleteKey then return end
 			if KeyId.Name ~= Value.Name then return end 
-			
+
 			--// Invoke callback
 			Callback(Func, KeyId)
 		end
@@ -3296,7 +3368,7 @@ ReGui:DefineElement("Keybind", {
 		Object.Activated:Connect(function()
 			Config:WaitForNewKey()
 		end)
-		
+
 		ReGui:SetAnimation(Object, "Inputs")
 
 		return Class, Object
@@ -3308,7 +3380,9 @@ ReGui:DefineElement("ArrowButton", {
 		Direction = "Left",
 		ColorTag = "Button",
 		Icon = ReGui.Icons.Arrow,
-		Size = UDim2.fromOffset(21,21),
+		Size = UDim2.fromOffset(21, 21),
+		IconSize = UDim2.fromScale(1, 1),
+		IconPadding = UDim.new(0, 4),
 		Rotations = {
 			Left = 180,
 			Right = 0,
@@ -3371,7 +3445,7 @@ ReGui:DefineElement("Label", {
 		if not FontFace and AddFlag then
 			Config.FontFace = Font.fromName(FontName, Weight, Style)
 		end
-		
+
 		local Label = ReGui:InsertPrefab("Label", Config)
 		local Padding = Label:FindFirstChildOfClass("UIPadding")
 
@@ -3403,8 +3477,159 @@ ReGui:DefineElement("Error", {
 	end,
 })
 
-----// Tabs box class
-local TabSelectorClass = {
+------// MenuBar class
+local MenuBar = {
+	Engaged = false
+}
+MenuBar.__index = MenuBar
+
+function MenuBar:SetEngaged(Engaged: boolean)
+	local Object = self.Object
+	local Window = self.WindowClass
+	
+	self.Engaged = Engaged
+	
+	--// Set the Window interaction state based on the MenuBar enagement
+	if Window then
+		Window:SetCanvasInteractable(not Engaged)
+	end
+end
+
+function MenuBar:IsHovering(): boolean
+	local Hovering = false
+	
+	--// Check the hover state for each menu
+	self:Foreach(function(Data)
+		Hovering = Data.Popup:IsMouseHovering()
+		return Hovering
+	end)
+	
+	return Hovering
+end
+
+function MenuBar:Foreach(Func)
+	local Menus = self.Menus
+	for _, Data in next, Menus do
+		--// Invoke callback
+		local Break = Func(Data)
+		if Break then break end
+	end
+end
+
+function MenuBar:SetFocusedMenu(Menu)
+	self:Foreach(function(Data)
+		--// Set active state based on if MenuItem is the requested
+		local Active = Data == Menu
+		Data:SetActiveState(Active)
+	end)
+end
+
+function MenuBar:Close()
+	self:SetEngaged(false)
+	self:SetFocusedMenu(nil)
+end
+
+function MenuBar:MenuItem(Config)
+	local Canvas = self.Canvas
+	local Menus = self.Menus
+	
+	--// Create elements
+	local Selectable = Canvas:MenuButton(Config)
+	local Popup = Canvas:PopupCanvas({
+		RelativeTo = Selectable,
+		MaxSizeX = 210,
+		Visible = false,
+		AutoClose = false,
+		AfterClick = function()
+			self:Close()
+		end,
+	})
+
+	--// Menu data for the array
+	local MenuData = {
+		Popup = Popup,
+		Button = Selectable
+	}
+	
+	--// Connect mouse focus events
+	ReGui:DetectHover(Selectable, {
+		MouseEnter = true,
+		OnInput = function()
+			if not self.Engaged then return end
+			self:SetFocusedMenu(MenuData)
+		end,
+	})
+	
+	function MenuData:SetActiveState(Active: boolean)
+		Popup:SetPopupVisible(Active)
+		Selectable:SetSelected(Active)
+	end
+	
+	--// Engage button connections
+	Selectable.Activated:Connect(function()
+		self:SetFocusedMenu(MenuData)
+		self:SetEngaged(true)
+	end)
+	
+	--// Add menu to the Menu array
+	table.insert(Menus, MenuData)
+	
+	return Popup, MenuData
+end
+
+ReGui:DefineElement("MenuBar", {
+	Base = {},
+	Create = function(self, Config): Elements
+		local WindowClass = self.WindowClass
+
+		--// Create object
+		local Object = ReGui:InsertPrefab("MenuBar", Config)
+
+		--// Content canvas
+		local Canvas = ReGui:MakeCanvas({
+			Element = Object,
+			WindowClass = WindowClass,
+			Class = Config
+		})
+		
+		--// Make menu bar class
+		local Class = NewClass(MenuBar, {
+			WindowClass = WindowClass,
+			Canvas = Canvas,
+			Object = Object,
+			Menus = {}
+		})
+		Merge(Class, Config)
+		
+		--// Mouse click detection for closure
+		ReGui:DetectHover(Object, {
+			MouseOnly = true,
+			OnInput = function()
+				if not Class.Engaged then return end
+				if Class:IsHovering() then return end
+				
+				Class:Close()
+			end,
+		})
+		
+		local Meta = ReGui:MergeMetatables(Class, Canvas)
+		return Meta, Object
+	end,
+})
+
+ReGui:DefineElement("MenuButton", {
+	Base = {
+		Text = "MenuButton",
+		PaddingLeft = UDim.new(0, 8),
+		PaddingRight = UDim.new(0, 8),
+		Size = UDim2.fromOffset(0, 19),
+		AutomaticSize = Enum.AutomaticSize.XY
+	},
+	Create = Elements.Selectable
+})
+
+----// TabsBar class
+local TabBarClass = {
 	ColorTags = {
 		BGSelected = {
 			[true] = "SelectedTab",
@@ -3416,27 +3641,26 @@ local TabSelectorClass = {
 		},
 	}
 }
-function TabSelectorClass:UpdateButton(Tab: table, Selected: boolean)	
-	local IsSelected = Tab.IsSelected
-	local TabFrame = Tab.Tab
-	local Button = TabFrame.Button
-	local Label = Button.Label
-
+function TabBarClass:SetButtonSelected(Tab: table, Selected: boolean)	
 	--// Ignore update if the value is identical
-	if IsSelected == Selected then return end
+	if Tab.IsSelected == Selected then return end
 	Tab.IsSelected = Selected
 
 	local NoAnimation = self.NoAnimation
 	local WindowClass = self.WindowClass
 	local ColorTags = self.ColorTags
-
+	
 	--// Coloring dicts
 	local Theme = WindowClass.Theme
 	local Elements = WindowClass.TagsList
-
+	
 	--// Colors tags
 	local BGSelected = ColorTags.BGSelected
 	local LabelSelected = ColorTags.LabelSelected
+	
+	local TabButton = Tab.TabButton
+	local Button = TabButton.Button
+	local Label = Button.Label
 
 	ReGui:MultiUpdateColors({
 		Animate = not NoAnimation,
@@ -3449,111 +3673,48 @@ function TabSelectorClass:UpdateButton(Tab: table, Selected: boolean)
 	})
 end
 
-function TabSelectorClass:SetActiveTab(Target: (table|string))
-	--// Unpack class data
-	local Tabs = self.Tabs
-	local NoAnimation = self.NoAnimation
-	local Previous = self.ActiveTab
-	local OnActiveTabChange = self.OnActiveTabChange
-
-	local MatchName = typeof(Target) == "string"
-	local FoundTab = nil
-	local IsVisible = false
-	
-	--// Hide other tabs
-	for _, Tab in next, Tabs do
-		local Page = Tab.Content
-		local Canvas = Tab.Canvas
-		local Name = Tab.Name
-
-		local Match = false
-
-		--// Match for requested content type
-		if MatchName then
-			Match = Name == Target
-		else --Match Canvas class
-			Match = Canvas == Target
-		end
-
-		--// Name matches
-		if Match then
-			IsVisible = Page.Visible
-			FoundTab = Tab
-		end
-
-		--// Set visiblity
-		Page.Visible = Match
-
-		--// Animate tab buttons
-		self:UpdateButton(Tab, Match)
-	end
-	
-	if not FoundTab then return self end
-	
-	local Canvas = FoundTab.Canvas
-	local Page = FoundTab.Content
-	
-	--// Set ActiveTab value
-	if Previous == Canvas then return end
-	self.ActiveTab = Canvas
-	
-	--// Invoke OnActiveTabChange
-	OnActiveTabChange(Canvas, Previous)
-
-	--// Page animation
-	if NoAnimation then return self end
-
-	--// Slide in effect
-	Animation:Tween({
-		Object = Page,
-		NoAnimation = NoAnimation,
-		StartProperties = {
-			Position = UDim2.fromOffset(0, 5)
-		},
-		EndProperties = {
-			Position = UDim2.fromOffset(0, 0)
-		}
-	})
-
-	return self
+function TabBarClass:CompareTabs(Tab, Match)
+	if not Tab then return false end
+	return Tab.MatchBy == Match or Tab == Match
 end
 
-function TabSelectorClass:RemoveTab(Target: (table|string))
-	--// Unpack class data
+function TabBarClass:ForEachTab(Match: (Tab|string), Func: (Tab, IsMatch: boolean, Index: number) -> nil)
+	local CompareName = typeof(Match) == "string"
 	local Tabs = self.Tabs
-
-	local MatchName = typeof(Target) == "string"
-
-	--// Hide other tabs
+	
 	for Index, Tab in Tabs do
-		local Canvas = Tab.Canvas
 		local Name = Tab.Name
-		local Page = Tab.Content
-		local TabFrame = Tab.Tab
-		
-		local Config = Tab.Config
-		local OnClosure = Config.OnClosure
-
-		local Match = false
+		local IsMatch = false
 
 		--// Match for requested content type
-		if MatchName then
-			Match = Name == Target
-		else --Match Canvas class
-			Match = Canvas == Target
+		if CompareName then
+			IsMatch = Name == Match
+		else
+			IsMatch = self:CompareTabs(Tab, Match)
 		end
+		
+		--// Invoke callback
+		Func(Tab, IsMatch, Index)
+	end
+end
 
-		if not Match then continue end
-
+function TabBarClass:RemoveTab(Target: (Tab|string))
+	local OnTabRemove = self.OnTabRemove
+	local Tabs = self.Tabs
+	
+	self:ForEachTab(Target, function(Tab, IsMatch, Index)
+		if not IsMatch then return end
+		local TabButton = Tab.TabButton
+		local OnClosure = Tab.OnClosure
+		
 		--// Remove
 		table.remove(Tabs, Index)
+		TabButton:Destroy()
 
-		Page:Destroy()
-		TabFrame:Destroy()
-		
 		--// Invoke OnClosure
+		OnTabRemove(self, Tab)
 		OnClosure(Tab)
-	end
+	end)
 
 	return self
 end
@@ -3561,13 +3722,13 @@ end
 export type Tab = {
 	Name: string,
 	Focused: boolean?,
-	AutoSize: string?,
 	TabButton: boolean?,
 	Closeable: boolean?,
 	OnClosure: (Tab) -> nil,
 	Icon: (string|number)?
 }
-function TabSelectorClass:CreateTab(Config: Tab): Elements
+function TabBarClass:CreateTab(Config: Tab): Elements
+	Config = Config or {}
 	ReGui:CheckConfig(Config, {
 		Name = "Tab",
 		AutoSize = "Y",
@@ -3577,61 +3738,35 @@ function TabSelectorClass:CreateTab(Config: Tab): Elements
 
 	--// Unpack class data
 	local AutoSelectNewTabs = self.AutoSelectNewTabs
-	local ParentCanvas = self.ParentCanvas
 	local WindowClass = self.WindowClass
-	local Templates = self.Templates
-	local TabsBar = self.TabsBar
-	local Body = self.Body
+	local ParentCanvas = self.ParentCanvas
 	local Tabs = self.Tabs
+	local TabsFrame = self.TabsFrame
+	local OnTabCreate = self.OnTabCreate
 
 	--// Unpack config
 	local Focused = Config.Focused
 	local Name = Config.Name
 	local Icon = Config.Icon
-	local AutoSize = Config.AutoSize
 	local IsFocused = Focused or #Tabs <= 0 and AutoSelectNewTabs
 
 	--// Template sources
-	local Page = Templates.Page
-	local TabButton = Templates.TabButton
+	local TabButton = ReGui:InsertPrefab("TabButton", Config)
+	TabButton.Parent = TabsFrame
 
 	--// Create new tab button
-	local Tab = TabButton:Clone()
-	local Button = Tab.Button
+	local Button = TabButton.Button
+	local TextPadding = Button:FindFirstChildOfClass("UIPadding")
 	local Label = Button.Label
-	local TextPadding = ReGui:GetChildOfClass(Button, "UIPadding")
-
 	Label.Text = tostring(Name)
-	Tab.Parent = TabsBar
-	Tab.Visible = true
-
-	--// Create new page
-	local NewPage = Page:Clone()
-	local PagePadding = ReGui:GetChildOfClass(NewPage, "UIPadding")
 	
-	ReGui:SetProperties(NewPage, {
-		Parent = Body,
-		Name = Name
+	Merge(Config, {
+		TabButton = TabButton
 	})
 
-	--// Content canvas
-	local Canvas = ReGui:MakeCanvas({
-		Element = NewPage,
-		WindowClass = WindowClass,
-		Class = Config
-	})
-
-	local function Activated()
-		self:SetActiveTab(Canvas)
+	local function SetActive()
+		self:SetActiveTab(Config)
 	end
-
-	local TabData = {
-		Name = Name,
-		Tab = Tab,
-		Canvas = Canvas,
-		Content = NewPage,
-		Config = Config
-	}
 
 	--// Addional flags
 	local ExtraFlags = {
@@ -3645,10 +3780,10 @@ function TabSelectorClass:CreateTab(Config: Tab): Elements
 				ZIndex = 2,
 				UsePropertiesList = true,
 				Callback = function()
-					self:RemoveTab(Canvas)
+					self:RemoveTab(Config)
 				end,
 			})
-			
+
 			--// Animate close icon on hover
 			local Icon = Button.Icon
 			ReGui:SetAnimation(Icon, {
@@ -3661,76 +3796,87 @@ function TabSelectorClass:CreateTab(Config: Tab): Elements
 					}
 				},
 				Init = "MouseLeave"
-			}, Tab)
+			}, TabButton)
 		end,
 	}
 
 	--// Connect events
-	Button.Activated:Connect(Activated)
+	Button.Activated:Connect(SetActive)
 
 	--// Apply flags
 	ReGui:CheckFlags(ExtraFlags, Config)
 
 	--// Add to tabs dict
-	table.insert(Tabs, TabData)
+	table.insert(Tabs, Config)
 
 	--// Add color infomation
 	if WindowClass then
 		WindowClass:TagElements({
-			[Button] = "Tab",
-			[Label] = "TabLabel",
-			[TextPadding] = "TabSelectorTabPadding",
-			[PagePadding] = "TabSelectorPagePadding",
+			[TextPadding] = "TabPadding",
 		})
 	end
 
-	--// Apply automatic size
-	ReGui:SetProperties(NewPage, {
-		AutomaticSize = Enum.AutomaticSize[AutoSize],
-		Size = UDim2.fromScale(
-			AutoSize == "Y" and 1 or 0, 
-			AutoSize == "X" and 1 or 0
-		)
-	})
-
 	--// Set animation for tab button
 	ReGui:SetAnimation(Button, "Buttons")
+	self:SetButtonSelected(Config, IsFocused)	
 
 	--// Apply flags
 	ReGui:ApplyFlags({
-		Object = Button,
-		Class = {
-			Icon = Icon
-		}
+		Object = TabButton,
+		Class = Config
 	})
-
-	--// Update object state
-	self:UpdateButton(TabData, IsFocused)
 	
+	local Responce = OnTabCreate(self, Config)
+	
+	--// Change tab focus
 	if IsFocused then
-		self:SetActiveTab(Canvas)
+		self:SetActiveTab(Config)
 	end
-
-	return Canvas
+	
+	return Responce or Config
 end
 
-export type TabSelector = {
-	NoTabsBar: boolean?,
-	NoBody: boolean?,
-	NoAnimation: boolean?,
-	AutoSelectNewTabs: boolean?,
-	OnActiveTabChange: ((Tab: Tab, Previous: Tab) -> nil)?,
+function TabBarClass:SetActiveTab(Target: (table|string))
+	--// Unpack class data
+	local Tabs = self.Tabs
+	local NoAnimation = self.NoAnimation
+	local Previous = self.ActiveTab
+	local OnActiveTabChange = self.OnActiveTabChange
 
-	CreateTab: (TabsBox, Tab) -> Elements,
-	RemoveTab: (TabsBox, Target: (table|string)) -> nil,
-	SetActiveTab: (TabsBox, Target: (table|string)) -> nil,
+	local MatchName = typeof(Target) == "string"
+	local MatchedTab = nil
+	local IsVisible = false
+	
+	self:ForEachTab(Target, function(Tab, IsMatch, Index)
+		if IsMatch then
+			MatchedTab = Tab
+		end
+		self:SetButtonSelected(Tab, IsMatch)
+	end)
+	
+	if not MatchedTab then return self end
+	if self:CompareTabs(MatchedTab, Previous) then return self end
+	
+	self.ActiveTab = MatchedTab
+	
+	--// Invoke OnActiveTabChange
+	OnActiveTabChange(self, MatchedTab, Previous)
+	
+	return self
+end
+
+export type TabBar = {
+	AutoSelectNewTabs: boolean,
+	OnActiveTabChange: ((TabBar, Tab: Tab, Previous: Tab) -> nil)?,
+	OnTabCreate: ((TabBar, Tab: Tab) -> nil)?,
+	OnTabRemove: ((TabBar, Tab: Tab) -> nil)?
 }
-ReGui:DefineElement("TabSelector", {
+ReGui:DefineElement("TabBar", {
 	Base = {
-		NoTabsBar = false,
-		NoBody = false,
 		AutoSelectNewTabs = true,
 		OnActiveTabChange = EmptyFunction,
+		OnTabCreate = EmptyFunction,
+		OnTabRemove = EmptyFunction,
 	},
 	ColorData = {
 		["DeselectedTab"] = {
@@ -3747,80 +3893,162 @@ ReGui:DefineElement("TabSelector", {
 			FontFace = "TextFont",
 			TextColor3 = "TabTextActive",
 		},
-		["TabSelectorLine"] = {
-			Color = "TabBgActive",
+		["TabsBarSeparator"] = {
+			BackgroundColor3 = "TabBgActive",
 		},
-		["TabSelectorTabPadding"] = {
+		["TabPadding"] = {
 			PaddingTop = "TabTextPaddingTop",
 			PaddingBottom = "TabTextPaddingBottom"
 		},
-		["TabSelectorPagePadding"] = {
-			PaddingBottom = "TabPadding",
-			PaddingLeft = "TabPadding",
-			PaddingRight = "TabPadding",
-			PaddingTop = "TabPadding",
+		["TabPagePadding"] = {
+			PaddingBottom = "TabPagePadding",
+			PaddingLeft = "TabPagePadding",
+			PaddingRight = "TabPagePadding",
+			PaddingTop = "TabPagePadding",
 		}
 	},
-	Create = function(self, Config: TabSelector): (TabSelector, GuiObject)
+	Create = function(self, Config: TabBar)
 		local WindowClass = self.WindowClass
 
-		local NoTabsBar = Config.NoTabsBar
-		local NoBody = Config.NoBody
+		--// Create object
+		local Object = ReGui:InsertPrefab("TabsBar", Config)
+		local Class = NewClass(TabBarClass)
 
-		--// Create TabSelector object
-		local Object = ReGui:InsertPrefab("TabSelector", Config)
-		local Class = NewClass(TabSelectorClass)
-
-		--// TabsBar (TabsBar)
-		local TabsBar = Object.TabsBar
-		local Body = Object.Body
-		local TemplateButton = TabsBar.TemplateButton
-		local PageTemplate = Body.PageTemplate
-
-		local Line = TabsBar:FindFirstChildOfClass("UIStroke")
+		local Separator = Object.Separator
+		local TabsFrame = Object.TabsFrame
 		
+		--// Create canvas
 		local TabsRailCanvas = ReGui:MakeCanvas({
-			Element = TabsBar,
+			Element = TabsFrame,
 			WindowClass = WindowClass,
 			Class = Class
 		})
 		
-		--// Hide template objects
-		TemplateButton.Visible = false
-		PageTemplate.Visible = false
-
-		--// Hide/Show elements
-		TabsBar.Visible = not NoTabsBar
-		Body.Visible = not NoBody
-		
-		--// NoBody style
-		if NoBody then
-			ReGui:CheckConfig(Config, {
-				AutomaticSize = Enum.AutomaticSize.Y,
-				Size = UDim2.fromScale(1, 0)
-			})
-		end
-
-		--// Merge table into class
+		--// Merge configurations into the class
 		Merge(Class, Config)
 		Merge(Class, {
-			Templates = {
-				TabButton = TemplateButton,
-				Page = PageTemplate
-			},
-			TabsRailCanvas = TabsRailCanvas,
 			ParentCanvas = self,
+			Object = Object,
+			TabsFrame = TabsFrame,
 			WindowClass = WindowClass,
-			Body = Body,
-			TabsBar = TabsBar,
 			Tabs = {}
 		})
-
+		
+		--// Tag elementss
 		self:TagElements({
-			[TabsBar] = "TabSelectorTabsBar",
-			[Line] = "TabSelectorLine",
+			[Object] = "TabsBar",
+			[Separator] = "TabsBarSeparator",
 		})
+		
+		local Merged = ReGui:MergeMetatables(TabsRailCanvas, Object)
+		return Merged, Object
+	end,
+})
 
+export type TabSelector = {
+	NoTabsBar: boolean?,
+	NoAnimation: boolean?,
+} & TabBar
+ReGui:DefineElement("TabSelector", {
+	Base = {
+		NoTabsBar = false,
+		OnActiveTabChange = EmptyFunction,
+		OnTabCreate = EmptyFunction,
+		OnTabRemove = EmptyFunction,
+	},
+	Create = function(Canvas, Config: TabSelector): (TabSelector, GuiObject)
+		local WindowClass = Canvas.WindowClass
+		
+		local NoTabsBar = Config.NoTabsBar
+		local NoAnimation = Config.NoAnimation
+		
+		--// Create TabSelector object
+		local Object = ReGui:InsertPrefab("TabSelector", Config)
+		
+		local Body = Object.Body
+		local PageTemplate = Body.PageTemplate
+		PageTemplate.Visible = false
+		
+		--// TabsBar functions
+		local function OnTabCreate(self, Tab, ...)
+			local AutoSize = Tab.AutoSize
+			local Name = Tab.Name
+			
+			--// Create page
+			local Page = PageTemplate:Clone()
+			local PagePadding = ReGui:GetChildOfClass(Page, "UIPadding")
+			
+			ReGui:SetProperties(Page, {
+				Parent = Body,
+				Name = Name,
+				AutomaticSize = Enum.AutomaticSize[AutoSize],
+				Size = UDim2.fromScale(
+					AutoSize == "Y" and 1 or 0, 
+					AutoSize == "X" and 1 or 0
+				)
+			})
+			
+			--// Page padding
+			Canvas:TagElements({
+				[PagePadding] = "TabPagePadding",
+			})
+
+			--// Create canvas
+			local Canvas = ReGui:MakeCanvas({
+				Element = Page,
+				WindowClass = WindowClass,
+				Class = Tab
+			})
+			
+			--// Invoke user callback
+			Config.OnTabCreate(self, Tab, ...)
+			
+			Merge(Tab, {
+				Page = Page,
+				MatchBy = Canvas
+			})
+
+			return Canvas
+		end
+		local function OnActiveTabChange(self, Tab, ...)
+			self:ForEachTab(Tab, function(Tab, IsMatch, Index)
+				local Page = Tab.Page
+				Page.Visible = IsMatch
+				
+				if not IsMatch then return end
+
+				--// Slide in effect
+				local Tweeninfo = Canvas:GetThemeKey("AnimationTweenInfo")
+				Animation:Tween({
+					Object = Page,
+					Tweeninfo = Tweeninfo,
+					NoAnimation = NoAnimation,
+					StartProperties = {
+						Position = UDim2.fromOffset(0, 4)
+					},
+					EndProperties = {
+						Position = UDim2.fromOffset(0, 0)
+					}
+				})
+			end)
+			
+			--// Invoke user callback
+			Config.OnActiveTabChange(self, Tab, ...)
+		end
+		
+		--// Create tabs bar
+		local TabsBar = Canvas:TabBar({
+			Parent = Object,
+			Visible = not NoTabsBar,
+			OnTabCreate = OnTabCreate,
+			OnActiveTabChange = OnActiveTabChange,
+			OnTabRemove = function(self, Tab, ...)
+				Tab.Page:Remove()
+				Config.OnTabRemove(...) --// Invoke user callback
+			end,
+		})
+		
+		local Class = ReGui:MergeMetatables(TabsBar, Object)
 		return Class, Object
 	end,
 })
@@ -3836,12 +4064,11 @@ ReGui:DefineElement("RadioButton", {
 	},
 	Create = function(self, Config: RadioButton): GuiButton
 		local Object = ReGui:InsertPrefab("RadioButton", Config)
-
 		Object.Activated:Connect(function(...)
 			local Callback = Config.Callback
 			return Callback(Object, ...)
 		end)
-
+		
 		return Object
 	end,
 })
@@ -3852,7 +4079,7 @@ export type Checkbox = {
 	Value: boolean,
 	NoAnimation: boolean?,
 	Callback: ((...any) -> unknown)?,
-	SetTicked: (self: Checkbox, Value: boolean, NoAnimation: boolean) -> ...any,
+	SetValue: (self: Checkbox, Value: boolean, NoAnimation: boolean) -> ...any,
 	Toggle: (self: Checkbox) -> ...any,
 	TickedImageSize: UDim2,
 	UntickedImageSize: UDim2,
@@ -3905,7 +4132,7 @@ ReGui:DefineElement("Checkbox", {
 		else
 			PaddingSize = UDim.new(0, 2)
 		end
-		
+
 		--// Apply UIPadding sizes
 		ReGui:SetProperties(UIPadding, {
 			PaddingBottom = PaddingSize,
@@ -3922,7 +4149,7 @@ ReGui:DefineElement("Checkbox", {
 
 		local function SetStyle(Value: boolean, NoAnimation: boolean)
 			local Tweeninfo = Canvas:GetThemeKey("AnimationTweenInfo")
-			
+
 			--// Animate tick
 			local Size = Value and TickedSize or UntickedSize
 			Animation:Tween({
@@ -3944,7 +4171,7 @@ ReGui:DefineElement("Checkbox", {
 			}, true)
 		end
 
-		function Config:SetTicked(Value: boolean, NoAnimation: boolean)
+		function Config:SetValue(Value: boolean, NoAnimation: boolean)
 			self.Value = Value
 
 			--// Animate
@@ -3955,11 +4182,16 @@ ReGui:DefineElement("Checkbox", {
 
 			return self
 		end
+		
+		function Config:SetTicked(...)
+			ReGui:Warn("Checkbox:SetTicked is deprecated, please use :SetValue")
+			return self:SetValue(...)
+		end
 
 		function Config:Toggle()
 			local Value = not self.Value
 			self.Value = Value
-			self:SetTicked(Value)
+			self:SetValue(Value)
 
 			return self
 		end
@@ -3974,9 +4206,9 @@ ReGui:DefineElement("Checkbox", {
 		Tickbox.Activated:Connect(Clicked)
 
 		--// Update object state
-		Config:SetTicked(Value, true)
+		Config:SetValue(Value, true)
 		Config:SetDisabled(Disabled)
-		
+
 		--// Style elements
 		ReGui:SetAnimation(Tickbox, "Buttons", Object)
 		Canvas:TagElements({
@@ -3993,9 +4225,7 @@ ReGui:DefineElement("Radiobox", {
 		IsRadio = true,
 		CornerRadius = UDim.new(1,0),
 	},
-	Create = function(self, Config: Checkbox): Checkbox
-		return self:Checkbox(Config)
-	end,
+	Create = Elements.Checkbox,
 })
 
 export type PlotHistogram = {
@@ -4037,7 +4267,7 @@ ReGui:DefineElement("PlotHistogram", {
 		local Label = Canvas:Label({
 			Text = LabelText,
 			Parent = Object,
-			Position = UDim2.new(1, 5)
+			Position = UDim2.new(1, 4)
 		})
 
 		--// Create tooltip
@@ -4054,12 +4284,12 @@ ReGui:DefineElement("PlotHistogram", {
 		function Config:GetBaseValues(): (number, number)
 			local Minimum = self.Minimum
 			local Maximum = self.Maximum
-			
+
 			--// User defined minimum
 			if Minimum and Maximum then
 				return Minimum, Maximum
 			end
-			
+
 			local Plots = self._Plots
 
 			for _, Data in Plots do
@@ -4084,7 +4314,7 @@ ReGui:DefineElement("PlotHistogram", {
 
 			local Minimum, Maximum = self:GetBaseValues()
 			if not Minimum or not Maximum then return end
-			
+
 			local Difference = Maximum - Minimum
 
 			--// Update each plot on the graph
@@ -4113,7 +4343,7 @@ ReGui:DefineElement("PlotHistogram", {
 				Parent = GraphCanvas,
 				Visible = true
 			})
-			
+
 			local HoverConnection = ReGui:DetectHover(Plot, {
 				MouseEnter = true,
 				OnInput = function()
@@ -4126,7 +4356,7 @@ ReGui:DefineElement("PlotHistogram", {
 				Point = Point,
 				Value = Value
 			}
-			
+
 			function Module:UpdateTooltip()
 				local Index = Module:GetPointIndex()
 				ValueLabel.Text = `{Index}:	{Data.Value}`
@@ -4135,7 +4365,7 @@ ReGui:DefineElement("PlotHistogram", {
 			function Module:SetValue(Value)
 				Data.Value = Value
 				Config:UpdateGraph()
-				
+
 				--// Update tooltip value if hovered
 				if HoverConnection.Hovering then
 					self:UpdateTooltip()
@@ -4222,16 +4452,17 @@ ReGui:DefineElement("Viewport", {
 		IsRadio = true,
 	},
 	Create = function(self, Config: Viewport): Viewport
+		--// Unpack configuration
+		local Model = Config.Model
+		local Camera = Config.Camera 
+		
+		--// Create viewport object
 		local Object = ReGui:InsertPrefab("Viewport", Config)
 		local Class = ReGui:MergeMetatables(Config, Object)
 
 		local Viewport = Object.Viewport
 		local WorldModel = Viewport.WorldModel
-
-		--// Unpack configuration
-		local Model = Config.Model
-		local Camera = Config.Camera 
-
+	
 		if not Camera then
 			Camera = ReGui:CreateInstance("Camera", Viewport)
 			Camera.CFrame = CFrame.new(0,0,0)
@@ -4244,8 +4475,8 @@ ReGui:DefineElement("Viewport", {
 		})
 
 		function Config:SetCamera(Camera)
-			Viewport.CurrentCamera = Camera
 			self.Camera = Camera
+			Viewport.CurrentCamera = Camera
 			return self
 		end
 
@@ -4258,6 +4489,7 @@ ReGui:DefineElement("Viewport", {
 			if CreateClone then
 				Model = Model:Clone()
 			end
+			
 			if PivotTo then
 				Model:PivotTo(PivotTo)
 			end
@@ -4275,7 +4507,7 @@ ReGui:DefineElement("Viewport", {
 
 		Config:SetCamera(Camera)
 
-		return Class
+		return Class, Object
 	end,
 })
 
@@ -4284,9 +4516,12 @@ export type InputText = {
 	Placeholder: string?,
 	MultiLine: boolean?,
 	Label: string?,
+	Disabled: boolean?,
+	
 	Callback: ((string, ...any) -> unknown)?,
 	Clear: (InputText) -> InputText,
 	SetValue: (InputText, Value: string) -> InputText,
+	SetDisabled: (InputText, Disabled: boolean) -> InputText,
 }
 ReGui:DefineElement("InputText", {
 	Base = {
@@ -4304,6 +4539,7 @@ ReGui:DefineElement("InputText", {
 		local Placeholder = Config.Placeholder
 		local Label = Config.Label
 		local Disabled = Config.Disabled
+		local Value = Config.Value
 
 		--// Create Text input object
 		local Object = ReGui:InsertPrefab("InputBox", Config)
@@ -4317,7 +4553,7 @@ ReGui:DefineElement("InputText", {
 			Text = Label,
 			AutomaticSize = Enum.AutomaticSize.X,
 			Size = UDim2.fromOffset(0, 19),
-			Position = UDim2.new(1, 5),
+			Position = UDim2.new(1, 4),
 			LayoutOrder = 2
 		})
 
@@ -4328,7 +4564,6 @@ ReGui:DefineElement("InputText", {
 
 		local function Callback(...)
 			local Func = Config.Callback
-			warn(Config, Config.Callback == EmptyFunction)
 			Func(Class, ...)
 		end
 
@@ -4341,10 +4576,10 @@ ReGui:DefineElement("InputText", {
 		function Config:SetDisabled(Disabled: boolean)
 			self.Disabled = Disabled
 			Object.Interactable = not Disabled
-
 			Canvas:SetColorTags({
 				[Label] = Disabled and "LabelDisabled" or "Label"
 			}, true)
+			return self
 		end
 
 		function Config:Clear()
@@ -4363,6 +4598,7 @@ ReGui:DefineElement("InputText", {
 
 		--// Update object state
 		Config:SetDisabled(Disabled)
+		Config:SetValue(Value)
 
 		Canvas:TagElements({
 			[TextBox] = "Frame"
@@ -4445,7 +4681,7 @@ ReGui:DefineElement("InputInt", {
 			Text = LabelText,
 			AutomaticSize = Enum.AutomaticSize.X,
 			Size = UDim2.fromOffset(0, 19),
-			Position = UDim2.new(1, 5),
+			Position = UDim2.new(1, 4),
 			LayoutOrder = 4
 		})
 
@@ -4465,7 +4701,7 @@ ReGui:DefineElement("InputInt", {
 			local Increment = self.Increment
 			Config:SetValue(Value - Increment)
 		end
-		
+
 		function Config:SetDisabled(Disabled: boolean)
 			self.Disabled = Disabled
 			Object.Interactable = not Disabled
@@ -4557,12 +4793,10 @@ export type Console = {
 ReGui:DefineElement("Console", {
 	Base = {
 		Enabled = true,
-		ReadOnly = false,
 		Value = "",
 		TextWrapped = false,
-		RichText = false,
-		LineNumbers = false,
 		Border = true,
+		MaxLines = 300,
 		LinesFormat = "%s",
 		Callback = EmptyFunction,
 	},
@@ -4692,7 +4926,7 @@ ReGui:DefineElement("Console", {
 
 		--// Update element
 		Config:SetValue(Value)
-		
+
 		self:TagElements({
 			[Source] = "ConsoleText",
 			[Lines] = "ConsoleLineNumbers",
@@ -4723,6 +4957,7 @@ ReGui:DefineElement("Table", {
 		RowBackground = false,
 		RowBgTransparency = 0.87,
 		Border = false,
+		Spacing = UDim.new(0, 4)
 	},
 	Create = function(Canvas, Config: Table): Table
 		local WindowClass = Canvas.WindowClass
@@ -4733,20 +4968,22 @@ ReGui:DefineElement("Table", {
 		local Border = Config.Border
 		local VerticalAlignment = Config.VerticalAlignment
 		local MaxColumns = Config.MaxColumns
+		local Spacing = Config.Spacing
 
 		--// Create table object
 		local Object = ReGui:InsertPrefab("Table", Config)
 		local Class = ReGui:MergeMetatables(Config, Object)
-		
+
 		local RowTemplate = Object.RowTemp
 		local RowsCount = 0
 		local Rows = {}
-		
+		local HasStyling = Border and RowBackground
+
 		function Config:Row(Config)
 			Config = Config or {}
-			
+
 			local IsHeader = Config.IsHeader
-			
+
 			local ColumnIndex = 0
 			local Columns = {}
 
@@ -4757,11 +4994,14 @@ ReGui:DefineElement("Table", {
 				Visible = true,
 				Parent = Object,
 			})
-			
+
 			--// Set alignment
 			local UIListLayout = Row:FindFirstChildOfClass("UIListLayout")
-			UIListLayout.VerticalAlignment = VerticalAlignment
-			
+			ReGui:SetProperties(UIListLayout, {
+				VerticalAlignment = VerticalAlignment,
+				Padding = not HasStyling and Spacing or UDim.new(0, 1)
+			})
+
 			--// Apply header styles
 			if IsHeader then
 				Canvas:TagElements({
@@ -4770,7 +5010,7 @@ ReGui:DefineElement("Table", {
 			else
 				RowsCount += 1
 			end
-			
+
 			--// RowBackground background colors for rows
 			if RowBackground and not IsHeader then
 				local Transparency = RowsCount % 2 ~= 1 and RowTransparency or 1
@@ -4780,32 +5020,38 @@ ReGui:DefineElement("Table", {
 			--// Row class
 			local RowClass = {}
 			local Class = ReGui:MergeMetatables(RowClass, Row)
-			
+
 			function RowClass:Column(Config)
 				Config = Config or {}
-				
+
 				ReGui:CheckConfig(Config, {
 					HorizontalAlign = Enum.HorizontalAlignment.Left,
 					VerticalAlignment = Enum.VerticalAlignment.Top,
 				})
-				
+
 				--// Create column object
 				local Column = Row.ColumnTemp:Clone()
-				local Stroke = Column:FindFirstChildOfClass("UIStroke")
-				local ListLayout = Column:FindFirstChildOfClass("UIListLayout")
 				
+				--// ListLayout Properties
+				local ListLayout = Column:FindFirstChildOfClass("UIListLayout")
+				ReGui:SetProperties(ListLayout, Config)
+				
+				--// Set border enabled based on Flag
+				local Stroke = Column:FindFirstChildOfClass("UIStroke")
+				Stroke.Enabled = Border
+				
+				--// Remove padding if there is no styling
+				local UIPadding = Column:FindFirstChildOfClass("UIPadding")
+				if not HasStyling then
+					UIPadding:Destroy()
+				end
+
 				--// Column Properties
 				ReGui:SetProperties(Column, {
 					Parent = Row,
 					Visible = true,
 					Name = "Column"
 				})
-				
-				--// ListLayout Properties
-				ReGui:SetProperties(ListLayout, Config)
-
-				--// Set border enabled based on Flag
-				Stroke.Enabled = Border
 				
 				--// Content canvas
 				return ReGui:MakeCanvas({
@@ -4814,33 +5060,33 @@ ReGui:DefineElement("Table", {
 					Class = Class
 				})
 			end
-			
+
 			function RowClass:NextColumn()
 				ColumnIndex += 1
-				
+
 				local Index = ColumnIndex % MaxColumns + 1
 				local Column = Columns[Index]
-				
+
 				--// Create Column
 				if not Column then
 					Column = self:Column()	
 					Columns[Index] = Column
 				end
-				
+
 				return Column
 			end
-			
+
 			table.insert(Rows, RowClass)
-			
+
 			--// Content canvas
 			return Class
 		end
-		
+
 		--// TODO: 
 		function Config:NextRow()
 			return self:Row()
 		end
-		
+
 		function Config:HeaderRow()
 			return self:Row({
 				IsHeader = true
@@ -4870,7 +5116,7 @@ export type List = {
 }
 ReGui:DefineElement("List", {
 	Base = {
-		Spacing = 5,
+		Spacing = 4,
 		HorizontalFlex = Enum.UIFlexAlignment.None,
 		VerticalFlex = Enum.UIFlexAlignment.None,
 		HorizontalAlignment = Enum.HorizontalAlignment.Left,
@@ -4879,7 +5125,7 @@ ReGui:DefineElement("List", {
 	},
 	Create = function(self, Config)
 		local WindowClass = self.WindowClass
-		
+
 		--// Unpack configuration
 		local Spacing = Config.Spacing
 		local HorizontalFlex = Config.HorizontalFlex
@@ -4924,7 +5170,7 @@ export type CollapsingHeader = {
 	OpenOnDoubleClick: boolean?, -- Need double-click to open node
 	OpenOnArrow: boolean?, -- Only open when clicking on the arrow
 	Activated: (CollapsingHeader) -> nil,
-	
+
 	Remove: (CollapsingHeader) -> nil,
 	SetArrowVisible: (CollapsingHeader, Visible: boolean) -> nil,
 	SetTitle: (CollapsingHeader, Title: string) -> nil,
@@ -4940,6 +5186,7 @@ ReGui:DefineElement("CollapsingHeader", {
 		Offset = 0,
 		NoAutoTag = true,
 		NoAutoFlags = true,
+		IconPadding = UDim.new(0, 4),
 		Activated = EmptyFunction
 	},
 	Create = function(Canvas, Config: CollapsingHeader): CollapsingHeader
@@ -4952,6 +5199,7 @@ ReGui:DefineElement("CollapsingHeader", {
 		local OpenOnDoubleClick = Config.OpenOnDoubleClick
 		local OpenOnArrow = Config.OpenOnArrow
 		local CollapseIcon = Config.CollapseIcon
+		local IconPadding = Config.IconPadding
 		local Icon = Config.Icon
 		local NoArrow = Config.NoArrow
 
@@ -4959,9 +5207,13 @@ ReGui:DefineElement("CollapsingHeader", {
 		local Object = ReGui:InsertPrefab("CollapsingHeader", Config)
 
 		local Titlebar = Object.TitleBar
-		local CollapseButton = Titlebar.Collapse.CollapseIcon
+		local Collapse = Titlebar.Collapse
 		local IconImage = Titlebar.Icon
 		
+		local CollapseButton = Collapse.CollapseIcon
+		local CollapsePadding = Collapse.UIPadding
+		ReGui:SetPadding(CollapsePadding, IconPadding)
+
 		local TitleText = Canvas:Label({
 			ColorTag = "CollapsingHeader",
 			Parent = Titlebar,
@@ -4979,14 +5231,14 @@ ReGui:DefineElement("CollapsingHeader", {
 			PaddingTop = UDim.new(0, 4),
 			PaddingBottom = UDim.new(0, 1),
 		})
-		
+
 		CollapseButton.Image = ReGui:CheckAssetUrl(CollapseIcon)
-		
+
 		local function Activated()
 			local Callback = Config.Activated
 			Callback(Canvas)
 		end
-		
+
 		function Config:Remove()
 			Object:Destroy()
 			table.clear(self)
@@ -5003,7 +5255,7 @@ ReGui:DefineElement("CollapsingHeader", {
 		function Config:SetIcon(Icon: (string|number)?)
 			local Visible = Icon and Icon ~= ""
 			IconImage.Visible = Visible
-			
+
 			if Visible then 
 				IconImage.Image = ReGui:CheckAssetUrl(Icon) 
 			end
@@ -5034,11 +5286,11 @@ ReGui:DefineElement("CollapsingHeader", {
 
 			return self
 		end
-		
+
 		local function Toggle()
 			Config:SetCollapsed(not Config.Collapsed)
 		end
-		
+
 		--// Apply flags
 		if TitleProperties then
 			ReGui:ApplyFlags({
@@ -5056,7 +5308,7 @@ ReGui:DefineElement("CollapsingHeader", {
 		end
 		CollapseButton.Activated:Connect(Toggle)
 		Titlebar.Activated:Connect(Activated)
-		
+
 		--// Update object state
 		Config:SetCollapsed(Collapsed)
 		Config:SetTitle(Title)
@@ -5076,13 +5328,12 @@ ReGui:DefineElement("CollapsingHeader", {
 ReGui:DefineElement("TreeNode", {
 	Base = {
 		Offset = 21,
+		IconPadding = UDim.new(0, 2),
 		TitleBarProperties = {
-			Size = UDim2.new(1, 0, 0, 14)
+			Size = UDim2.new(1, 0, 0, 13)
 		}
 	},
-	Create = function(self, Config)
-		return self:CollapsingHeader(Config)
-	end,
+	Create = Elements.CollapsingHeader,
 })
 
 export type Separator = {
@@ -5108,7 +5359,7 @@ ReGui:DefineElement("Separator", {
 			PaddingLeft = UDim.new(0, 4),
 			PaddingRight = UDim.new(0, 4),
 		})
-		
+
 		self:TagElements({
 			[Object.Left] = "Separator",
 			[Object.Right] = "Separator",
@@ -5118,14 +5369,13 @@ ReGui:DefineElement("Separator", {
 	end,
 })
 
-export type Indent = {
-	Scroll: boolean?
+export type Canvas = {
+	Scroll: boolean?,
+	Class: table?
 }
 ReGui:DefineElement("Canvas", {
-	Base = {
-		Scroll = false
-	},
-	Create = function(self, Config: Indent)
+	Base = {},
+	Create = function(self, Config: Canvas)
 		local WindowClass = self.WindowClass
 
 		local Scroll = Config.Scroll
@@ -5144,6 +5394,13 @@ ReGui:DefineElement("Canvas", {
 
 		return Canvas, Object
 	end,
+})
+
+ReGui:DefineElement("ScrollingCanvas", {
+	Base = {
+		Scroll = true
+	},
+	Create = Elements.Canvas
 })
 
 export type Region = {
@@ -5181,7 +5438,7 @@ ReGui:DefineElement("Group", {
 	},
 	Create = function(self, Config)
 		local WindowClass = self.WindowClass
-		
+
 		--// Create object
 		local Object = ReGui:InsertPrefab("Group", Config)
 
@@ -5273,32 +5530,36 @@ ReGui:DefineElement("Bullet", {
 
 export type Row = {
 	Spacing: number?,
+	Expanded: boolean?,
+	HorizontalFlex: Enum.UIFlexAlignmen?,
+	VerticalFlex: Enum.UIFlexAlignmen?,
 	Expand: (Row) -> Row
 }
 ReGui:DefineElement("Row", {
 	Base = {
 		Spacing = 4,
 		Expanded = false, 
+		HorizontalFlex = Enum.UIFlexAlignment.None,
+		VerticalFlex = Enum.UIFlexAlignment.None,
 	},
 	Create = function(self, Config: Row)
 		local WindowClass = self.WindowClass
-		
+
 		--// Unpack configuration
 		local Spacing = Config.Spacing
 		local Expanded = Config.Expanded
-		
+		local HorizontalFlex = Config.HorizontalFlex
+		local VerticalFlex = Config.VerticalFlex
+
 		--// Create row object
 		local Object = ReGui:InsertPrefab("Row", Config)
 		local Class = ReGui:MergeMetatables(Config, Object)
-		
+
 		local UIListLayout = Object:FindFirstChildOfClass("UIListLayout")
 		UIListLayout.Padding = UDim.new(0, Spacing)
-		
-		function Config:Expand()
-			UIListLayout.HorizontalFlex = Enum.UIFlexAlignment.Fill
-			return self
-		end
-		
+		UIListLayout.HorizontalFlex = HorizontalFlex
+		UIListLayout.VerticalFlex = VerticalFlex
+
 		--// Content canvas
 		local Canvas = ReGui:MakeCanvas({
 			Element = Object,
@@ -5306,18 +5567,22 @@ ReGui:DefineElement("Row", {
 			Class = Class
 		})
 		
+		function Config:Expand()
+			UIListLayout.HorizontalFlex = Enum.UIFlexAlignment.Fill
+			return self
+		end
+
 		--// Expand if Fill flag is enabled
 		if Expanded then
 			Config:Expand()
 		end
-		
+
 		return Canvas, Object
 	end,
 })
 
 --TODO
--- Vertical 
--- :SetPercentage
+-- Vertical
 export type SliderIntFlags = {
 	Value: number?,
 	Format: string?,
@@ -5330,6 +5595,7 @@ export type SliderIntFlags = {
 	Callback: (number) -> any?,
 	ReadOnly: boolean?,
 	SetValue: (SliderInt, Value: number, IsSlider: boolean?) -> SliderInt?,
+	SetDisabled: (SliderInt, Disabled: boolean) -> SliderInt,
 	MakeProgress: (SliderInt) -> nil?,
 }
 ReGui:DefineElement("SliderBase", {
@@ -5367,14 +5633,14 @@ ReGui:DefineElement("SliderBase", {
 
 		local Class = ReGui:MergeMetatables(Config, Object)
 		local GrabSize = Grab.AbsoluteSize
-		
+
 		--// Set object animations
 		local HoverAnimation = ReGui:SetAnimation(Object, "Inputs")
-		
+
 		local Label = Canvas:Label({
 			Parent = Object, 
 			Text = LabelText,
-			Position = UDim2.new(1, 5),
+			Position = UDim2.new(1, 4),
 			Size = UDim2.fromScale(0, 1)
 		})
 
@@ -5382,7 +5648,7 @@ ReGui:DefineElement("SliderBase", {
 			Grab = Grab,
 			Name = LabelText,
 		})
-		
+
 		--// Temporary solution
 		if Type == "Slider" then
 			Track.Position = UDim2.fromOffset(GrabSize.X/2, 0)
@@ -5418,10 +5684,10 @@ ReGui:DefineElement("SliderBase", {
 		function Config:SetDisabled(Disabled: boolean)
 			self.Disabled = Disabled
 			Object.Interactable = not Disabled
-			
 			Canvas:SetColorTags({
 				[Label] = Disabled and "LabelDisabled" or "Label"
 			}, true)
+			return self
 		end
 
 		function Config:SetValueText(Text: string)
@@ -5430,7 +5696,7 @@ ReGui:DefineElement("SliderBase", {
 
 		function Config:SetValue(Value, IsPercentage: boolean)
 			local Tweeninfo = Canvas:GetThemeKey("AnimationTweenInfo")
-			
+
 			local Minimum = Config.Minimum
 			local Maximum = Config.Maximum
 
@@ -5468,13 +5734,12 @@ ReGui:DefineElement("SliderBase", {
 
 			return self
 		end
-		
+
 		local function SetFocused(Focused: boolean)
 			--// Update object colors from a style
 			Canvas:SetColorTags({
 				[Object] = Focused and "FrameActive" or "Frame"
 			}, true)
-			
 			Canvas:SetElementFocused(Object, {
 				Focused = Focused,
 				Animation = HoverAnimation
@@ -5506,9 +5771,9 @@ ReGui:DefineElement("SliderBase", {
 		end
 		local function DragBegan(...)
 			if not CanDrag() then return end
-			
+
 			SetFocused(true)
-			
+
 			if not NoClick then
 				DragMovement(...)
 			end
@@ -5516,7 +5781,7 @@ ReGui:DefineElement("SliderBase", {
 		local function DragEnded()
 			SetFocused(false)
 		end
-		
+
 		--// Update object state
 		Grab.Visible = not NoGrab
 		Config:SetValue(Value) -- Ensure the grab is positioned correctly on initialization
@@ -5655,7 +5920,7 @@ ReGui:DefineElement("DragInt", {
 		local InputBeganPosition = nil
 		local Percentage = 0
 		local BeganPercentage = 0
-		
+
 		--// Set object animations
 		local HoverAnimation = ReGui:SetAnimation(Object, "Inputs")
 
@@ -5696,13 +5961,13 @@ ReGui:DefineElement("DragInt", {
 				[Label] = Disabled and "LabelDisabled" or "Label"
 			}, true)
 		end
-		
+
 		local function SetFocused(Focused: boolean)
 			--// Update object colors from a style
 			Canvas:SetColorTags({
 				[Object] = Focused and "FrameActive" or "Frame"
 			}, true)
-			
+
 			Canvas:SetElementFocused(Object, {
 				Focused = Focused,
 				Animation = HoverAnimation
@@ -5746,7 +6011,7 @@ ReGui:DefineElement("DragInt", {
 			DragEnd = DragEnded,
 			DragMovement = DragMovement,
 		})
-		
+
 		Canvas:TagElements({
 			[ValueText] = "Label"
 		})
@@ -5786,16 +6051,16 @@ ReGui:DefineElement("MultiElement", {
 		local Value = Config.Value
 		local Minimum = Config.Minimum
 		local Maximum = Config.Maximum
-		
+
 		assert(InputType, "No input type provided for MultiElement")
 		--assert(#Minimum ~= #InputConfigs, `Minimum does not match input count ({Minimum} != {#InputConfigs})`)
 		--assert(#Maximum ~= #InputConfigs, `Maximum does not match input count ({Maximum} != {#InputConfigs})`)
 
 		--// Create container row
-		local ContainerRow = Canvas:Row({
-			Spacing = 5
+		local ContainerRow, Object = Canvas:Row({
+			Spacing = 4
 		})
-		
+
 		local Row = ContainerRow:Row({
 			Size = UDim2.fromScale(0.65, 0),
 			Expanded = true,
@@ -5810,22 +6075,22 @@ ReGui:DefineElement("MultiElement", {
 		local Class = ReGui:MergeMetatables(Config, ContainerRow)
 		local Inputs = {}
 		local _CallbackEnabled = false
-		
+
 		local function GetValue()
 			local Value = {}
 			for Index, Input in Inputs do
 				Value[Index] = Input:GetValue()
 			end
-			
+
 			Config.Value = Value
 			return Value
 		end
-		
+
 		local function Callback(...)
 			local Callback = Config.MultiCallback
 			Callback(Class, ...)
 		end
-		
+
 		local function InputChanged()
 			--// Check if all the elements have loaded
 			if #Inputs ~= #InputConfigs then return end
@@ -5834,7 +6099,7 @@ ReGui:DefineElement("MultiElement", {
 			local Values = GetValue()
 			Callback(Values)
 		end
-		
+
 		function Config:SetDisabled(Disabled: boolean)
 			self.Disabled = Disabled
 
@@ -5851,7 +6116,7 @@ ReGui:DefineElement("MultiElement", {
 
 		function Config:SetValue(Values)
 			_CallbackEnabled = false
-			
+
 			--// Invoke :SetValue on each input object
 			for Index, Value in Values do
 				local Input = Inputs[Index]
@@ -5859,11 +6124,11 @@ ReGui:DefineElement("MultiElement", {
 
 				Input:SetValue(Value)
 			end
-			
+
 			_CallbackEnabled = true
 			Callback(Values)
 		end
-		
+
 		--// BaseInputConfig
 		BaseInputConfig = Copy(BaseInputConfig, {
 			Size = UDim2.new(1, 0, 0, 19),
@@ -5878,25 +6143,25 @@ ReGui:DefineElement("MultiElement", {
 				Minimum = Minimum[Index],
 				Maximum = Maximum[Index],
 			})
-			
+
 			--// Create input object
 			local Input = Row[InputType](Row, Config)
 			table.insert(Inputs, Input)
 		end
-		
+
 		--// Merge properties into the configuration
 		Merge(Config, {
 			Row = Row,
 			Inputs = Inputs
 		})
-		
+
 		_CallbackEnabled = true
-		
+
 		--// Update object states
 		Config:SetDisabled(Disabled)
 		Config:SetValue(Value)
-		
-		return Class, ContainerRow
+
+		return Class, Object
 	end,
 })
 
@@ -5912,7 +6177,7 @@ local function GenerateMultiInput(Name: string, Class: string, InputCount: numbe
 		Create = function(self, Config)
 			local BaseInputConfig = Config.BaseInputConfig
 			local Object = nil
-			
+
 			if Extra then
 				Merge(BaseInputConfig, Extra)
 			end
@@ -5941,6 +6206,7 @@ export type InputColor3Flags = {
 	SetValue: (InputColor3Flags, Value: Color3) -> InputColor3Flags,
 }
 local function GenerateColor3Input(Name: string, InputType: string, InputCount: number, Extra)
+	Extra = Extra or {}
 	ReGui:DefineElement(Name, {
 		Base = {
 			Label = Name,
@@ -5948,7 +6214,7 @@ local function GenerateColor3Input(Name: string, InputType: string, InputCount: 
 			Value = ReGui.Accent.Light,
 			Disabled = false,
 			Minimum = {0,0,0},
-			Maximum = {255,255,255},
+			Maximum = {255,255,255,100},
 			BaseInputConfig = {},
 			InputConfigs = {
 				[1] = {Format = "R: %.f"},
@@ -5959,8 +6225,14 @@ local function GenerateColor3Input(Name: string, InputType: string, InputCount: 
 		Create = function(self, Config: InputColor3Flags)
 			--// Unpack configuration
 			local BaseInputConfig = Config.BaseInputConfig
+			local InputConfigs = Config.InputConfigs
 			local Value = Config.Value
 			local Disabled = Config.Disabled
+			
+			--// Add alpha slider
+			if Extra.Color4 then
+				InputConfigs[4] = {Format = "A: %.f"}
+			end
 
 			--// Create Object
 			local InputConfig = Copy(Config, {
@@ -5971,10 +6243,10 @@ local function GenerateColor3Input(Name: string, InputType: string, InputCount: 
 					end
 				end,
 			})
-			
-			local Object = self[InputType](self, InputConfig)
-			local Class = ReGui:MergeMetatables(Config, Object)
-			local Row = Object.Row
+
+			local Element, Object = self[InputType](self, InputConfig)
+			local Class = ReGui:MergeMetatables(Config, Element)
+			local Row = Element.Row
 
 			--// Preview frame
 			local Preview = Row:Button({
@@ -6010,7 +6282,7 @@ local function GenerateColor3Input(Name: string, InputType: string, InputCount: 
 				SetPreview(Color)
 
 				--// Update Drag elements
-				Object:SetValue({
+				Element:SetValue({
 					math.round(Color.R*255),
 					math.round(Color.G*255),
 					math.round(Color.B*255)
@@ -6020,11 +6292,10 @@ local function GenerateColor3Input(Name: string, InputType: string, InputCount: 
 			--// Update object state
 			Config:SetValue(Value)
 
-			return Class, Row
+			return Class, Object
 		end,
 	})
 end
-
 
 export type InputCFrameFlags = {
 	Label: string?,
@@ -6047,7 +6318,7 @@ local function GenerateCFrameInput(Name: string, InputType: string, InputCount: 
 			InputConfigs = {
 				[1] = {Format = "X: %.f"},
 				[2] = {Format = "Y: %.f"},
-				[3] = {Format = "Z: %.f"},
+				[3] = {Format = "Z: %.f"}
 			}
 		},
 		Create = function(self, Config: InputCFrameFlags)
@@ -6057,28 +6328,28 @@ local function GenerateCFrameInput(Name: string, InputType: string, InputCount: 
 			local Disabled = Config.Disabled
 			local Maximum = Config.Maximum
 			local Minimum = Config.Minimum
-			
+
 			local InputConfig = Copy(Config, {
-				Maximum = {Maximum.X,Maximum.Y,Maximum.Z},
-				Minimum = {Minimum.X,Minimum.Y,Minimum.Z},
-				Value = {Value.X,Value.Y,Value.Z},
+				Maximum = {Maximum.X, Maximum.Y, Maximum.Z},
+				Minimum = {Minimum.X, Minimum.Y, Minimum.Z},
+				Value = {Value.X, Value.Y, Value.Z},
 				Callback = function(self, ...)
 					if Config.ValueChanged then
 						Config:ValueChanged(...)
 					end
 				end,
 			})
-			
-			--// Create Object
-			local Object = self[InputType](self, InputConfig)
-			local Class = ReGui:MergeMetatables(Config, Object)
-			local Row = Object.Row
 
+			--// Create Object
+			local Element, Object = self[InputType](self, InputConfig)
+			local Class = ReGui:MergeMetatables(Config, Element)
+			local Row = Element.Row
+			
 			local function Callback(...)
 				local func = Config.Callback
 				return func(Class, ...)
 			end
-			
+
 			function Config:ValueChanged(Values)
 				local X, Y, Z = Values[1], Values[2], Values[3]
 				local Value = CFrame.new(X, Y, Z)
@@ -6090,7 +6361,7 @@ local function GenerateCFrameInput(Name: string, InputType: string, InputCount: 
 				self.Value = Value
 
 				--// Update Drag elements
-				Object:SetValue({
+				Element:SetValue({
 					math.round(Value.X),
 					math.round(Value.Y),
 					math.round(Value.Z)
@@ -6100,7 +6371,7 @@ local function GenerateCFrameInput(Name: string, InputType: string, InputCount: 
 			--// Update object state
 			Config:SetValue(Value)
 
-			return Class, Row
+			return Class, Object
 		end,
 	})
 end
@@ -6200,54 +6471,49 @@ ReGui:DefineElement("Combo", {
 		--// Create combo element
 		local Object = ReGui:InsertPrefab("Combo", Config)
 		local Class = ReGui:MergeMetatables(Config, Object)
-		
-		local Combo = Object.Combo
-		
-		local Dropdown = nil
 
+		local Combo = Object.Combo
+		local Dropdown = nil
+		
+		--// Elements
 		local ValueText = Canvas:Label({
 			Text = tostring(Placeholder),
 			Parent = Combo,
 			--Visible = not NoPreview,
 			Name = "ValueText"
 		})
-
 		local ArrowButton = Canvas:ArrowButton({
 			Parent = Combo,
-			Ratio = 1,
 			Interactable = false,
-			Size = UDim2.fromScale(0, 0),
+			Size = UDim2.fromOffset(19, 19),
 			LayoutOrder = 2,
 		})
-
 		local Label = Canvas:Label({
 			Text = LabelText,
 			Parent = Object,
 			LayoutOrder = 2,
 		})
-		
+
 		--// Enable automatic sizes
 		if WidthFitPreview then
 			ReGui:SetProperties(Object, {
-				AutomaticSize = Enum.AutomaticSize.X,
-				Size = UDim2.new(0, 0, 0, 20)
+				AutomaticSize = Enum.AutomaticSize.XY,
+				Size = UDim2.new(0, 0, 0, 0)
 			})
 			ReGui:SetProperties(Combo, {
-				AutomaticSize = Enum.AutomaticSize.X,
+				AutomaticSize = Enum.AutomaticSize.XY,
 				Size = UDim2.fromScale(0, 1)
 			})
 		end
 
 		local function Callback(Value, ...)
-			local Func = Config.Callback
 			Config:SetOpen(false)
-
-			return Func(Class, Value, ...)
+			return Config.Callback(Class, Value, ...)
 		end
-		
+
 		local function SetAnimationState(Open: boolean, NoAnimation: boolean?)
 			local Tweeninfo = Canvas:GetThemeKey("AnimationTweenInfo")
-			
+
 			Object.Interactable = not Open
 
 			--// Animate Arrow button
@@ -6275,11 +6541,16 @@ ReGui:DefineElement("Combo", {
 		function Config:SetValueText(Value: string?)
 			ValueText.Text = tostring(Value)
 		end
+		
+		function Config:ClosePopup()
+			if Dropdown then
+				Dropdown:ClosePopup(true)
+			end
+		end
 
 		function Config:SetDisabled(Disabled: boolean)
 			self.Disabled = Disabled
 			Object.Interactable = not Disabled
-
 			Canvas:SetColorTags({
 				[Label] = Disabled and "LabelDisabled" or "Label"
 			}, true)
@@ -6287,12 +6558,13 @@ ReGui:DefineElement("Combo", {
 
 		function Config:SetValue(Selected)
 			local Items = GetItems()
-
 			local DictValue = Items[Selected]
 			local Value = DictValue or Selected
 
 			self._Selected = Selected
 			self.Value = Value
+			
+			self:ClosePopup()
 
 			--// Update Value text with selected item
 			if typeof(Selected) == "number" then
@@ -6309,19 +6581,16 @@ ReGui:DefineElement("Combo", {
 
 			self.Open = Open
 			SetAnimationState(Open, NoAnimation)
-			
+
 			if not Open	then 
 				--// Close open dropdown
-				if Dropdown then
-					Dropdown:Close()
-				end
-
+				self:ClosePopup()
 				return 
 			end
 
 			--// Create dropdown
 			Dropdown = Canvas:Dropdown({
-				ParentObject = Combo,
+				RelativeTo = Combo,
 				Items = GetItems(),
 				Selected = Selected,
 				OnSelected = function(...)
@@ -6346,14 +6615,14 @@ ReGui:DefineElement("Combo", {
 		--// Update object state
 		SetAnimationState(false, true)
 		Config:SetDisabled(Disabled)
-		
+
 		if Selected then
 			Config:SetValue(Selected)
 		end
 
 		--// Set object animations
 		ReGui:SetAnimation(Combo, "Inputs")
-		
+
 		Canvas:TagElements({
 			[Combo] = "Frame",
 		})
@@ -6389,7 +6658,7 @@ ReGui:DefineElement("Combo", {
 --				end
 --			end,
 --		})
-		
+
 --		--// Create inputText element
 --		local Object = Canvas:InputText(InputConfig)
 --		local Class = ReGui:MergeMetatables(Config, Object)
@@ -6414,11 +6683,11 @@ ReGui:DefineElement("Combo", {
 --			--// Return Dict/Array
 --			return Items
 --		end
-		
+
 --		function Config:SetDropdownVisible(Visible: boolean)
 --			if self.Open == Visible then return end
 --			self.Open = Visible
-			
+
 --			--// Close open dropdown
 --			if not Visible	then 
 --				if Dropdown then
@@ -6426,7 +6695,7 @@ ReGui:DefineElement("Combo", {
 --				end
 --				return 
 --			end
-			
+
 --			--// Create dropdown
 --			Dropdown = Canvas:Dropdown({
 --				ParentObject = Object,
@@ -6439,14 +6708,14 @@ ReGui:DefineElement("Combo", {
 --				end,
 --			})
 --		end
-		
+
 --		function Config:ResolveQuery(Query: string)
 --			local Items = GetItems()
 --			local Sorted = SortByQuery(Items, Query)
-			
+
 --			--// Create dropdown
 --			self:SetDropdownVisible(true)
-			
+
 --			--// Set dropdown items
 --			Dropdown:SetItems(Sorted, 1)
 --		end
@@ -6478,12 +6747,12 @@ local WindowClass = {
 	--// Icons
 	TileBarConfig = {
 		Close = {
-			Image = ReGui.Icons.Close,	
-			IconSize = UDim2.fromOffset(11,11),
+			Image = ReGui.Icons.Close,
+			IconPadding = UDim.new(0, 3)
 		},
 		Collapse = {
 			Image = ReGui.Icons.Arrow,
-			IconSize = UDim2.fromScale(1,1),
+			IconPadding = UDim.new(0, 3)
 		},
 	},
 
@@ -6499,7 +6768,6 @@ function WindowClass:Tween(Data)
 	ReGui:CheckConfig(Data, {
 		Tweeninfo = self:GetThemeKey("AnimationTweenInfo")
 	})
-	
 	return Animation:Tween(Data)
 end
 
@@ -6529,7 +6797,6 @@ function WindowClass:MakeTitleBarCanvas(): TitleBarCanvas
 		WindowClass = self,
 		Element = TitleBar
 	})
-	
 	self.TitleBarCanvas = Canvas
 
 	return Canvas
@@ -6547,29 +6814,27 @@ function WindowClass:AddDefaultTitleButtons()
 	if not Canvas then
 		Canvas = self:MakeTitleBarCanvas()
 	end
-	
+
 	ReGui:CheckConfig(self, {
 		--// Create window interaction buttons
 		Toggle = Canvas:RadioButton({
 			Icon = Toggle.Image,
-			IconSize = Toggle.IconSize,
+			IconPadding = Toggle.IconPadding,
 			LayoutOrder = 1,
 			Ratio = 1,
 			Size = UDim2.new(0, 0),
-
 			Callback = function()
 				self:ToggleCollapsed()
 			end,
 		}),
 		CloseButton = Canvas:RadioButton({
 			Icon = Close.Image,
-			IconSize = Close.IconSize,
+			IconPadding = Close.IconPadding,
 			LayoutOrder = 3,
 			Ratio = 1,
 			Size = UDim2.new(0, 0),
-
 			Callback = function()
-				self:Close()
+				self:SetVisible(false)
 			end,
 		}),
 		TitleLabel = Canvas:Label({
@@ -6578,6 +6843,7 @@ function WindowClass:AddDefaultTitleButtons()
 			Size = UDim2.new(1, 0),
 			Active = false,
 			Fill = true,
+			ClipsDescendants = true,
 			AutomaticSize = Enum.AutomaticSize.XY
 		})
 	})
@@ -6600,25 +6866,13 @@ function WindowClass:Close()
 	self:Remove()
 end
 
-function WindowClass:GetWindowSize(): Vector2
-	local Window = self.WindowFrame
-	return Window.AbsoluteSize
-end
-
-function WindowClass:GetTitleBarSizeY(): number
-	local TitleBar = self.TitleBar
-	if not TitleBar.Visible then return 0 end
-	
-	return ReGui:GetContentSize(TitleBar, true).Y
-end
-
 function WindowClass:SetVisible(Visible: boolean): WindowClass
 	local Window = self.WindowFrame
 	local NoFocusOnAppearing = self.NoFocusOnAppearing
-	
+
 	self.Visible = Visible
 	Window.Visible = Visible
-	
+
 	--// Update window focus
 	if Visible and not NoFocusOnAppearing then
 		ReGui:SetFocusedWindow(self)
@@ -6627,38 +6881,47 @@ function WindowClass:SetVisible(Visible: boolean): WindowClass
 	return self
 end
 
+function WindowClass:ToggleVisibility(Visible: boolean): WindowClass
+	local IsVisible = self.Visible
+	self:SetVisible(not IsVisible)
+end
+
+function WindowClass:GetWindowSize(): Vector2
+	return self.WindowFrame.AbsoluteSize
+end
+
+function WindowClass:GetTitleBarSizeY(): number
+	local TitleBar = self.TitleBar
+	return TitleBar.Visible and TitleBar.AbsoluteSize.Y or 0
+end
+
 function WindowClass:SetTitle(Text: string?): WindowClass
-	local Title = self.TitleLabel
-	Title.Text = tostring(Text)
+	self.TitleLabel.Text = tostring(Text)
 	return self
 end
 
 function WindowClass:SetPosition(Position): WindowClass
-	local Window = self.WindowFrame
-	Window.Position = Position
+	self.WindowFrame.Position = Position
 	return self
 end
 
 function WindowClass:SetSize(Size: (Vector2|UDim2), NoAnimation: boolean): WindowClass
 	local Window = self.WindowFrame
-
+	
 	--// Convert Vector2 to UDim2
 	if typeof(Size) == "Vector2" then
 		Size = UDim2.fromOffset(Size.X, Size.Y)
 	end
-
-	--// Tween to the new size
-	self:Tween({
-		Object = Window,
-		NoAnimation = NoAnimation,
-		EndProperties = {
-			Size = Size
-		}
-	})
-
+	
+	Window.Size = Size
 	self.Size = Size
 
 	return self
+end
+
+function WindowClass:SetCanvasInteractable(Interactable: boolean)
+	local Body = self.Body 
+	Body.Interactable = Interactable
 end
 
 function WindowClass:Center(): WindowClass --// Without an Anchor point
@@ -6673,15 +6936,18 @@ function WindowClass:LoadStylesIntoElement(Data)
 	local Flags = Data.Flags
 	local Object = Data.Object
 	local Canvas = Data.Canvas
-	
+
 	local TagFunctions = {
-		["FrameRounding"] = function(Value)
+		["FrameRounding"] = function()
 			if Flags.CornerRadius then return end
+			if not Canvas then return end
 			
 			local UICorner = Object:FindFirstChild("FrameRounding", true)
 			if not UICorner then return end
-
-			UICorner.CornerRadius = UDim.new(0, Value)
+			
+			Canvas:TagElements({
+				[UICorner] = "FrameRounding"
+			})
 		end,
 	}
 
@@ -6698,6 +6964,7 @@ function WindowClass:SetTheme(ThemeName: string): WindowClass
 
 	local Elements = self.TagsList
 	local Focused = self.Focused
+	local WindowState = self.WindowState
 
 	--// Use the current theme if no theme is defined
 	if not ThemeName then
@@ -6717,31 +6984,21 @@ function WindowClass:SetTheme(ThemeName: string): WindowClass
 	})
 
 	--// Refresh Focus styles
-	self:SetFocused(Focused)
+	self:SetFocusedColors(WindowState)
 
 	return self
 end
 
-function WindowClass:SetFocused(Focused: true)
-	Focused = Focused == nil and true or Focused
-	
-	self.Focused = Focused
-
-	--// Update Window focus
-	if Focused then
-		ReGui:SetFocusedWindow(self)
-	end
-
+function WindowClass:SetFocusedColors(State: string)
 	--// Unpack class values
-	local ContentFrame = self.ContentFrame
+	local WindowFrame = self.WindowFrame
 	local TitleBar = self.TitleBar
 	local Theme = self.Theme
 	local TitleLabel = self.TitleLabel
-	local Collapsed = self.Collapsed
-	local State = self.WindowState
+	local Tweeninfo = self:GetThemeKey("AnimationTweenInfo")
 
-	local Border = ContentFrame:FindFirstChildOfClass("UIStroke")
-
+	local Border = WindowFrame:FindFirstChildOfClass("UIStroke")
+	
 	--// Color tags
 	local Tags = {
 		Focused = {
@@ -6767,19 +7024,37 @@ function WindowClass:SetFocused(Focused: true)
 		}
 	}
 	
+	--// Update colors
+	ReGui:MultiUpdateColors({
+		Tweeninfo = Tweeninfo,
+		Animate = true,
+		Objects = Tags[State],
+		Theme = Theme,
+	})
+end
+
+function WindowClass:SetFocused(Focused: true)
+	Focused = Focused == nil and true or Focused
+	
+	--// Unpack class values
+	local Collapsed = self.Collapsed
+	local CurrentState = self.WindowState
+
+	--// Update Window focus
+	if Focused then
+		ReGui:SetFocusedWindow(self)
+	end
+
 	--// Theme tags for Window state
 	local NewState = Collapsed and "Collapsed" or Focused and "Focused" or "UnFocused"
-	
+
 	--// Check if the window state is identical
-	if NewState == State then return end
+	if NewState == CurrentState then return end
+	self.Focused = Focused
 	self.WindowState = NewState
 	
 	--// Update colors
-	ReGui:MultiUpdateColors({
-		Animate = true,
-		Objects = Tags[NewState],
-		Theme = Theme,
-	})
+	self:SetFocusedColors(NewState)
 end
 
 function WindowClass:GetThemeKey(Key: string)
@@ -6793,7 +7068,7 @@ function WindowClass:ResetColors(): WindowClass
 
 	--// Reset values
 	table.clear(Theme)
-	
+
 	ReGui:MultiUpdateColors({
 		Animate = false,
 		Theme = Defaults,
@@ -6839,7 +7114,7 @@ function WindowClass:SetCollapsed(Collapsed: boolean, NoAnimation: false): Windo
 
 	--// Change the window focus
 	self:SetFocused(not Collapsed)
-	
+
 	--// Animate the closing
 	Animation:HeaderCollapse({
 		Tweeninfo = Tweeninfo,
@@ -6887,7 +7162,7 @@ function WindowClass:UpdateConfig(Config)
 		NoTabsBar = function(Value)
 			local Object = self.WindowTabSelector
 			if not Object then return end
-			
+
 			local TabsBar = Object.TabsBar
 			TabsBar.Visible = not Value
 		end,
@@ -6896,7 +7171,7 @@ function WindowClass:UpdateConfig(Config)
 			local NoScroll = self.NoScroll
 			local TabSelector = self.WindowTabSelector
 			local ContentCanvas = self.ContentCanvas
-			
+
 			--// TabSelector
 			if TabSelector then 
 				TabSelector.Body.ScrollBarThickness = ScrollBarThickness
@@ -6910,7 +7185,7 @@ function WindowClass:UpdateConfig(Config)
 			local NoScroll = self.NoScroll
 			local TabSelector = self.WindowTabSelector
 			local ContentCanvas = self.ContentCanvas
-			
+
 			if TabSelector then 
 				TabSelector.Body.ScrollingEnabled = not Value
 			end
@@ -6943,7 +7218,7 @@ function WindowClass:UpdateConfig(Config)
 			Func(Value)
 		end
 	end
-	
+
 	return self
 end
 
@@ -6952,17 +7227,30 @@ function WindowClass:Remove()
 	local Window = self.WindowFrame
 	local WindowClass = self.WindowClass
 	local Windows = ReGui.Windows
-	
+
 	--// Remove Window from the Windows array
 	local Index = table.find(Windows, WindowClass)
 	if Index then
 		table.remove(Windows, Index)
 	end
-	
+
 	--// Destroy the Window frame
 	Window:Destroy()
 end
 
+function WindowClass:MenuBar(Config, ...)
+	local ContentCanvas = self.ContentCanvas
+	local ContentFrame = self.ContentFrame
+	
+	Config = Config or {}
+	
+	Merge(Config, {
+		Parent = ContentFrame,
+		Layout = -1
+	})
+	
+	return ContentCanvas:MenuBar(Config, ...)
+end
 
 export type WindowFlags = {
 	AutoSize: string?,
@@ -7018,7 +7306,7 @@ ReGui:DefineElement("Window", {
 		--// Global config unpack
 		local Windows = ReGui.Windows
 		local WindowsContainer = ReGui.Container.Windows
-		
+
 		ReGui:CheckConfig(Config, {
 			Parent = WindowsContainer,
 			Title = ReGui.DefaultTitle
@@ -7038,14 +7326,14 @@ ReGui:DefineElement("Window", {
 		local OpenOnDoubleClick = Config.OpenOnDoubleClick
 		local NoCollapse = Config.NoCollapse
 		local _SelectDisabled = Config.Parent ~= WindowsContainer
-		
+
 		local CanvasConfig = {
 			Scroll = not NoScroll,
 			Fill = not AutomaticSize and true or nil,
 			UiPadding = UDim.new(0, NoTabs and 8 or 0),
 			AutoSelectNewTabs = AutoSelectNewTabs
 		}
-		
+
 		--// Merge AutomaticSize configuration 
 		if AutomaticSize then
 			Merge(CanvasConfig, {
@@ -7062,6 +7350,21 @@ ReGui:DefineElement("Window", {
 		--// Create window class
 		local Class = NewClass(WindowClass)
 
+		--// Content canvas
+		local BaseCanvas = ReGui:MakeCanvas({
+			Element = ContentFrame,
+			WindowClass = Class,
+			Class = Class
+		})
+
+		--// Create Window content canvas
+		local Canvas, Body, WindowClass = nil, nil, nil
+		local WindowCanvas, CanvasFrame = BaseCanvas:Canvas(Copy(CanvasConfig, {
+			Parent = ContentFrame,
+			CornerRadius = UDim.new(0, 0),
+			--NoStyle = true
+		}))
+		
 		--// Make the window resizable
 		local ResizeConnection = ReGui:MakeResizable({
 			MinimumSize = MinimumSize,
@@ -7070,20 +7373,7 @@ ReGui:DefineElement("Window", {
 				Class:SetSize(Size, true)
 			end,
 		})
-		
-		--// Content canvas
-		local ContentCanvas = ReGui:MakeCanvas({
-			Element = ContentFrame,
-			WindowClass = Class,
-			Class = Class
-		})
-		
-		--// Create Window content canvas
-		local Canvas, Body, WindowClass = nil, nil, nil
-		local WindowCanvas, CanvasFrame = ContentCanvas:Canvas(Copy(CanvasConfig, {
-			Parent = ContentFrame
-		}))
-		
+
 		--// Merge tables
 		Merge(Class, Config)
 		Merge(Class, {
@@ -7100,23 +7390,34 @@ ReGui:DefineElement("Window", {
 			ResizeConnection = ResizeConnection,
 			HoverConnection = ReGui:DetectHover(ContentFrame),
 			DragConnection = ReGui:MakeDraggable({
-				Move = Window,
 				Grab = ContentFrame,
+				Move = Window,
+				SetPosition = function(self, Position: UDim2)
+					local Tweeninfo = Canvas:GetThemeKey("AnimationTweenInfo")
+					--// Tween frame element to the new size
+					Animation:Tween({
+						Tweeninfo = Tweeninfo,
+						Object = self.Move,
+						EndProperties = {
+							Position = Position
+						}
+					})
+				end,
 				OnDragStateChange = function(IsDragging: boolean)
 					Class.IsDragging = IsDragging
 					CanvasFrame.Interactable = not IsDragging
-					
+
 					--// Change window focus on drag
 					if IsDragging then
 						ReGui:SetFocusedWindow(WindowClass)
 					end
-					
+
 					--// Disable other window focuses if dragging
 					ReGui:SetWindowFocusesEnabled(not IsDragging)
 				end,
 			}),
 		})
-		
+
 		--// Create canvas for Window type
 		if NoTabs then
 			--// Window
@@ -7126,17 +7427,17 @@ ReGui:DefineElement("Window", {
 			Canvas, Body = WindowCanvas:TabSelector(CanvasConfig)
 			Class.WindowTabSelector = Canvas
 		end
-		
+
 		--// Create Window class from Canvas and Class merge
 		WindowClass = ReGui:MergeMetatables(Class, Canvas)
-		
+
 		--// Merge canvas data
 		Merge(Class, {
+			ContentCanvas = Canvas,
 			WindowClass = WindowClass,
-			Body = Body,
-			ContentCanvas = Canvas
+			Body = Body
 		})
-		
+
 		--// Connect double click events to the collapse
 		ReGui:ConnectMouseEvent(ContentFrame, {
 			DoubleClick = true,
@@ -7164,7 +7465,7 @@ ReGui:DefineElement("Window", {
 
 		--// Update selection
 		Class:SetFocused()
-		
+
 		--// Register elements into Window Class
 		local ResizeGrab = ResizeConnection.Grab
 		ReGui:SetAnimation(ResizeGrab, "TextButtons")
@@ -7179,7 +7480,7 @@ ReGui:DefineElement("Window", {
 		if not NoWindowRegistor then
 			table.insert(Windows, WindowClass)
 		end
-		
+
 		return WindowClass, Window
 	end,
 })
@@ -7198,45 +7499,148 @@ ReGui:DefineElement("TabsWindow", {
 	end,
 })
 
-export type Region = {
-	Scroll: boolean?
+export type PopupCanvas = {
+	Scroll: boolean?,
+	AutoClose: boolean?,
+	RelativeTo: GuiObject,
+	MaxSizeY: number?,
+	MinSizeX: number?,
+	MaxSizeX: number?,
+
+	UpdateScale: (PopupCanvas) -> nil,
+	UpdatePosition: (PopupCanvas) -> nil,
+	ClosePopup: (PopupCanvas) -> nil,
+	SetPopupVisible: (PopupCanvas, Visible: boolean) -> nil
 }
 ReGui:DefineElement("PopupCanvas", {
 	Base = {
+		AutoClose = false,
 		Scroll = false,
-		AutomaticSize = Enum.AutomaticSize.Y
+		Visible = true,
+		Spacing = UDim.new(0, 1),
+		AutomaticSize = Enum.AutomaticSize.XY,
+		MaxSizeY = 150,
+		MinSizeX = 100,
+		MaxSizeX = math.huge,
+		OnClosed = EmptyFunction
 	},
-	Create = function(self, Config: Region)
-		local WindowClass = self.WindowClass
+	Create = function(self, Config: PopupCanvas)
+		Config.Parent = ReGui.Container.Overlays
 
-		local Scroll = Config.Scroll
-		local Class = Scroll and "ScrollingCanvas" or "Canvas"
+		local RelativeTo = Config.RelativeTo
+		local MaxSizeY = Config.MaxSizeY
+		local MinSizeX = Config.MinSizeX
+		local MaxSizeX = Config.MaxSizeX
+		local Visible = Config.Visible
+		local AutoClose = Config.AutoClose
+		local NoAnimation = Config.NoAnimation
 
 		--// Create object
-		local Object = ReGui:InsertPrefab(Class, Config)
+		local Canvas, Object = self:OverlayScroll(Config)
+		local UIStroke = Object.UIStroke
+
+		local Padding = UIStroke.Thickness
+		local Relative = Object.Parent.AbsolutePosition
 		
-		function Config:ClosePopup()
-			Object:Destroy()
-		end
-		function Config:ShowPopup()
-			Object.Visible = true
-		end
-		
+		local Position, Size, YSize, XSize
+
 		--// Connect mouse events
 		local Hover = ReGui:DetectHover(Object, {
 			MouseOnly = true,
 			OnInput = function(MouseHovering, Input)
 				if MouseHovering then return end
-				Config:ClosePopup()
+				if not Object.Visible then return end
+				Config:OnFocusLost()
 			end,
 		})
+		
+		function Config:FetchScales()
+			--// Roblox does not support UISizeConstraint on a scrolling frame grr
+			local CanvasSize = Canvas:GetCanvasSize()
+			
+			Position = RelativeTo.AbsolutePosition
+			Size = RelativeTo.AbsoluteSize
+			
+			YSize = math.clamp(CanvasSize.Y, Size.Y, MaxSizeY)
+			XSize = math.clamp(Size.X, MinSizeX, MaxSizeX)
+		end
 
-		--// Content canvas
-		local Canvas = ReGui:MakeCanvas({
-			Element = Object,
-			WindowClass = WindowClass,
-			Class = Config
-		})
+		function Config:UpdatePosition()
+			Object.Position = UDim2.fromOffset(
+				Position.X - Relative.X + Padding,
+				Position.Y - Relative.Y + Size.Y
+			)
+		end
+
+		function Config:GetScale(Visible: boolean): UDim2
+			local OpenSize = UDim2.fromOffset(XSize, YSize)
+			local ClosedSize = UDim2.fromOffset(XSize, 0)
+			
+			return Visible and OpenSize or ClosedSize
+		end
+		
+		function Config:IsMouseHovering(): boolean
+			return Hover.Hovering
+		end
+		
+		function Config:OnFocusLost()
+			local OnClosed = self.OnClosed
+			
+			self:SetPopupVisible(false)
+			OnClosed(self) -- Invoke closed callback
+			
+			--// Automatically destroy popup
+			if AutoClose then
+				self:ClosePopup()
+			end
+		end
+
+		function Config:ClosePopup(Wait: boolean?)
+			self:SetPopupVisible(false, NoAnimation, Wait)
+			Hover:Disconnect()
+			Object:Remove()
+		end
+
+		function Config:SetPopupVisible(Visible: boolean, Wait: boolean?)
+			--// Check if the visiblity is the same
+			if Object.Visible == Visible then return end
+			
+			RelativeTo.Interactable = not Visible
+			self:UpdateScales(Visible, NoAnimation, Wait)
+			self.Visible = Visible
+		end
+		
+		function Config:UpdateScales(Visible: boolean, NoAnimation: boolean, Wait: boolean?)
+			local Tweeninfo = Canvas:GetThemeKey("AnimationTweenInfo")
+			
+			if Visible == nil then 
+				Visible = Object.Visible 
+			end
+			
+			Config:FetchScales()
+			Config:UpdatePosition()
+			
+			local Tween = Animation:Tween({
+				Tweeninfo = Tweeninfo,
+				Object = Object,
+				NoAnimation = NoAnimation,
+				EndProperties = {
+					Size = Config:GetScale(Visible),
+					Visible = Visible,
+				}
+			})
+			
+			--// Wait for tween to finish
+			if Tween and Wait then
+				Tween.Completed:Wait()
+			end
+		end
+		
+		--// Update object
+		Config:UpdateScales(false, true)
+		Config:SetPopupVisible(Visible)
+		
+		Canvas.OnChildChange:Connect(Config.UpdateScales)
 
 		return Canvas, Object
 	end,
@@ -7255,32 +7659,33 @@ ReGui:DefineElement("PopupModal", {
 		NoScroll = true,
 	},
 	Create = function(self, Config: WindowFlags)
+		Config.Parent = ReGui.Container.Overlays
+		
 		local WindowClass = self.WindowClass
 		
 		--// Unpack configuration
 		local NoAnimation = Config.NoAnimation
 		local WindowDimTweenInfo = nil
-		Config.Parent = ReGui.Container.Overlays
-		
+
 		--// Get addional configuration from the Window Class
 		if WindowClass then 
 			WindowDimTweenInfo = WindowClass:GetThemeKey("ModalWindowDimTweenInfo")
 			Config.Theme = WindowClass.Theme
 		end
-		
+
 		--// Create Effect object
 		local ModalEffect = ReGui:InsertPrefab("ModalEffect", Config)
-		
+
 		--// Create window used for the modal
 		local Window = self:Window(Copy(Config, {
+			NoAutoFlags = false,
 			Parent = ModalEffect,
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.fromScale(0.5, 0.5),
 			Size = UDim2.fromOffset(372, 38),
-			NoAutoFlags = false,
 			AutomaticSize = Enum.AutomaticSize.Y
 		}))
-		
+
 		function Config:ClosePopup()
 			Animation:Tween({
 				Object = ModalEffect,
@@ -7293,10 +7698,10 @@ ReGui:DefineElement("PopupModal", {
 					ModalEffect:Destroy()
 				end
 			})
-			
+
 			Window:Close()
 		end
-		
+
 		--// Fade modal effect 
 		Animation:Tween({
 			Object = ModalEffect,
@@ -7309,19 +7714,16 @@ ReGui:DefineElement("PopupModal", {
 				BackgroundTransparency = 0.8
 			}
 		})
-		
+
 		--// Tag elements into the theme
 		self:TagElements({
 			[ModalEffect] = "ModalWindowDim"
 		})
-		
+
 		--// Create the modal class
 		local ModalClass = ReGui:MergeMetatables(Config, Window)
 		return ModalClass, ModalEffect
 	end,
 })
-
---// Load the library
---ReGui:Init()
 
 return ReGui

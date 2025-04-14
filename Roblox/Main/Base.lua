@@ -24,51 +24,7 @@ function BaseLoader.new(name: string)
 
     genv[name] = self
     
-    local Window = ImGui:CreateWindow({Title = name, Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false, 	--// Styles
-	Colors = {
-		Window = {
-			BackgroundColor3 = Color3.fromRGB(89, 57, 92),
-			BackgroundTransparency = 0.1,
-			ResizeGrip = {
-				TextColor3 = Color3.fromRGB(87, 26, 95)
-			},
-			
-			TitleBar = {
-				BackgroundColor3 = Color3.fromRGB(49, 21, 51),
-				[{
-					Recursive = true,
-					Name = "ToggleButton"
-				}] = {
-					BackgroundColor3 = Color3.fromRGB(134, 63, 134)
-				}
-			},
-			ToolBar = {
-				TabButton = {
-					BackgroundColor3 = Color3.fromRGB(170, 81, 155)
-				}
-			},
-		},
-		CheckBox = {
-			Tickbox = {
-				BackgroundColor3 = Color3.fromRGB(20, 20, 20),
-				Tick = {
-					ImageColor3 = Color3.fromRGB(226, 130, 255)
-				}
-			}
-		},
-		Slider = {
-			Grab = {
-				BackgroundColor3 = Color3.fromRGB(255, 152, 229)
-			},
-			BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-		},
-		CollapsingHeader = {
-			TitleBar = {
-				BackgroundColor3 = Color3.fromRGB(155, 42, 136)
-			}
-		}
-	}
-})
+    local Window = ImGui:TabsWindow({Title = name, Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false,})
     Window:Center()
     
     local hooks = Janitor.new()
@@ -81,7 +37,161 @@ function BaseLoader.new(name: string)
 end
 
 function BaseLoader:ConfigManager()
-    self.window:CreateConfigSaveHandler(self.name)
+	local fileManagerLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Exploit/FileManager.lua'))()
+
+	local saveFolder = fileManagerLib.new(self.name)
+	local configTabDataFolder = fileManagerLib.new(self.name .. "/tabData")
+
+	local configHandlerSettings = configTabDataFolder:getSave("data") or {
+		AutoLoadEnabled = true,
+		AutoSaveEnabled = true,
+		lastSaveName = "AutoSave"
+	}
+
+	local function loadConfig(name: string)
+		local save = saveFolder:getSave(name)
+		if save then
+			ImGui:LoadIni(save, false)
+		else
+			ImGui:Notify("Config", `There is no config with the name: ({name}), make sure you've saved it first.`, 6)
+		end
+	end
+
+	local function saveConfig(name: string)
+		saveFolder:save(name, ImGui:DumpIni(false))
+	end 
+
+	-->> UI
+	local tab = self.winow:CreateTab({
+		Name = "Configs",
+		Visible = false 
+	})
+
+	tab:Separator({
+		Text = "Save/Load configs"
+	})
+
+	local row = tab:Row()
+
+	row:Checkbox({
+		Label = "Auto-Save",
+		Value = configHandlerSettings.AutoSaveEnabled,
+		Callback = function(self, Value)
+			configHandlerSettings.AutoSaveEnabled = Value
+			configTabDataFolder:save("data", configHandlerSettings)
+		end,
+	})
+
+	row:Checkbox({
+		Label = "Auto-Load",
+		Value = configHandlerSettings.AutoLoadEnabled,
+		Callback = function(self, Value)
+			configHandlerSettings.AutoLoadEnabled = Value
+			configTabDataFolder:save("data", configHandlerSettings)
+		end,
+	})
+
+	tab:Separator({
+		Text = "Selected Save"
+	})
+
+	row:Fill()
+
+	local selectedSaveName = configHandlerSettings.lastSaveName;
+	local inputText = tab:InputText({
+		Text = configHandlerSettings.lastSaveName,
+		PlaceHolder = "Type save name",
+		Callback = function(self, v)
+			selectedSaveName = v;	
+		end
+	})
+
+	local row2 = tab:Row()
+
+	row2:Button({
+		Text = "Load",
+		Callback = function(self)
+			loadConfig(selectedSaveName)
+		end
+	})
+
+	row2:Button({
+		Text = "Save",
+		Callback = function(self)
+			saveConfig(selectedSaveName)
+		end
+	})
+
+	row2:Button({
+		Text = "Delete",
+		Callback = function(self)
+			saveFolder:delete(selectedSaveName)
+		end
+	})
+
+	row2:Fill()
+
+	tab:Separator({
+		Text = "Save List"
+	})
+
+	--local row3 = tab:Row()
+	local previousCombo;
+
+	local function getSaves()
+		local saves = saveFolder:getSaves()
+		local result = {}
+		for i, v in saves do
+			table.insert(result, i)
+		end
+		return result
+	end
+
+	local function refreshConfigList()
+		if previousCombo then
+			previousCombo:Destroy()
+		end
+		previousCombo = tab:Combo({
+			Placeholder = "Select a save.",
+			Label = "Saves",
+			Items = getSaves(),
+			Callback = function(self, Value)
+				inputText:SetValue(Value)
+			end,
+		})
+	end
+
+	local refreshButton = tab:Button({
+		Text = "Refresh",
+		Callback = function(self)
+			refreshConfigList()
+		end
+	})
+
+	refreshConfigList()
+	--row3:Fill()
+
+	if configHandlerSettings.AutoLoadEnabled then
+		loadConfig(configHandlerSettings.lastSaveName)
+		ImGui:Notify("Config", "Auto-loaded config: " .. configHandlerSettings.lastSaveName .. ".", 4)
+	end
+
+	local function autoSave()
+		if not configHandlerSettings.AutoSaveEnabled then return end
+		saveConfig("AutoSave")
+	end
+
+	--// AutoSave when leaving game / also at a interval, add the connection to the hooks
+	self.hooks:Add(function()
+		autoSave()
+	end)
+
+	--// AutoSave when game closes
+	self.hooks:Add(game:GetService("CoreGui").ChildRemoved:Connect(function(child)
+		if child.Name == "RobloxGui" then
+			autoSave()
+		end
+	end))
 end
 
 function BaseLoader:UiTab()

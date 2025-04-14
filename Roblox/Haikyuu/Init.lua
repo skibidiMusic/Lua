@@ -269,7 +269,7 @@ do
     RayTab:Checkbox({
         Label = "Enabled",
         Value = true,
-        saveFlag = "RayEnabledToggle",
+        IniFlag = "RayEnabledToggle",
         Callback = function(_, v)
             setEnabled(v)
         end,
@@ -282,7 +282,7 @@ do
     RayTab:Checkbox({
         Label = "Jump Check",
         Value = AIR_CHECK,
-        saveFlag = "RayJumpCheckToggle",
+        IniFlag = "RayJumpCheckToggle",
         Callback = function(_, v)
             AIR_CHECK = v
         end,
@@ -294,7 +294,7 @@ do
         Value = RAY_LENGTH,
         MinValue = 0,
         MaxValue = 120,
-        saveFlag = "RayLengthSlider",
+        IniFlag = "RayLengthSlider",
     
         Callback = function(self, Value)
             RAY_LENGTH = Value
@@ -307,7 +307,7 @@ do
         Value = ANGLE,
         MinValue = 0,
         MaxValue = 50,
-        saveFlag = "RayAngleSlider",
+        IniFlag = "RayAngleSlider",
     
         Callback = function(self, Value)
             ANGLE = Value
@@ -372,7 +372,7 @@ do
         CharacterTab:Checkbox({
             Label = "Enabled",
             Value = true,
-            saveFlag = "CharacterRotateToggle",
+            IniFlag = "CharacterRotateToggle",
             Callback = function(_, v)
                 setEnabled(v)
             end,
@@ -384,7 +384,7 @@ do
             Value = DLY_SLIDER,
             MinValue = 0,
             MaxValue = 4,
-            saveFlag = "RotateOffDelaySlider",
+            IniFlag = "RotateOffDelaySlider",
             Callback = function(self, Value)
                 DLY_SLIDER = Value
             end,
@@ -448,7 +448,7 @@ do
         local checkBox = CharacterTab:Checkbox({
             Label = "Enabled",
             Value = true,
-            saveFlag = "AirShiftlockToggle",
+            IniFlag = "AirShiftlockToggle",
             Callback = function(_, v)
                 setEnabled(v)
             end,
@@ -457,7 +457,7 @@ do
         local kb = CharacterTab:Keybind({
             Label = "Keybind",
             Value = Enum.KeyCode.R,
-            saveFlag = "AirShiftlockKeybind",
+            IniFlag = "AirShiftlockKeybind",
             Callback = function()
                 checkBox:Toggle()
             end,
@@ -513,7 +513,7 @@ do
         CharacterTab:Checkbox({
             Label = "Enabled",
             Value = ENABLED,
-            saveFlag = "WalkspeedEnabled",
+            IniFlag = "WalkspeedEnabled",
             Callback = function(_, v)
                 setEnabled(v)
             end,
@@ -525,7 +525,7 @@ do
             Value = WALKSPEED_VALUE,
             MinValue = 0,
             MaxValue = 40,
-            saveFlag = "WalkspeedValueSlider",
+            IniFlag = "WalkspeedValueSlider",
             Callback = function(self, Value)
                 WALKSPEED_VALUE = math.round(Value)
                 if ENABLED then
@@ -572,7 +572,7 @@ do
             Value = baseVal,
             MinValue = min,
             MaxValue = max,
-            saveFlag = name.."sliderAttribute",
+            IniFlag = name.."sliderAttribute",
             Callback = function(self, Value)
                 currentValue = Value
                 db = true
@@ -648,7 +648,7 @@ if currentCam then
         CameraTab:Checkbox({
             Label = "Enabled",
             Value = true,
-            saveFlag = "FovEnabled",
+            IniFlag = "FovEnabled",
             Callback = function(_, v)
                 setEnabled(v)
             end,
@@ -660,7 +660,7 @@ if currentCam then
             Value = FOV_VALUE,
             MinValue = 1,
             MaxValue = 120,
-            saveFlag = "FovValueSlider",
+            IniFlag = "FovValueSlider",
             Callback = function(self, Value)
                 FOV_VALUE = math.round(Value)
             end,
@@ -710,7 +710,7 @@ do
             Value = 100,
             MinValue = 0,
             MaxValue = 100,
-            saveFlag = "ServeFixedPowerSlider",
+            IniFlag = "ServeFixedPowerSlider",
         
             Callback = function(self, Value)
                 value = Value / 100
@@ -721,7 +721,7 @@ do
         InternalTab:Checkbox({
             Label = "Enabled",
             Value = true,
-            saveFlag = "ServePowerToggle",
+            IniFlag = "ServePowerToggle",
             Callback = function(_, v)
                 setEnabled(v)
             end,
@@ -769,7 +769,7 @@ do
                 InternalTab:Checkbox({
                     Label = "Enabled",
                     Value = ENABLED,
-                    saveFlag = `TsHinoto{name}Toggle`,
+                    IniFlag = `TsHinoto{name}Toggle`,
                     Callback = function(_, v)
                         ENABLED = v
                     end,
@@ -781,7 +781,7 @@ do
                     Value = 1,
                     MinValue = 0,
                     MaxValue = 10,
-                    saveFlag = `TsHinoto{name}ValueSlider`,
+                    IniFlag = `TsHinoto{name}ValueSlider`,
                 
                     Callback = function(self, Value)
                         MULTIPLIER = Value
@@ -827,7 +827,7 @@ do
             InternalTab:Checkbox({
                 Label = "Enabled",
                 Value = ENABLED,
-                saveFlag = "HinataMaxToggle",
+                IniFlag = "HinataMaxToggle",
                 Callback = function(_, v)
                     ENABLED = v
                 end,
@@ -917,7 +917,7 @@ do
             Value = MAX_ANGLE,
             MinValue = 0,
             MaxValue = 90,
-            saveFlag = "SanuTiltMaxAngle",
+            IniFlag = "SanuTiltMaxAngle",
         
             Callback = function(self, Value)
                 MAX_ANGLE = Value
@@ -927,7 +927,7 @@ do
         InternalTab:Checkbox({
             Label = "Enabled",
             Value = ENABLED,
-            saveFlag = "SanuTiltToggle",
+            IniFlag = "SanuTiltToggle",
             Callback = function(_, v)
                 ENABLED = v
             end,
@@ -951,7 +951,7 @@ do
                     InternalTab:Checkbox({
                         Label = "Enabled",
                         Value = ENABLED,
-                        saveFlag = "NoCooldownsToggle",
+                        IniFlag = "NoCooldownsToggle",
                         Callback = function(_, v)
                             ENABLED = v
                         end,
@@ -1025,7 +1025,7 @@ do
             Value = MULTIPLIER,
             MinValue = 0,
             MaxValue = 10,
-            saveFlag = "HitboxMultiplier",
+            IniFlag = "HitboxMultiplier",
         
             Callback = function(self, Value)
                 MULTIPLIER = Value
@@ -1035,7 +1035,7 @@ do
         InternalTab:Checkbox({
             Label = "Enabled",
             Value = true,
-            saveFlag = "HitboxToggle",
+            IniFlag = "HitboxToggle",
             Callback = function(_, v)
                 ENABLED = v
             end,
@@ -1069,7 +1069,7 @@ do
         InternalTab:Checkbox({
             Label = "Custom Charge",
             Value = ENABLED,
-            saveFlag = "CustomChargeToggle",
+            IniFlag = "CustomChargeToggle",
             Callback = function(_, v)
                 ENABLED = v
             end,
@@ -1081,7 +1081,7 @@ do
             Value = SLIDER,
             MinValue = 0,
             MaxValue = 10,
-            saveFlag = "ChargeValSlider",
+            IniFlag = "ChargeValSlider",
         
             Callback = function(self, Value)
                 SLIDER = Value
@@ -1127,7 +1127,7 @@ do
         InternalTab:Checkbox({
             Label = "Enabled",
             Value = ENABLED,
-            saveFlag = "PerfectDiveToggle",
+            IniFlag = "PerfectDiveToggle",
             Callback = function(_, v)
                 ENABLED = v
             end,
@@ -1244,7 +1244,7 @@ do
             DebugTab:Checkbox({
                 Label = "Enabled",
                 Value = true,
-                saveFlag = "TrajectoryPreviewToggle",
+                IniFlag = "TrajectoryPreviewToggle",
                 Callback = function(_, v)
                     ToggleBallTrajectoryPreviews(v)
                 end,
@@ -1399,7 +1399,7 @@ do
         DebugTab:Checkbox({
             Label = "Enabled",
             Value = toggleEnabled,
-            saveFlag = "HitZoneToggle",
+            IniFlag = "HitZoneToggle",
             Callback = function(_, v)
                 toggle(v)
             end,
