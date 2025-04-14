@@ -507,12 +507,8 @@ do
 
     end
 
-    CharacterTab:Separator({
-        Text = "Attributes"
-    })
-
     CharacterTab:Label({
-        Text = ``
+        Text = "* Attributes"
     })
 
     local function attributeModifier(name: string, attributeName: string, baseVal: number, min: number, max: number)
