@@ -54,12 +54,12 @@ end
 function BaseLoader:Notify(title: string, message: string, length: number?)
 	length = 0.5 + (length or 5)
 
-	local notification = ImGui:Window({
+	local notification = ImGui:PopupModal({
 		Title = title,
 		TabsBar = false,
-		AutoSize = "X",
+		--AutoSize = "X",
 		NoCollapse = true,
-		--NoResize = true,
+		NoResize = true,
 		NoClose = false,
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1 - 0.05, 0, 1 - 0.05, 0),
@@ -74,12 +74,12 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 		notification:Label({
 			Text = message,
 			TextWrapped = true,
-			RichText = true,
+			--RichText = true,
 		})
 	end)
 
 	task.delay(length, function() 
-		notification:Close()
+		notification:ClosePopup()
 		notification:Destroy()
 	end)
 
