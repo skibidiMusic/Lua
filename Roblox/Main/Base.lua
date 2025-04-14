@@ -29,7 +29,7 @@ function BaseLoader.new(name: string)
 	local InsertService = game:GetService("InsertService")
 
 	--local ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/depthso/Dear-ReGui/refs/heads/main/ReGui.lua'))()
-	local PrefabsId = "rbxassetid://" .. ReGui.PrefabsId
+	local PrefabsId = "rbxassetid://" .. ImGui.PrefabsId
 
 	--// Declare the Prefabs asset
 	ImGui:Init({
