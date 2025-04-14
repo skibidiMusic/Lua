@@ -23,9 +23,23 @@ function BaseLoader.new(name: string)
     end
 
     genv[name] = self
+
+	-- Window
+
+	local InsertService = game:GetService("InsertService")
+
+	--local ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/depthso/Dear-ReGui/refs/heads/main/ReGui.lua'))()
+	local PrefabsId = "rbxassetid://" .. ReGui.PrefabsId
+
+	--// Declare the Prefabs asset
+	ImGui:Init({
+		Prefabs = InsertService:LoadLocalAsset(PrefabsId)
+	})
     
     local Window = ImGui:TabsWindow({Title = name, Position = UDim2.new(0.5, 0, 0, 70), Size = UDim2.new(0, 800, 0, 500), AutoSize = false,})
     Window:Center()
+
+	--
     
     local hooks = Janitor.new()
 
