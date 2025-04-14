@@ -57,7 +57,7 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 	local notification = ImGui:PopupModal({
 		Title = title,
 		TabsBar = false,
-		--AutoSize = "X",
+		AutoSize = "Y",
 		NoCollapse = true,
 		NoResize = true,
 		NoClose = false,
