@@ -67,14 +67,14 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 	})
 
 	local windowUi = notification.WindowFrame
-	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Circular),  {Size = UDim2.fromOffset(500, 50)})
+	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Circular),  {Size = UDim2.fromOffset(500, 50), Position = UDim2.new(1 - 0.05, 0, 1 - 0.05, 0)})
 	tween:Play()
 
 	tween.Completed:Connect(function(playbackState)
 		notification:Label({
 			Text = message,
 			TextWrapped = true,
-			--RichText = true,
+			RichText = true,
 		})
 	end)
 
@@ -264,7 +264,7 @@ function BaseLoader:UiTab()
 		local wasClosedBefore = false
 		self.window.WindowFrame:GetPropertyChangedSignal("Visible"):Connect(function()
 			if self.window.Visible then return end
-			
+
 			if toggleUiKeybind.Value then
 				if wasClosedBefore then
 					--ImGui:Notify("Press " .. `{toggleUiKeybind.Value}` .. " to re-open the gui." , 1)
