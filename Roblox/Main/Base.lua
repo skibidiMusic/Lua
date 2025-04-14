@@ -54,7 +54,7 @@ end
 function BaseLoader:Notify(title: string, message: string, length: number?)
 	length = 0.5 + (length or 5)
 
-	local notification = ImGui:CreateWindow({
+	local notification = ImGui:Window({
 		Title = title,
 		TabsBar = false,
 		AutoSize = "Y",
