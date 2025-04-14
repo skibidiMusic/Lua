@@ -231,7 +231,6 @@ function BaseLoader:ConfigManager()
 	end
 
 	--// AutoSave when leaving game / also at a interval, add the connection to the hooks
-
 	self.autosave = autoSave
 
 	--// AutoSave when game closes
@@ -263,7 +262,9 @@ function BaseLoader:UiTab()
 		})
 		
 		local wasClosedBefore = false
-		self.window.CloseCallback = function()
+		self.window.WindowFrame:GetPropertyChangedSignal("Visible"):Connect(function()
+			if self.window.Visible then return end
+			
 			if toggleUiKeybind.Value then
 				if wasClosedBefore then
 					--ImGui:Notify("Press " .. `{toggleUiKeybind.Value}` .. " to re-open the gui." , 1)
@@ -272,7 +273,7 @@ function BaseLoader:UiTab()
 				wasClosedBefore = true
 				self:Notify("Gui", "Press " .. `{toggleUiKeybind.Value.Name}` .. " to re-open the gui." , 4)
 			end
-		end
+		end)
 	end
 end
 
