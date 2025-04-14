@@ -114,7 +114,6 @@ function BaseLoader:ConfigManager()
 	-->> UI
 	local tab = self.window:CreateTab({
 		Name = "Configs",
-		Visible = false 
 	})
 
 	tab:Separator({
@@ -248,7 +247,6 @@ function BaseLoader:UiTab()
     --ui tab
     local UiTab = self.window:CreateTab({
     	Name = "Ui",
-    	Visible = false 
     })
 
 	UiTab:Separator({
@@ -283,7 +281,6 @@ function BaseLoader:UnloadTab()
     -- unloading gui
     local closeTab = self.window:CreateTab({
     	Name = "Unload",
-    	Visible = false
     })
 
     closeTab:Separator({
