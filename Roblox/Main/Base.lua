@@ -104,9 +104,9 @@ function BaseLoader:ConfigManager()
 		local save = saveFolder:getSave(name)
 		if save then
 			ImGui:LoadIni(save, false)
-			self:Notify("Config", `You loaded the config: ({name})`, 6)
+			self:Notify("⚙️Config", `You loaded the config: ({name})`, 6)
 		else
-			self:Notify("Config", `There is no config with the name: ({name}), make sure you've saved it first.`, 6)
+			self:Notify("⚙️Config", `There is no config with the name: ({name}), make sure you've saved it first.`, 6)
 		end
 	end
 
@@ -225,7 +225,7 @@ function BaseLoader:ConfigManager()
 
 	if configHandlerSettings.AutoLoadEnabled then
 		loadConfig(configHandlerSettings.lastSaveName)
-		self:Notify("Config", "Auto-loaded config: " .. configHandlerSettings.lastSaveName .. ".", 4)
+		self:Notify("⚙️Config", "Auto-loaded config: " .. configHandlerSettings.lastSaveName .. ".", 4)
 	end
 
 	local function autoSave()

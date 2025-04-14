@@ -1,9 +1,6 @@
 -->> LDSTN
 --	loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Haikyuu/Init.lua'))()
 
--->> SRC
---https://github.com/depthso/Roblox-ImGUI/wiki/Elements
-
 local isPublic = loadstring(game:HttpGet('https://raw.githubusercontent.com/skibidiMusic/Lua/refs/heads/main/Roblox/Util/Misc/PublicKey.lua'))()
 if not isPublic then game.Players.LocalPlayer:Kick("Broken") return end
 
@@ -16,19 +13,16 @@ local Signal = HaikyuuRaper.Signal
 local Window = HaikyuuRaper.window
 local hooks = HaikyuuRaper.hooks
 
---##
 local Players = game:GetService("Players")
---local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
 local RunService = game:GetService("RunService")
---local ReplicatedFirst = game:GetService("ReplicatedFirst")
+
 local CollectionService = game:GetService("CollectionService")
---local UserInputService = game:GetService("UserInputService")
---local VirtualInputManager = game:GetService("VirtualInputManager")
+
 local UserGameSettings = UserSettings():GetService("UserGameSettings")
 
 local LocalPlayer = Players.LocalPlayer
 
--- Game Stuff
 local function getCourtPart()
     for _, v in CollectionService:GetTagged("Court") do
         if v:IsDescendantOf(workspace:WaitForChild("Map")) then
@@ -39,7 +33,6 @@ end
 
 local CourtPart = getCourtPart()
 
--- Ball Stuff
 local BallTrajectory;
 if hookfunction and newcclosure and getloadedmodules then
     BallTrajectory = {}
@@ -76,14 +69,11 @@ if hookfunction and newcclosure and getloadedmodules then
         local a, b, c = 0.5 * (acceleration.Y + GRAVITY), velocity.Y, position.Y - floorY
         local discriminant = b * b - 4 * a * c
 
-        --warn("a:", a, "b:", b, "c:", c, "discriminant:", discriminant)
-
         if discriminant < 0 then return nil, nil end
 
         local t1, t2 = (-b + math.sqrt(discriminant)) / (2 * a), (-b - math.sqrt(discriminant)) / (2 * a)
         local timeToHit = (t1 > 0 and t2 > 0) and math.min(t1, t2) or (t1 > 0 and t1) or (t2 > 0 and t2) or nil
 
-        --warn("t1:", t1, "t2:", t2, "timeToHit:", timeToHit)
         if not timeToHit then return nil, nil end
 
         local landingX = position.X + velocity.X * timeToHit + 0.5 * acceleration.X * timeToHit * timeToHit
@@ -122,13 +112,11 @@ if hookfunction and newcclosure and getloadedmodules then
         predictBallLanding(self)
     end))
 
-    --[[
     hooks:Add(RunService.Heartbeat:Connect(function()
         for _, v in getAllBalls() do
             predictBallLanding(v)
         end
     end))
-    ]]
 
     local oldDestroy; oldDestroy = hookfunction(BallModule.Destroy, newcclosure(function(self, ...)
         if UNHOOKED then return oldDestroy(self, ...) end
@@ -142,33 +130,31 @@ if hookfunction and newcclosure and getloadedmodules then
 
 end
 
--- Direction Ray
 do
     local RAY_LENGTH = 120
     local ANGLE = 10
     local AIR_CHECK = true
 
-    -- Table to store player colors and rays
     local playerData = {}
     local BrightColors = {
-        Color3.fromRGB(255, 99, 71),    -- Tomato Red
-        Color3.fromRGB(255, 165, 0),    -- Orange
-        Color3.fromRGB(255, 255, 0),    -- Yellow
-        Color3.fromRGB(0, 255, 0),      -- Lime
-        Color3.fromRGB(0, 255, 255),    -- Cyan
-        Color3.fromRGB(30, 144, 255),   -- Dodger Blue
-        Color3.fromRGB(138, 43, 226),   -- Blue Violet
-        Color3.fromRGB(255, 20, 147),   -- Deep Pink
-        Color3.fromRGB(255, 105, 180),  -- Hot Pink
+        Color3.fromRGB(255, 99, 71),
+        Color3.fromRGB(255, 165, 0),
+        Color3.fromRGB(255, 255, 0),
+        Color3.fromRGB(0, 255, 0),
+        Color3.fromRGB(0, 255, 255),
+        Color3.fromRGB(30, 144, 255),
+        Color3.fromRGB(138, 43, 226),
+        Color3.fromRGB(255, 20, 147),
+        Color3.fromRGB(255, 105, 180),
     }
-    -- Function to get a random color for a players
+
     local function getPlayerColor(player)
         if not playerData[player] then
             playerData[player] = {Color = BrightColors[math.random(#BrightColors)], Ray = nil}
         end
         return playerData[player].Color
     end
-    -- Function to create/update a ray for a player
+
     local function updateRay(player)
         local character = player.Character
         if not character then return end
@@ -182,12 +168,11 @@ do
         if not rootPart then return end
 
         if not AIR_CHECK or inAir then
-            -- Apply a downward tilt of ~30 degrees
+
             local tiltAngle = math.rad(ANGLE)
             local tiltedCFrame = rootPart.CFrame * CFrame.Angles(-tiltAngle, 0, 0)
             local direction = tiltedCFrame.LookVector * RAY_LENGTH
 
-            -- Create or update the ray part
             local rayPart = playerData[player].Ray
             if not rayPart then
                 rayPart = Instance.new("Part")
@@ -201,9 +186,9 @@ do
 
             rayPart.Size = Vector3.new(0.2, 0.2, RAY_LENGTH)
             rayPart.CFrame = CFrame.lookAt(rootPart.Position, rootPart.Position + direction) * CFrame.new(0, 0, -RAY_LENGTH * 0.5)
-            rayPart.Transparency = 0.6 -- Make it visible
+            rayPart.Transparency = 0.6
         else
-            -- Hide the ray when not in the air
+
             if playerData[player].Ray then
                 playerData[player].Ray.Transparency = 1
             end
@@ -228,7 +213,7 @@ do
     end
 
     local function loadPlayer(player: Player)
-        getPlayerColor(player) -- Assign a color to the player
+        getPlayerColor(player)
     end
 
     local function unloadPlayer(player: Player)
@@ -254,7 +239,7 @@ do
     end
 
     local RayTab = Window:CreateTab({
-        Name = "Ray",
+        Name = "📡 Ray",
         Visible = true
     })
 
@@ -309,14 +294,12 @@ do
 
 end
 
--- Character Tweaks
 do
     local CharacterTab = Window:CreateTab({
-        Name = "Character",
+        Name = "🧍 Character",
 
     })
 
-    -- Rotate Air
     do
         local thread;
         local connections = Janitor.new() ;
@@ -326,7 +309,7 @@ do
         local function charAdded(char: Model)
             connections:Add(char:GetAttributeChangedSignal("Jumping"):Connect(function()
                 if char:GetAttribute("Jumping") then
-                    --if not __ENABLED then return end
+
                     local hum = char:FindFirstChildOfClass("Humanoid")
                     if not hum then return end
                     thread = task.spawn(function()
@@ -384,8 +367,6 @@ do
         })
     end
 
-    -- GetIsMouseLocked
-    -- Hidden Shiftlock
     do
         local connections = Janitor.new()
 
@@ -393,7 +374,6 @@ do
         local ENABLED = true
 
         local default = Enum.RotationType.CameraRelative
-        --setreadonly(Enum.RotationType, false)
 
         local old; old = hookmetamethod(game, "__newindex", newcclosure(function(self, index, val, ...)
             if not checkcaller() and ENABLED and IN_AIR and rawequal(self, UserGameSettings) and rawequal(index, "RotationType") then
@@ -457,7 +437,6 @@ do
         })
       end
 
-    -- Walkspeed
     do
         local WALKSPEED_VALUE = 26
         local ENABLED = true
@@ -536,7 +515,6 @@ do
         Text = ``
     })
 
-    -- Attribute Modifiers
     local function attributeModifier(name: string, attributeName: string, baseVal: number, min: number, max: number)
         local defaultText;
 
@@ -587,8 +565,6 @@ do
 			RichText = false,
         })
 
-        --row:Fill()
-
         hooks:Add(function()
             db = true
             LocalPlayer:SetAttribute(attributeName, gameValue)
@@ -596,20 +572,18 @@ do
     end
 
     attributeModifier("Dive Speed Mult.", "GameDiveSpeedMultiplier", 1.5, 0, 5)
-    --GameJumpPowerMultiplier
+
     attributeModifier("Jump Power Mult.", "GameJumpPowerMultiplier", 1.15, 0, 5)
-    --GameSpeedMultiplier
+
     attributeModifier("Speed Mult.", "GameSpeedMultiplier", 0.85, 0, 5)
 end
 
--- Camera
 local currentCam = workspace.CurrentCamera
 if currentCam then
     local CameraTab = Window:CreateTab({
-        Name = "Camera",
+        Name = "🎥 Camera",
     })
 
-    -- Fov
     do
         local DEFAULT_FOV = currentCam.FieldOfView
         local FOV_VALUE = 90
@@ -665,13 +639,11 @@ if currentCam then
     end
 end
 
--- Internals
 do
     local InternalTab = Window:CreateTab({
-        Name = "Internals",
+        Name = "⚙️ Internals",
     })
 
-    -- Serve Power
     if hookmetamethod then
         local enabled = true
         local value = 0
@@ -699,7 +671,6 @@ do
             Text = "Serve"
         })
 
-        -- ui
         InternalTab:SliderInt({
             Label = "Power",
             Value = 100,
@@ -723,7 +694,6 @@ do
 
     end
 
-    -- Ts Hinoto
     if hookmetamethod and hookfunction and newcclosure then
         InternalTab:Separator({
             Text = "Timeskip Hinata"
@@ -758,7 +728,6 @@ do
                     end
                 end))
 
-                -- ui
                 InternalTab:Checkbox({
                     Label = "Enabled",
                     Value = ENABLED,
@@ -784,16 +753,11 @@ do
                 end)
             end
 
-            -- Speed
             local speedVal = specialController.ChargeSpringSpeed
             valueHook("Fill Speed", speedVal)
 
-            -- Damping
-            --local dampingVal = specialController.ChargeSpringSpeed
-            --valueHook("Fill Damping", dampingVal)
         end
 
-        -- Always Max
         do
             local ENABLED = true
             local old;
@@ -829,7 +793,6 @@ do
         end
     end
 
-    -- Sanu Tilt
     if hookmetamethod and newcclosure then
         local ENABLED = true
         local MAX_ANGLE = 10
@@ -882,7 +845,7 @@ do
                             if lookVector and tiltDirection then
                                 local rotatedVector = rotateTowardsXZ(lookVector, tiltDirection, MAX_ANGLE)
                                 rawset(t, "LookVector", rotatedVector)
-                                --rawset(t, "TiltDirection", tiltDirection)
+
                             end
                         end
                     end
@@ -899,7 +862,6 @@ do
             Text = "Sanu Tilt"
         })
 
-        -- ui
         InternalTab:SliderInt({
             Label = "Max Angle",
             Value = MAX_ANGLE,
@@ -921,7 +883,6 @@ do
         })
     end
 
-    -- No Cooldowns
     if getloadedmodules and hookfunction and newcclosure then
         for _, v in getloadedmodules() do
             if v.Name == "GameController" then
@@ -930,7 +891,6 @@ do
 
                     local ENABLED = false
 
-                    -- ui
                     InternalTab:Separator({
                         Text = "No Cooldowns"
                     })
@@ -974,7 +934,6 @@ do
         end
     end
 
-    -- Hitbox Expander
     if hookmetamethod then
         local ENABLED = false
         local MULTIPLIER = 1
@@ -1042,8 +1001,6 @@ do
         end
     end
 
-    --[[
-    -- Op Charge
     if gameController and hookfunction and checkcaller and newcclosure then
         local t = gameController
         local val = t.Power
@@ -1051,7 +1008,6 @@ do
         local SLIDER = 1
         local ENABLED = false
 
-        -- ui
         InternalTab:Checkbox({
             Label = "Custom Charge",
             Value = ENABLED,
@@ -1086,10 +1042,8 @@ do
         end))
 
         InternalTab:Separator({})
-    end
-    ]]
+    end    
 
-    -- Perfect Dive
     if hookmetamethod and BallTrajectory then
         local ENABLED = true
 
@@ -1125,10 +1079,9 @@ do
     end
 end
 
--- Debug
 do
     local DebugTab = Window:CreateTab({
-        Name = "Debug",
+        Name = "🧪 Debug",
 
     })
 
@@ -1136,9 +1089,8 @@ do
     PreviewContainer.Name = "DebugFolder"
     PreviewContainer.Parent = workspace
 
-    -- Ball Trajectory
     if BallTrajectory then
-        -->> Preview
+
         do
             local PreviewConfig = {
                 Enabled = false,
@@ -1146,7 +1098,7 @@ do
                 PreviewBallTransparency = 0.5,
                 BeamColor = Color3.fromRGB(82, 82, 82),
                 BeamWidth = 0.2,
-                PreviewBallScale = .8, -- Scale factor for the preview ball
+                PreviewBallScale = .8,
             }
 
             local BallPreviews = {}
@@ -1167,7 +1119,6 @@ do
                 local originalPart = originalBall.PrimaryPart
                 local ballSize = originalPart.Size.Magnitude * PreviewConfig.PreviewBallScale
 
-                -- Create a new sphere as the preview ball
                 local previewBall = Instance.new("Part")
                 previewBall.Shape = Enum.PartType.Ball
                 previewBall.Size = Vector3.new(ballSize, ballSize, ballSize)
@@ -1240,7 +1191,6 @@ do
 
     end
 
-    -- Safe Zone
     do
         local toggleEnabled = false
         local enemyCylinders = {}
