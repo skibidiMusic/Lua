@@ -281,7 +281,7 @@ function BaseLoader:UiTab()
 	})
 
 	do
-		ImGui:DefineTheme("🌸Pink", {
+		ImGui:DefineTheme("🌸 Pink", {
 			TitleAlign = Enum.TextXAlignment.Center,
 			TextDisabled = Color3.fromRGB(150, 120, 150),
 			Text = Color3.fromRGB(255, 200, 255),
@@ -313,7 +313,7 @@ function BaseLoader:UiTab()
 		})
 
 		-- Green Theme
-		ImGui:DefineTheme("🍀Green", {
+		ImGui:DefineTheme("🍀 Green", {
 		    TitleAlign = Enum.TextXAlignment.Center,
 		    TextDisabled = Color3.fromRGB(100, 120, 100),
 		    Text = Color3.fromRGB(180, 200, 180),
@@ -345,7 +345,7 @@ function BaseLoader:UiTab()
 		})
 
 		-- Red Theme
-		ImGui:DefineTheme("🍒Red", {
+		ImGui:DefineTheme("🍒 Red", {
 		    TitleAlign = Enum.TextXAlignment.Center,
 		    TextDisabled = Color3.fromRGB(120, 100, 100),
 		    Text = Color3.fromRGB(200, 180, 180),
@@ -377,7 +377,7 @@ function BaseLoader:UiTab()
 		})
 
 		-- Yellow Theme
-		ImGui:DefineTheme("🍋Yellow", {
+		ImGui:DefineTheme("🍋 Yellow", {
 		    TitleAlign = Enum.TextXAlignment.Center,
 		    TextDisabled = Color3.fromRGB(120, 120, 100),
 		    Text = Color3.fromRGB(200, 200, 180),
@@ -409,7 +409,7 @@ function BaseLoader:UiTab()
 		})
 
 		-- Blue Theme
-		ImGui:DefineTheme("🌊Blue", {
+		ImGui:DefineTheme("🌊 Blue", {
 		    TitleAlign = Enum.TextXAlignment.Center,
 		    TextDisabled = Color3.fromRGB(100, 100, 120),
 		    Text = Color3.fromRGB(180, 180, 200),
@@ -441,7 +441,7 @@ function BaseLoader:UiTab()
 		})
 
 		-- Purple Theme
-		ImGui:DefineTheme("🍇Purple", {
+		ImGui:DefineTheme("🍇 Purple", {
 		    TitleAlign = Enum.TextXAlignment.Center,
 		    TextDisabled = Color3.fromRGB(120, 100, 130),
 		    Text = Color3.fromRGB(200, 180, 210),
