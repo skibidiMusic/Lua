@@ -481,7 +481,7 @@ function BaseLoader:UiTab()
 		UiTab:Combo({
 			Placeholder = "Select Theme",
 			Label = "Theme",
-			IniFlag = "ThemeSelector",
+			IniFlag = "ThemeSelectorDropdown",
 			Items = allThemes,
 			Value = "🌸Pink",
 			Callback = function(_, Value)
