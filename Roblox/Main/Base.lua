@@ -59,7 +59,7 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 		TabsBar = false,
 		AutoSize = "Y",
 		NoCollapse = true,
-		NoResize = true,
+		--NoResize = true,
 		NoClose = false,
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1 - 0.05, 0, 1 - 0.05, 0),
