@@ -288,12 +288,11 @@ do
         end,
     })
 
-    RayTab:Slider({
+    RayTab:SliderInt({
         Label = "Length",
-        Format = "%.d/%s", 
         Value = RAY_LENGTH,
-        MinValue = 0,
-        MaxValue = 120,
+        Minimum = 0,
+        Maximum = 120,
         IniFlag = "RayLengthSlider",
     
         Callback = function(self, Value)
@@ -301,14 +300,12 @@ do
         end,
     })
 
-    RayTab:Slider({
+    RayTab:SliderInt({
         Label = "Angle",
-        Format = "%.d/%s", 
         Value = ANGLE,
-        MinValue = 0,
-        MaxValue = 50,
+        Minimum = 0,
+        Maximum = 50,
         IniFlag = "RayAngleSlider",
-    
         Callback = function(self, Value)
             ANGLE = Value
         end,
@@ -378,12 +375,12 @@ do
             end,
         })
     
-        CharacterTab:Slider({
+        CharacterTab:SliderFloat({
             Label = "Max Time",
-            Format = "%.2f/%s", 
+            Format = "%.2f", 
             Value = DLY_SLIDER,
-            MinValue = 0,
-            MaxValue = 4,
+            Minimum = 0,
+            Maximum = 4,
             IniFlag = "RotateOffDelaySlider",
             Callback = function(self, Value)
                 DLY_SLIDER = Value
@@ -519,12 +516,11 @@ do
             end,
         })
 
-        CharacterTab:Slider({
+        CharacterTab:SliderInt({
             Label = "Speed",
-            Format = "%.d/%s", 
             Value = WALKSPEED_VALUE,
-            MinValue = 0,
-            MaxValue = 40,
+            Minimum = 0,
+            Maximum = 40,
             IniFlag = "WalkspeedValueSlider",
             Callback = function(self, Value)
                 WALKSPEED_VALUE = math.round(Value)
@@ -533,6 +529,7 @@ do
                 end
             end,
         })
+        
     end
     
     CharacterTab:Separator({
@@ -566,12 +563,12 @@ do
 
         local row = CharacterTab:Row()
 
-        local slider = CharacterTab:Slider({
+        local slider = CharacterTab:SliderFloat({
             Label = name,
-            Format = "%.2f/%s", 
+            Format = "%.2f", 
             Value = baseVal,
-            MinValue = min,
-            MaxValue = max,
+            Minimum = min,
+            Maximum = max,
             IniFlag = name.."sliderAttribute",
             Callback = function(self, Value)
                 currentValue = Value
@@ -654,12 +651,11 @@ if currentCam then
             end,
         })
 
-        CameraTab:Slider({
+        CameraTab:SliderInt({
             Label = "FOV Value",
-            Format = "%.d/%s", 
             Value = FOV_VALUE,
-            MinValue = 1,
-            MaxValue = 120,
+            Minimum = 1,
+            Maximum = 120,
             IniFlag = "FovValueSlider",
             Callback = function(self, Value)
                 FOV_VALUE = math.round(Value)
@@ -704,14 +700,12 @@ do
         })
 
         -- ui
-        InternalTab:Slider({
+        InternalTab:SliderInt({
             Label = "Power",
-            Format = "%.d/%s", 
             Value = 100,
-            MinValue = 0,
-            MaxValue = 100,
+            Minimum = 0,
+            Maximum = 100,
             IniFlag = "ServeFixedPowerSlider",
-        
             Callback = function(self, Value)
                 value = Value / 100
                 print(value)
@@ -775,19 +769,17 @@ do
                     end,
                 })
 
-                InternalTab:Slider({
+                InternalTab:SliderInt({
                     Label = "Multiplier",
-                    Format = "%.d/%s", 
                     Value = 1,
-                    MinValue = 0,
-                    MaxValue = 10,
+                    Minimum = 0,
+                    Maximum = 10,
                     IniFlag = `TsHinoto{name}ValueSlider`,
-                
                     Callback = function(self, Value)
                         MULTIPLIER = Value
                     end,
                 })
-            
+
                 hooks:Add(function()
                     ENABLED = false
                 end)
@@ -911,18 +903,17 @@ do
         })
 
         -- ui
-        InternalTab:Slider({
+        InternalTab:SliderInt({
             Label = "Max Angle",
-            Format = "%.d/%s", 
             Value = MAX_ANGLE,
-            MinValue = 0,
-            MaxValue = 90,
+            Minimum = 0,
+            Maximum = 90,
             IniFlag = "SanuTiltMaxAngle",
-        
             Callback = function(self, Value)
                 MAX_ANGLE = Value
             end,
         })
+        
     
         InternalTab:Checkbox({
             Label = "Enabled",
@@ -1019,14 +1010,13 @@ do
             Text = "Hitbox Expander"
         })
 
-        InternalTab:Slider({
+        InternalTab:SliderFloat({
             Label = "Size",
-            Format = "%.2f/%s", 
+            Format = "%.2f", 
             Value = MULTIPLIER,
-            MinValue = 0,
-            MaxValue = 10,
+            Minimum = 0,
+            Maximum = 10,
             IniFlag = "HitboxMultiplier",
-        
             Callback = function(self, Value)
                 MULTIPLIER = Value
             end,
