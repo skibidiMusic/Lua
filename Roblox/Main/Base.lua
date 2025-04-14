@@ -307,6 +307,11 @@ function BaseLoader:UiTab()
 			Border = Color3.fromRGB(50, 45, 50),
 			ResizeGrab = Color3.fromRGB(50, 45, 50),
 			RegionBgTransparency = 1,
+
+			TabText = Color3.fromRGB(24, 24, 24),
+			TabBg =  Color3.fromRGB(150, 100, 150),
+			TabTextActive = Color3.fromRGB(0, 0, 0),
+			TabBgActive = Color3.fromRGB(200, 180, 200),
 		})
 
 		local allThemes = {}
