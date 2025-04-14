@@ -225,6 +225,7 @@ function BaseLoader:ConfigManager()
 
 	if configHandlerSettings.AutoLoadEnabled then
 		loadConfig(configHandlerSettings.lastSaveName)
+		self.window:SetTheme(self.window.Theme)
 		self:Notify("⚙️Config", "Auto-loaded config: " .. configHandlerSettings.lastSaveName .. ".", 4)
 	end
 
