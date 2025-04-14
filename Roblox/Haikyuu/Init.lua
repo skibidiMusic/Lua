@@ -446,6 +446,7 @@ do
         local defaultWalkspeed = nil
         local currentHum = nil
         local function WalkSpeedChange()
+            if LocalPlayer:GetAttribute("IsServing") then return end
             if currentHum then
                 currentHum.WalkSpeed = WALKSPEED_VALUE
             end
