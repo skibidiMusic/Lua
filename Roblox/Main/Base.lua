@@ -66,16 +66,12 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 		Size = UDim2.fromOffset(0, 0), --// Roblox property 
 	})
 
-	local Content = notification:CreateTab({
-		Visible = true
-	})
-
 	local windowUi = notification.Window
 	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Linear),  {Size = UDim2.fromOffset(500, 50)})
 	tween:Play()
 
 	tween.Completed:Connect(function(playbackState)
-		Content:Label({
+		notification:Label({
 			Text = message,
 			TextWrapped = true,
 			RichText = true,
