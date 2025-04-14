@@ -291,6 +291,8 @@ function BaseLoader:UiTab()
 		})
 
 		local allThemes = {}
+		warn(ImGui.ThemeConfigs)
+
 		for i, v in ImGui.ThemeConfigs do
 			table.insert(allThemes, i)
 		end
