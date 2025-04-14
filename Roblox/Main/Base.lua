@@ -57,7 +57,7 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 	local notification = ImGui:PopupModal({
 		Title = title,
 		TabsBar = false,
-		--AutoSize = "Y",
+		AutoSize = "Y",
 		NoCollapse = true,
 		NoResize = true,
 		NoClose = false,
@@ -256,7 +256,7 @@ function BaseLoader:UiTab()
 		local toggleUiKeybind = UiTab:Keybind({
 			Label = "Toggle UI",
 			Value = Enum.KeyCode.RightControl,
-			saveFlag = "ToggleUiKeybind",
+			IniFlag = "ToggleUiKeybind",
 			Callback = function()
 				self.window:SetVisible(not self.window.Visible)
 			end,
