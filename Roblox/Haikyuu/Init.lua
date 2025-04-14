@@ -51,7 +51,7 @@ if hookfunction and newcclosure and getloadedmodules then
             end
         end
     end
-    
+
     local BallModule, GameModule
     for _, v in getloadedmodules() do
         if v.Name == "Ball" then
@@ -60,11 +60,11 @@ if hookfunction and newcclosure and getloadedmodules then
             GameModule = require(v)
         end
     end
-    
+
     local newBallSignal, ballDestroySignal, trajectoryUpdatedSignal = Signal.new(), Signal.new(), Signal.new()
 
     BallTrajectory.newBallSignal, BallTrajectory.ballDestroySignal, BallTrajectory.trajectoryUpdatedSignal = newBallSignal, ballDestroySignal, trajectoryUpdatedSignal
-    
+
     local function trajectoryResult(ball)
         local gravityMultiplier = ball.GravityMultiplier or 1
         local acceleration = ball.Acceleration or Vector3.new(0, 0, 0)
@@ -73,20 +73,19 @@ if hookfunction and newcclosure and getloadedmodules then
         local floorY = CourtPart.Position.Y + GameModule.Physics.Radius
         local GRAVITY = -GameModule.Physics.Gravity * gravityMultiplier
 
-
         local a, b, c = 0.5 * (acceleration.Y + GRAVITY), velocity.Y, position.Y - floorY
         local discriminant = b * b - 4 * a * c
 
         --warn("a:", a, "b:", b, "c:", c, "discriminant:", discriminant)
 
         if discriminant < 0 then return nil, nil end
-        
+
         local t1, t2 = (-b + math.sqrt(discriminant)) / (2 * a), (-b - math.sqrt(discriminant)) / (2 * a)
         local timeToHit = (t1 > 0 and t2 > 0) and math.min(t1, t2) or (t1 > 0 and t1) or (t2 > 0 and t2) or nil
 
         --warn("t1:", t1, "t2:", t2, "timeToHit:", timeToHit)
         if not timeToHit then return nil, nil end
-        
+
         local landingX = position.X + velocity.X * timeToHit + 0.5 * acceleration.X * timeToHit * timeToHit
         local landingZ = position.Z + velocity.Z * timeToHit + 0.5 * acceleration.Z * timeToHit * timeToHit
 
@@ -108,7 +107,7 @@ if hookfunction and newcclosure and getloadedmodules then
     BallTrajectory.getAllBalls = getAllBalls
 
     local UNHOOKED = false
-    
+
     local oldNew; oldNew = hookfunction(BallModule.new, newcclosure(function(...)
         if UNHOOKED then return oldNew(...) end
         local newBall = oldNew(...)
@@ -116,7 +115,7 @@ if hookfunction and newcclosure and getloadedmodules then
         predictBallLanding(newBall)
         return newBall
     end))
-    
+
     local oldUpdate; oldUpdate = hookfunction(BallModule.Update, newcclosure(function(self, ...)
         if UNHOOKED then return oldUpdate(self, ...) end
         oldUpdate(self, ...)
@@ -130,18 +129,17 @@ if hookfunction and newcclosure and getloadedmodules then
         end
     end))
     ]]
-    
+
     local oldDestroy; oldDestroy = hookfunction(BallModule.Destroy, newcclosure(function(self, ...)
         if UNHOOKED then return oldDestroy(self, ...) end
         ballDestroySignal:Fire(self)
         oldDestroy(self, ...)
     end))
 
-
     hooks:Add(function()
         UNHOOKED = true
     end)
-    
+
 end
 
 -- Direction Ray
@@ -174,21 +172,21 @@ do
     local function updateRay(player)
         local character = player.Character
         if not character then return end
-    
+
         local humanoid = character:FindFirstChildOfClass("Humanoid") :: Humanoid
         if not humanoid or humanoid:GetState() == Enum.HumanoidStateType.Seated then return end
-    
+
         local state = humanoid:GetState()
         local inAir = state == Enum.HumanoidStateType.Freefall or state == Enum.HumanoidStateType.Jumping or humanoid.FloorMaterial == Enum.Material.Air
         local rootPart = character:FindFirstChild("HumanoidRootPart")
         if not rootPart then return end
-    
+
         if not AIR_CHECK or inAir then
             -- Apply a downward tilt of ~30 degrees
             local tiltAngle = math.rad(ANGLE)
             local tiltedCFrame = rootPart.CFrame * CFrame.Angles(-tiltAngle, 0, 0)
             local direction = tiltedCFrame.LookVector * RAY_LENGTH
-        
+
             -- Create or update the ray part
             local rayPart = playerData[player].Ray
             if not rayPart then
@@ -229,7 +227,6 @@ do
         end
     end
 
-
     local function loadPlayer(player: Player)
         getPlayerColor(player) -- Assign a color to the player
     end
@@ -238,7 +235,7 @@ do
         if playerData[player] and playerData[player].Ray then
             playerData[player].Ray:Destroy()
         end
-        playerData[player] = nil 
+        playerData[player] = nil
     end
 
     hooks:Add(function()
@@ -255,11 +252,10 @@ do
     for _, v in Players:GetPlayers() do
         loadPlayer(v)
     end
-    
 
     local RayTab = Window:CreateTab({
         Name = "Ray",
-        Visible = true 
+        Visible = true
     })
 
     RayTab:Separator({
@@ -294,7 +290,7 @@ do
         Minimum = 0,
         Maximum = 120,
         IniFlag = "RayLengthSlider",
-    
+
         Callback = function(self, Value)
             RAY_LENGTH = Value
         end,
@@ -324,9 +320,9 @@ do
     do
         local thread;
         local connections = Janitor.new() ;
-    
+
         local DLY_SLIDER = .33
-    
+
         local function charAdded(char: Model)
             connections:Add(char:GetAttributeChangedSignal("Jumping"):Connect(function()
                 if char:GetAttribute("Jumping") then
@@ -346,22 +342,22 @@ do
                 end
             end), nil, "jumpCon")
         end
-    
+
         local function setEnabled(v)
             if v then
                 connections:Add(LocalPlayer.CharacterAdded:Connect(charAdded))
                 if LocalPlayer.Character then
                     charAdded(LocalPlayer.Character)
                 end
-            else   
+            else
                 connections:Cleanup()
             end
         end
-    
+
         hooks:Add(function()
             setEnabled(false)
         end)
-   
+
         CharacterTab:Separator({
             Text = "Air Rotate"
         })
@@ -374,10 +370,10 @@ do
                 setEnabled(v)
             end,
         })
-    
+
         CharacterTab:SliderFloat({
             Label = "Max Time",
-            Format = "%.2f", 
+            Format = "%.2f",
             Value = DLY_SLIDER,
             Minimum = 0,
             Maximum = 4,
@@ -420,7 +416,7 @@ do
                 end
             end), nil, "jumpCon")
         end
-    
+
         local function setEnabled(v)
             ENABLED = v
             if v then
@@ -428,12 +424,12 @@ do
                 if LocalPlayer.Character then
                     charAdded(LocalPlayer.Character)
                 end
-            else   
+            else
                 setActive(false)
                 connections:Cleanup()
             end
         end
-    
+
         hooks:Add(function()
             setEnabled(false)
         end)
@@ -474,7 +470,7 @@ do
             if currentHum then
                 currentHum.WalkSpeed = WALKSPEED_VALUE
             end
-        end  
+        end
 
         local function charAdded(char)
             currentHum = char:WaitForChild("Humanoid", 2)
@@ -483,7 +479,7 @@ do
             connections:Add(currentHum:GetPropertyChangedSignal("WalkSpeed"):Connect(WalkSpeedChange), nil, "WalkSpeedChange")
             WalkSpeedChange()
         end
-        
+
         local function setEnabled(v)
             ENABLED = v
             if v then
@@ -529,9 +525,9 @@ do
                 end
             end,
         })
-        
+
     end
-    
+
     CharacterTab:Separator({
         Text = "Attributes"
     })
@@ -565,7 +561,7 @@ do
 
         local slider = CharacterTab:SliderFloat({
             Label = name,
-            Format = "%.2f", 
+            Format = "%.2f",
             Value = baseVal,
             Minimum = min,
             Maximum = max,
@@ -618,7 +614,7 @@ if currentCam then
         local DEFAULT_FOV = currentCam.FieldOfView
         local FOV_VALUE = 90
         local ENABLED = true
-        
+
         local connections = Janitor.new()
 
         local function fovUpdated()
@@ -683,7 +679,7 @@ do
         local function setEnabled(v)
             enabled = v
         end
-    
+
         hooks:Add(function()
             setEnabled(false)
         end)
@@ -715,7 +711,7 @@ do
                 print(value)
             end,
         })
-    
+
         InternalTab:Checkbox({
             Label = "Enabled",
             Value = true,
@@ -762,7 +758,6 @@ do
                     end
                 end))
 
-
                 -- ui
                 InternalTab:Checkbox({
                     Label = "Enabled",
@@ -788,19 +783,18 @@ do
                     ENABLED = false
                 end)
             end
-                
+
             -- Speed
             local speedVal = specialController.ChargeSpringSpeed
             valueHook("Fill Speed", speedVal)
-        
+
             -- Damping
             --local dampingVal = specialController.ChargeSpringSpeed
             --valueHook("Fill Damping", dampingVal)
         end
 
-
         -- Always Max
-        do     
+        do
             local ENABLED = true
             local old;
             old = hookmetamethod(game, "__namecall", function(self, ...)
@@ -843,38 +837,37 @@ do
         local function rotateTowardsXZ(lookVector, tiltVector, maxAngleDegrees)
             local lookXZ = Vector2.new(lookVector.X, lookVector.Z)
             local tiltXZ = Vector2.new(tiltVector.X, tiltVector.Z)
-            
+
             if lookXZ.Magnitude == 0 or tiltXZ.Magnitude == 0 then
                 return lookVector
             end
-            
+
             lookXZ = lookXZ.Unit
             tiltXZ = tiltXZ.Unit
-            
+
             local dot = lookXZ.Dot(lookXZ, tiltXZ)
-            
+
             if dot < -0.9 then
                 return lookVector
             end
-            
+
             local angle = math.acos(math.clamp(dot, -1, 1))
             local cross = lookXZ.X * tiltXZ.Y - lookXZ.Y * tiltXZ.X
             local direction = math.sign(cross)
-            
+
             local maxAngle = math.rad(maxAngleDegrees)
             local rotationAngle = math.min(angle, maxAngle)
-            
+
             local cos = math.cos(rotationAngle)
             local sin = math.sin(rotationAngle) * direction
-            
+
             local rotated = Vector2.new(
                 lookXZ.X * cos - lookXZ.Y * sin,
                 lookXZ.X * sin + lookXZ.Y * cos
             )
-            
+
             return Vector3.new(rotated.X, lookVector.Y, rotated.Y).Unit
         end
-        
 
         local old;
         old = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
@@ -917,8 +910,7 @@ do
                 MAX_ANGLE = Value
             end,
         })
-        
-    
+
         InternalTab:Checkbox({
             Label = "Enabled",
             Value = ENABLED,
@@ -955,15 +947,15 @@ do
                     hooks:Add(function()
                         ENABLED = false
                     end)
-                    
+
                     if ENABLED then
-                        val:set(false)  
+                        val:set(false)
                     end
 
                     local old; old = hookfunction(val.set, newcclosure(function(self, ...)
                         if ENABLED and not checkcaller() and rawequal(self, val) and not LocalPlayer:GetAttribute("IsServing") then
                             return old(self, false)
-                        end     
+                        end
                         return old(self, ...)
                     end))
 
@@ -992,21 +984,21 @@ do
             if ENABLED and not checkcaller() and rawequal(self, workspace) and getnamecallmethod() == "GetPartsInPart" then
                     local hitboxPart = args[1]
                     local overlapParams = args[2] :: OverlapParams
-    
+
                     if rawequal(args[3], nil) and (typeof(hitboxPart) == "Instance" and hitboxPart.IsA(hitboxPart, "BasePart") and typeof(overlapParams) == "OverlapParams") then
                             local testPart = overlapParams.FilterDescendantsInstances[1]
                             if testPart and testPart.HasTag(testPart, "Ball") then
-                                    
+
                                     local oldSize = hitboxPart.Size
                                     hitboxPart.Size = oldSize * MULTIPLIER
                                     local result = old(self, ...)
                                     hitboxPart.Size = oldSize
                                     return result
-    
+
                             end
                     end
             end
-    
+
             return old(self, unpack(args))
         end)
 
@@ -1016,7 +1008,7 @@ do
 
         InternalTab:SliderFloat({
             Label = "Size",
-            Format = "%.2f", 
+            Format = "%.2f",
             Value = MULTIPLIER,
             Minimum = 0,
             Maximum = 10,
@@ -1025,7 +1017,7 @@ do
                 MULTIPLIER = Value
             end,
         })
-    
+
         InternalTab:Checkbox({
             Label = "Enabled",
             Value = true,
@@ -1071,12 +1063,12 @@ do
 
         InternalTab:Slider({
             Label = "Charge Val",
-            Format = "%.2f/%s", 
+            Format = "%.2f/%s",
             Value = SLIDER,
             MinValue = 0,
             MaxValue = 10,
             IniFlag = "ChargeValSlider",
-        
+
             Callback = function(self, Value)
                 SLIDER = Value
             end,
@@ -1089,10 +1081,10 @@ do
         local old; old = hookfunction(val.getCharge, newcclosure(function(self, ...)
             if ENABLED and not checkcaller() and rawequal(self, val) then
                 return SLIDER
-            end     
+            end
             return old(self, ...)
         end))
-        
+
         InternalTab:Separator({})
     end
     ]]
@@ -1146,7 +1138,7 @@ do
 
     -- Ball Trajectory
     if BallTrajectory then
-        -->> Preview 
+        -->> Preview
         do
             local PreviewConfig = {
                 Enabled = false,
@@ -1156,9 +1148,9 @@ do
                 BeamWidth = 0.2,
                 PreviewBallScale = .8, -- Scale factor for the preview ball
             }
-            
+
             local BallPreviews = {}
-            
+
             local function removeBallPreview(ball)
                 if not BallPreviews[ball] then return end
                 for _, obj in pairs(BallPreviews[ball]) do
@@ -1166,15 +1158,15 @@ do
                 end
                 BallPreviews[ball] = nil
             end
-            
+
             local function createBallPreview(ball)
                 if not PreviewConfig.Enabled then return end
                 removeBallPreview(ball)
-            
+
                 local originalBall = ball.Ball
                 local originalPart = originalBall.PrimaryPart
                 local ballSize = originalPart.Size.Magnitude * PreviewConfig.PreviewBallScale
-            
+
                 -- Create a new sphere as the preview ball
                 local previewBall = Instance.new("Part")
                 previewBall.Shape = Enum.PartType.Ball
@@ -1186,30 +1178,30 @@ do
                 previewBall.CanQuery = false
                 previewBall.CanTouch = false
                 previewBall.Parent = PreviewContainer
-            
+
                 local sourceAttachment, targetAttachment = Instance.new("Attachment"), Instance.new("Attachment")
                 sourceAttachment.Parent, sourceAttachment.Name = originalPart, "TrajectoryBeamSource"
                 targetAttachment.Parent, targetAttachment.Name = previewBall, "TrajectoryBeamTarget"
-            
+
                 local beam = Instance.new("Beam")
                 beam.Name, beam.Color = "TrajectoryBeam", ColorSequence.new(PreviewConfig.BeamColor)
                 beam.Width0, beam.Width1, beam.FaceCamera = PreviewConfig.BeamWidth, PreviewConfig.BeamWidth, true
                 beam.Attachment0, beam.Attachment1, beam.Parent = sourceAttachment, targetAttachment, previewBall
-            
+
                 BallPreviews[ball] = { PreviewBall = previewBall, Beam = beam, SourceAttachment = sourceAttachment, TargetAttachment = targetAttachment }
             end
-            
+
             local function updateBallPreview(ball, landingPosition)
                 if PreviewConfig.Enabled and BallPreviews[ball] then
                     BallPreviews[ball].PreviewBall.Position = landingPosition
                 end
             end
-            
+
             local function cleanupAllPreviews()
                 for ball in pairs(BallPreviews) do removeBallPreview(ball) end
                 BallPreviews = {}
             end
-            
+
             function ToggleBallTrajectoryPreviews(enabled)
                 if PreviewConfig.Enabled == enabled then return end
                 PreviewConfig.Enabled = enabled
@@ -1218,7 +1210,7 @@ do
                 end
                 return PreviewConfig.Enabled
             end
-            
+
             BallTrajectory.newBallSignal:Connect(createBallPreview)
             BallTrajectory.trajectoryUpdatedSignal:Connect(function(ball, landingPosition)
                 if landingPosition then
@@ -1226,15 +1218,15 @@ do
                 else removeBallPreview(ball) end
             end)
             BallTrajectory.ballDestroySignal:Connect(removeBallPreview)
-            
+
             hooks:Add(function()
                 ToggleBallTrajectoryPreviews(false)
             end)
-      
+
             DebugTab:Separator({
                 Text = "Ball Trajectory"
             })
-            
+
             DebugTab:Checkbox({
                 Label = "Enabled",
                 Value = true,
@@ -1243,9 +1235,9 @@ do
                     ToggleBallTrajectoryPreviews(v)
                 end,
             })
-    
+
         end
-    
+
     end
 
     -- Safe Zone
@@ -1254,41 +1246,41 @@ do
         local enemyCylinders = {}
         local courtHighlight = nil
         local enemyHighlightModel = nil
-        
+
         local janitor = Janitor.new()
-        
+
         local function createHighlightModel()
             enemyHighlightModel = Instance.new("Model")
             enemyHighlightModel.Name = "EnemyHighlights"
             enemyHighlightModel.Parent = PreviewContainer
-        
+
             janitor:Add(enemyHighlightModel)
         end
-        
+
         local function updateCourtHighlight()
             if not courtHighlight then return end
-        
+
             if not LocalPlayer.Team or not LocalPlayer.Team:GetAttribute("Index") then
                 courtHighlight.Parent = nil
                 return
             else
                 courtHighlight.Parent = PreviewContainer
             end
-        
+
             local courtPos = CourtPart.Position
             local halfZ = CourtPart.Size.Z / 2
             local newPos = courtPos
-        
+
             if LocalPlayer.Team and LocalPlayer.Team:GetAttribute("Index") == 1 then
                 newPos = Vector3.new(courtPos.X, courtPos.Y + 0.1, courtPos.Z + (halfZ / 2))
             elseif LocalPlayer.Team and LocalPlayer.Team:GetAttribute("Index") == 2 then
                 newPos = Vector3.new(courtPos.X, courtPos.Y + 0.1, courtPos.Z - (halfZ / 2))
             end
-        
+
             courtHighlight.Size = Vector3.new(CourtPart.Size.X, CourtPart.Size.Y, halfZ)
             courtHighlight.CFrame = CFrame.new(newPos) * CourtPart.CFrame.Rotation
         end
-        
+
         local function createCourtHighlight()
             local highlightPart = Instance.new("Part")
             highlightPart.Name = "CourtHighlightPart"
@@ -1298,20 +1290,20 @@ do
             highlightPart.Material = Enum.Material.ForceField
             highlightPart.Transparency = 0.5
             highlightPart.Parent = PreviewContainer
-        
+
             courtHighlight = highlightPart
             updateCourtHighlight()
-        
+
             janitor:Add(highlightPart)
         end
-        
+
         local function createEnemyCylinder(player)
             if player == LocalPlayer then return end
             if not player.Team or (LocalPlayer.Team and player.Team and player.Team == LocalPlayer.Team) then return end
-        
+
             local multiplier = player:GetAttribute("GameDiveSpeedMultiplier") or 1
             local radius = 10 * multiplier
-        
+
             local cylinder = Instance.new("Part")
             cylinder.Shape = Enum.PartType.Cylinder
             cylinder.Name = player.Name .. "_HighlightCylinder"
@@ -1322,18 +1314,18 @@ do
             cylinder.Transparency = 0.75
             cylinder.Size = Vector3.new(0.2, radius * 2, radius * 2)
             cylinder.Parent = enemyHighlightModel
-        
+
             enemyCylinders[player] = cylinder
             janitor:Add(cylinder, nil, player)
-        
+
             return cylinder
         end
-        
+
         local function updateEnemyCylinder(player)
             if not enemyCylinders[player] then
                 createEnemyCylinder(player)
             end
-        
+
             local cyl = enemyCylinders[player]
             if cyl and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 cyl.Parent = enemyHighlightModel
@@ -1346,7 +1338,7 @@ do
                 end
             end
         end
-        
+
         local function removeEnemyCylinder(player)
             local cyl = enemyCylinders[player]
             if cyl then
@@ -1354,11 +1346,11 @@ do
                 enemyCylinders[player] = nil
             end
         end
-        
+
         local function setup()
             createHighlightModel()
             createCourtHighlight()
-        
+
             janitor:Add(RunService.Heartbeat:Connect(function()
                 for _, player in ipairs(Players:GetPlayers()) do
                     if player ~= LocalPlayer then
@@ -1370,11 +1362,11 @@ do
                     end
                 end
             end))
-        
+
             janitor:Add(Players.PlayerRemoving:Connect(removeEnemyCylinder))
             janitor:Add(LocalPlayer:GetPropertyChangedSignal("Team"):Connect(updateCourtHighlight))
         end
-        
+
         local function toggle(on)
             if on then
                 setup()
@@ -1385,11 +1377,11 @@ do
                 enemyHighlightModel = nil
             end
         end
-                
+
         DebugTab:Separator({
             Text = "Dive Range"
         })
-        
+
         DebugTab:Checkbox({
             Label = "Enabled",
             Value = toggleEnabled,
@@ -1398,13 +1390,12 @@ do
                 toggle(v)
             end,
         })
-        
+
         hooks:Add(function()
             toggle(false)
         end)
-    end        
+    end
 end
-
 
 HaikyuuRaper:UiTab()
 HaikyuuRaper:ConfigManager()
