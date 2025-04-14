@@ -65,7 +65,11 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 	})
 
 	local windowUi = notification.WindowFrame
-	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Circular),  {Size = UDim2.fromOffset(500, 50), Position = UDim2.fromScale(1 - 0.05, 0.5)})
+
+	windowUi.AnchorPoint = Vector2.new(1,1)
+	notification.AnchorPoint = Vector2.new(1,1)
+
+	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Circular),  {Size = UDim2.fromOffset(500, 50)})
 	tween:Play()
 
 	tween.Completed:Connect(function(playbackState)
