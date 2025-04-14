@@ -66,7 +66,7 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 		Size = UDim2.fromOffset(0, 0), --// Roblox property 
 	})
 
-	local windowUi = notification.Window
+	local windowUi = notification.WindowFrame
 	local tween = TweenService:Create(windowUi, TweenInfo.new(0.5, Enum.EasingStyle.Linear),  {Size = UDim2.fromOffset(500, 50)})
 	tween:Play()
 

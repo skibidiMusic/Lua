@@ -317,7 +317,7 @@ end
 do
     local CharacterTab = Window:CreateTab({
         Name = "Character",
-        Visible = false 
+
     })
 
     -- Rotate Air
@@ -611,7 +611,7 @@ local currentCam = workspace.CurrentCamera
 if currentCam then
     local CameraTab = Window:CreateTab({
         Name = "Camera",
-        Visible = false 
+
     })
 
     -- Fov
@@ -668,7 +668,7 @@ end
 do
     local InternalTab = Window:CreateTab({
         Name = "Internals",
-        Visible = false 
+
     })
 
     -- Serve Power
@@ -1133,7 +1133,7 @@ end
 do
     local DebugTab = Window:CreateTab({
         Name = "Debug",
-        Visible = false 
+
     })
 
     local PreviewContainer = Instance.new("Folder")
