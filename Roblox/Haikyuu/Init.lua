@@ -1001,50 +1001,7 @@ do
         end
     end
 
-    if gameController and hookfunction and checkcaller and newcclosure then
-        local t = gameController
-        local val = t.Power
-
-        local SLIDER = 1
-        local ENABLED = false
-
-        InternalTab:Checkbox({
-            Label = "Custom Charge",
-            Value = ENABLED,
-            IniFlag = "CustomChargeToggle",
-            Callback = function(_, v)
-                ENABLED = v
-            end,
-        })
-
-        InternalTab:Slider({
-            Label = "Charge Val",
-            Format = "%.2f/%s",
-            Value = SLIDER,
-            MinValue = 0,
-            MaxValue = 10,
-            IniFlag = "ChargeValSlider",
-
-            Callback = function(self, Value)
-                SLIDER = Value
-            end,
-        })
-
-        hooks:Add(function()
-            ENABLED = false
-        end)
-
-        local old; old = hookfunction(val.getCharge, newcclosure(function(self, ...)
-            if ENABLED and not checkcaller() and rawequal(self, val) then
-                return SLIDER
-            end
-            return old(self, ...)
-        end))
-
-        InternalTab:Separator({})
-    end    
-
-    if hookmetamethod and BallTrajectory then
+    if gameController and hookmetamethod and BallTrajectory then
         local ENABLED = true
 
         local player = LocalPlayer
