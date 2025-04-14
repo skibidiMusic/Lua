@@ -591,7 +591,7 @@ do
 			RichText = false,
         })
 
-        row:Fill()
+        --row:Fill()
 
         hooks:Add(function()
             db = true

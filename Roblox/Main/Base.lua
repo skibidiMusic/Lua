@@ -149,7 +149,7 @@ function BaseLoader:ConfigManager()
 		Text = "Selected Save"
 	})
 
-	row:Fill()
+	--row:Fill()
 
 	local selectedSaveName = configHandlerSettings.lastSaveName;
 	local inputText = tab:InputText({
@@ -183,7 +183,7 @@ function BaseLoader:ConfigManager()
 		end
 	})
 
-	row2:Fill()
+	--row2:Fill()
 
 	tab:Separator({
 		Text = "Save List"
