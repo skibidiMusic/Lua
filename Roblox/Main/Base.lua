@@ -64,7 +64,8 @@ function BaseLoader:Notify(title: string, message: string, length: number?)
 		NoClose = false,
 		AnchorPoint = Vector2.new(1, 1),
 		Position = UDim2.new(1 - 0.05, 0, 1 - 0.05, 0),
-		Size = UDim2.fromOffset(0, 0), --// Roblox property 
+		Size = UDim2.fromOffset(0, 0), --// Roblox property ,
+		Theme = self.window.Theme,
 	})
 
 	local windowUi = notification.WindowFrame
@@ -309,9 +310,9 @@ function BaseLoader:UiTab()
 			RegionBgTransparency = 1,
 
 			TabText = Color3.fromRGB(24, 24, 24),
-			TabBg =  Color3.fromRGB(150, 100, 150),
-			TabTextActive = Color3.fromRGB(0, 0, 0),
-			TabBgActive = Color3.fromRGB(200, 180, 200),
+			TabBg =  Color3.fromRGB(201, 141, 201),
+			TabTextActive = Color3.fromRGB(255, 255, 255),
+			TabBgActive = Color3.fromRGB(41, 22, 41),
 		})
 
 		local allThemes = {}
