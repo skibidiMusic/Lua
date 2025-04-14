@@ -248,7 +248,7 @@ function BaseLoader:UiTab()
     })
 
 	UiTab:Separator({
-		"lol 🙏😭"
+		"Keybind"
 	})
 	
 	do
@@ -274,6 +274,38 @@ function BaseLoader:UiTab()
 				self:Notify("Gui", "Press " .. `{toggleUiKeybind.Value.Name}` .. " to re-open the gui." , 4)
 			end
 		end)
+	end
+
+	UiTab:Separator({
+		"Theme 🎨"
+	})
+
+	do
+		ImGui:DefineTheme("Pink", {
+			Text = Color3.fromRGB(200, 180, 200),
+			WindowBg = Color3.fromRGB(35, 30, 35),
+			TitleBarBg = Color3.fromRGB(35, 30, 35),
+			TitleBarBgActive = Color3.fromRGB(50, 45, 50),
+			Border = Color3.fromRGB(50, 45, 50),
+			ResizeGrab = Color3.fromRGB(50, 45, 50),
+		})
+
+		local allThemes = {}
+		for i, v in ImGui.ThemeConfig do
+			table.insert(allThemes, i)
+		end
+
+		UiTab:Combo({
+			Placeholder = "Select Theme",
+			Label = "Theme",
+			IniFlag = "ThemeSelector",
+			Items = allThemes,
+			Callback = function(_, Value)
+				for _, v in ImGui.Windows do
+					v:SetTheme(Value)
+				end
+			end,
+		})
 	end
 end
 
