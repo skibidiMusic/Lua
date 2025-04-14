@@ -618,6 +618,8 @@ if currentCam then
     do
         local DEFAULT_FOV = currentCam.FieldOfView
         local FOV_VALUE = 90
+        local ENABLED = true
+        
         local connections = Janitor.new()
 
         local function fovUpdated()
@@ -625,6 +627,7 @@ if currentCam then
         end
 
         local function setEnabled(v)
+            ENABLED = v
             if v then
                 fovUpdated()
                 connections:Add(currentCam:GetPropertyChangedSignal("FieldOfView"):Connect(fovUpdated))
@@ -644,7 +647,7 @@ if currentCam then
 
         CameraTab:Checkbox({
             Label = "Enabled",
-            Value = true,
+            Value = ENABLED,
             IniFlag = "FovEnabled",
             Callback = function(_, v)
                 setEnabled(v)
@@ -659,6 +662,9 @@ if currentCam then
             IniFlag = "FovValueSlider",
             Callback = function(self, Value)
                 FOV_VALUE = math.round(Value)
+                if ENABLED then
+                    fovUpdated()
+                end
             end,
         })
     end
